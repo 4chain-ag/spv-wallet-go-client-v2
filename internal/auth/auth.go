@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -170,4 +171,4 @@ func setSignatureHeaders(header *http.Header, authData *models.AuthPayload) {
 }
 
 // ErrMissingXpriv is when xpriv is missing
-var ErrMissingXpriv = models.SPVError{Message: "xpriv is missing", StatusCode: 401, Code: "error-unauthorized-xpriv-missing"}
+var ErrMissingXpriv = errors.New("xpriv is missing")

@@ -4,10 +4,9 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"math"
-	"strconv"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
+	"github.com/bitcoin-sv/spv-wallet/engine/utils"
 )
 
 const (
@@ -44,7 +43,7 @@ func DeriveChildKeyFromHex(hdKey *bip32.ExtendedKey, hexHash string) (*bip32.Ext
 	var childKey *bip32.ExtendedKey
 	childKey = hdKey
 
-	childNums, err := GetChildNumsFromHex(hexHash)
+	childNums, err := utils.GetChildNumsFromHex(hexHash)
 	if err != nil {
 		return nil, err
 	}
@@ -55,28 +54,4 @@ func DeriveChildKeyFromHex(hdKey *bip32.ExtendedKey, hexHash string) (*bip32.Ext
 		}
 	}
 	return childKey, nil
-}
-
-// GetChildNumsFromHex get an array of uint32 numbers from the hex string
-func GetChildNumsFromHex(hexHash string) ([]uint32, error) {
-	strLen := len(hexHash)
-	size := 8
-	splitLength := int(math.Ceil(float64(strLen) / float64(size)))
-	childNums := make([]uint32, 0)
-	for i := 0; i < splitLength; i++ {
-		start := i * size
-		stop := start + size
-		if stop > strLen {
-			stop = strLen
-		}
-		num, err := strconv.ParseInt(hexHash[start:stop], 16, 64)
-		if err != nil {
-			return nil, err
-		}
-		if num > MaxInt32 {
-			num = num - MaxInt32
-		}
-		childNums = append(childNums, uint32(num)) // todo: re-work to remove casting (possible cutoff)
-	}
-	return childNums, nil
 }

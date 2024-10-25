@@ -4,7 +4,7 @@ package auth
 
 import (
 	"encoding/base64"
-	"errors"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"time"
@@ -116,12 +116,6 @@ func getUnlockingScript(privateKey *ec.PrivateKey) (*p2pkh.P2PKH, error) {
 
 // createSignature will create a signature for the given key & body contents
 func createSignature(xPriv *bip32.ExtendedKey, bodyString string) (payload *models.AuthPayload, err error) {
-	// No key?
-	if xPriv == nil {
-		err = ErrMissingXpriv
-		return
-	}
-
 	// Get the xPub
 	payload = new(models.AuthPayload)
 	if payload.XPub, err = bip32.GetExtendedPublicKey(xPriv); err != nil { // Should never error if key is correct
@@ -185,5 +179,27 @@ func setSignatureHeaders(header *http.Header, authData *models.AuthPayload) {
 	header.Set(models.AuthSignature, authData.Signature)
 }
 
-// ErrMissingXpriv is when xpriv is missing
-var ErrMissingXpriv = errors.New("xpriv is missing")
+// createSignatureAccessKey will create a signature for the given access key & body contents
+func createSignatureAccessKey(privateKeyHex, bodyString string) (payload *models.AuthPayload, err error) {
+
+	var privateKey *ec.PrivateKey
+	if privateKey, err = ec.PrivateKeyFromHex(
+		privateKeyHex,
+	); err != nil {
+		return
+	}
+	publicKey := privateKey.PubKey()
+
+	// Get the AccessKey
+	payload = new(models.AuthPayload)
+	payload.AccessKey = hex.EncodeToString(publicKey.SerializeCompressed())
+
+	// auth_nonce is a random unique string to seed the signing message
+	// this can be checked server side to make sure the request is not being replayed
+	payload.AuthNonce, err = cryptoutil.RandomHex(32)
+	if err != nil {
+		return nil, err
+	}
+
+	return createSignatureCommon(payload, bodyString, privateKey)
+}

@@ -1,5 +1,5 @@
 // Package auth is responsible for handling the authentication of the requests to the server.
-// nolint: unused // FIXME: this file will be used soon
+// nolint: unused,nolintlint // FIXME: this file will be used soon
 package auth
 
 import (

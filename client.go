@@ -27,7 +27,11 @@ type Client struct {
 // a response that can be unmarshaled into the response.SharedConfig struct.
 // If the request fails or the response cannot be decoded, an error will be returned.
 func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
-	return c.userAPI.ConfigsAPI.SharedConfig(ctx)
+	res, err := c.userAPI.ConfigsAPI.SharedConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve shared configuration from User Configs API: %w", err)
+	}
+	return res, nil
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).

@@ -8,7 +8,6 @@ import (
 	compat "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
-
 	"github.com/stretchr/testify/require"
 )
 

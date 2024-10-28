@@ -1,5 +1,4 @@
 // Package auth is responsible for handling the authentication of the requests to the server.
-// nolint: unused,nolintlint // FIXME: this file will be used soon
 package auth
 
 import (
@@ -78,7 +77,7 @@ func prepareLockingScript(dst *models.Destination) (*script.Script, error) {
 func prepareUnlockingScript(xPriv *bip32.ExtendedKey, dst *models.Destination) (*p2pkh.P2PKH, error) {
 	key, err := getDerivedKeyForDestination(xPriv, dst)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get derived key for destination: %w", err)
 	}
 	return getUnlockingScript(key)
 }
@@ -198,7 +197,7 @@ func createSignatureAccessKey(privateKeyHex, bodyString string) (payload *models
 	// this can be checked server side to make sure the request is not being replayed
 	payload.AuthNonce, err = cryptoutil.RandomHex(32)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to generate random hexadecimal string: %w", err)
 	}
 
 	return createSignatureCommon(payload, bodyString, privateKey)

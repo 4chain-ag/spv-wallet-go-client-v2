@@ -1,12 +1,8 @@
 package user
 
 import (
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configurations"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/httpx"
-)
-
-const (
-	v1 = "api/v1/"
 )
 
 // API aggregates the user-related API endpoint groups exposed by the SPV Wallet service.
@@ -17,7 +13,7 @@ const (
 // API struct, developers can streamline their code and focus on high-level operations without
 // needing to manage the underlying API details directly.
 type API struct {
-	*configurations.API
+	ConfigsAPI *configs.API
 }
 
 // NewAPI initializes a new API instance for user-related operations.
@@ -30,10 +26,7 @@ type API struct {
 // instance can be used to make requests to various user-related endpoints.
 func NewAPI(addr string, h *httpx.Resty) *API {
 	api := API{
-		API: &configurations.API{
-			Path: addr + v1 + "/configs",
-			HTTP: h,
-		},
+		ConfigsAPI: configs.NewAPI(addr, h),
 	}
 	return &api
 }

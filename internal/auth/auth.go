@@ -58,7 +58,7 @@ func setSignature(header *http.Header, xPriv *bip32.ExtendedKey, bodyString stri
 	// Create the signature
 	authData, err := createSignature(xPriv, bodyString)
 	if err != nil {
-		return fmt.Errorf("create signature op failure: %w", err)
+		return fmt.Errorf("failed to create signature: %w", err)
 	}
 
 	// Set the auth header

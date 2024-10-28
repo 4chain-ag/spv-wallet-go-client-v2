@@ -109,7 +109,7 @@ var (
 	// ErrMissingKeys is returned when the HeaderBuilder does not have either an ExtendedKey (bip32.ExtendedKey)
 	// or a PrivateKey (ec.PrivateKey) set, which are required for building the HTTP auth headers.
 	ErrMissingKeys = errors.New("Header builder requires either an ExtendedKey (bip32.ExtendedKey) or PrivateKey (ec.PrivateKey) to build auth headers")
-	// ErrMissingHeaderConfig is returned when NewHeaderBuilder is called with a nil `HeaderAuthConfig` argument,
+	// ErrMissingHeaderConfig is returned when NewHeaderBuilder is called with a nil `HeaderConfig` argument,
 	// indicating that header authentication configuration is required but not provided.
-	ErrMissingHeaderConfig = errors.New("Header builder requires header auth config to build auth headers")
+	ErrMissingHeaderConfig = errors.New("Header builder requires header auth config to build HTTP auth headers")
 )

@@ -24,7 +24,7 @@ func (r *Resty) Get(ctx context.Context, path string) ([]byte, error) {
 	req := r.cli.R().SetContext(ctx)
 	res, err := req.Get(path)
 	if err != nil {
-		return nil, fmt.Errorf("http GET %s: %w", r.cli.BaseURL+path, err)
+		return nil, fmt.Errorf("HTTP GET %s: %w", r.cli.BaseURL+path, err)
 	}
 	return res.Body(), nil
 }
@@ -33,7 +33,7 @@ func (r *Resty) Get(ctx context.Context, path string) ([]byte, error) {
 func NewResty(addr string, cfg *auth.HeaderConfig) (*Resty, error) {
 	b, err := auth.NewHeaderBuilder(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build auth header: %w", err)
+		return nil, fmt.Errorf("failed to build HTTP auth header: %w", err)
 
 	}
 	cli := resty.New().
@@ -51,7 +51,7 @@ func authHeaderMiddleware(b *auth.HeaderBuilder) func(c *resty.Client, r *resty.
 		case http.MethodGet:
 			auth, err := b.BuildWithoutBody() // Constructs an HTTP header.
 			if err != nil {
-				return fmt.Errorf("crat to build auth headers: %w", err)
+				return fmt.Errorf("failed to build HTTP auth headers: %w", err)
 			}
 			r.SetHeaderMultiValues(auth)
 		}

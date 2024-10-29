@@ -12,6 +12,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/httpx"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
 )
 
 // DefaultConfig defines default client options for local development.
@@ -66,7 +67,14 @@ func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
 // newClient initializes a new client instance with the given address and configuration.
 // This function creates a Resty HTTP client with the specified address and configuration
 // and initializes the client instance allowing for interaction with user-related and admin-related endpoints.
-func newClient(cfg httpx.Config) (*Client, error) {
+func newClient(cfg httpx.Config, authenticator auth.Authenticator) (*Client, error) {
+	// EXAMPLE HOW TO SETUP RESTY
+	rest := resty.New()
+	rest.OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
+		return authenticator.Authenticate(r)
+	})
+	// END OF EXAMPLE
+
 	cli, err := httpx.NewResty(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Resty client: %w", err)
@@ -83,14 +91,13 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate HD key from xPub: %w", err)
 	}
+
+	authenticator := auth.NewXpubOnlyAuthenticator(key)
+
 	return newClient(httpx.Config{
 		Addr:    cfg.Addr,
 		Timeout: cfg.Timeout,
-		HeaderConfig: auth.HeaderConfig{
-			ExtendedKey: key,
-			SignRequest: false,
-		},
-	})
+	}, authenticator)
 }
 
 // NewWithXPriv creates a new client instance using an extended private key (xPriv).
@@ -101,14 +108,13 @@ func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
 	}
+
+	authenticator := auth.NewXprivAuthenticator(key)
+
 	return newClient(httpx.Config{
 		Addr:    cfg.Addr,
 		Timeout: cfg.Timeout,
-		HeaderConfig: auth.HeaderConfig{
-			ExtendedKey: key,
-			SignRequest: true,
-		},
-	})
+	}, authenticator)
 }
 
 // NewWithAccessKey creates a new client instance using an access key.
@@ -120,12 +126,11 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to return private key from hex or WIF: %w", err)
 	}
+
+	authenticator := auth.NewAccessKeyAuthenticator(key)
+
 	return newClient(httpx.Config{
 		Addr:    cfg.Addr,
 		Timeout: cfg.Timeout,
-		HeaderConfig: auth.HeaderConfig{
-			PrivateKey:  key,
-			SignRequest: true,
-		},
-	})
+	}, authenticator)
 }

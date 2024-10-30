@@ -12,12 +12,10 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// XpubAuthenticator provides authentication using an extended public key (xpub).
 type XpubAuthenticator struct {
 	hdKey *bip32.ExtendedKey
 }
 
-// Authenticate sets an xpub-based authentication header on the given HTTP request.
 func (x *XpubAuthenticator) Authenticate(r *resty.Request) error {
 	xPub, err := bip32.GetExtendedPublicKey(x.hdKey)
 	if err != nil {
@@ -27,13 +25,11 @@ func (x *XpubAuthenticator) Authenticate(r *resty.Request) error {
 	return nil
 }
 
-// XprivAuthenticator provides authentication using an extended private key (xpriv).
 type XprivAuthenticator struct {
 	xpubAuth *XpubAuthenticator
 	xpriv    *bip32.ExtendedKey
 }
 
-// Authenticate sets an xpub header and adds a signature generated from the xpriv.
 func (x *XprivAuthenticator) Authenticate(r *resty.Request) error {
 	err := x.xpubAuth.Authenticate(r)
 	if err != nil {
@@ -49,13 +45,11 @@ func (x *XprivAuthenticator) Authenticate(r *resty.Request) error {
 	return nil
 }
 
-// AccessKeyAuthenticator provides authentication using EC private/public keys.
 type AccessKeyAuthenticator struct {
 	priv *ec.PrivateKey
 	pub  *ec.PublicKey
 }
 
-// Authenticate sets an access key header and a signature on the request.
 func (a *AccessKeyAuthenticator) Authenticate(r *resty.Request) error {
 	r.Header.Set(models.AuthAccessKey, a.pubKeyHex())
 	body := bodyString(r)
@@ -83,7 +77,6 @@ func bodyString(r *resty.Request) string {
 	return ""
 }
 
-// NewXprivAuthenticator creates an XprivAuthenticator with the provided xpriv key.
 func NewXprivAuthenticator(xpriv *bip32.ExtendedKey) (*XprivAuthenticator, error) {
 	if xpriv == nil {
 		return nil, ErrBip32ExtendedKey
@@ -95,7 +88,6 @@ func NewXprivAuthenticator(xpriv *bip32.ExtendedKey) (*XprivAuthenticator, error
 	return &x, nil
 }
 
-// NewAccessKeyAuthenticator creates an AccessKeyAuthenticator using an EC private key.
 func NewAccessKeyAuthenticator(accessKey *ec.PrivateKey) (*AccessKeyAuthenticator, error) {
 	if accessKey == nil {
 		return nil, ErrEcPrivateKey
@@ -107,7 +99,6 @@ func NewAccessKeyAuthenticator(accessKey *ec.PrivateKey) (*AccessKeyAuthenticato
 	return &a, nil
 }
 
-// NewXpubOnlyAuthenticator creates an XpubAuthenticator using a BIP32 extended public key.
 func NewXpubOnlyAuthenticator(xpub *bip32.ExtendedKey) (*XpubAuthenticator, error) {
 	if xpub == nil {
 		return nil, ErrBip32ExtendedKey
@@ -117,8 +108,6 @@ func NewXpubOnlyAuthenticator(xpub *bip32.ExtendedKey) (*XpubAuthenticator, erro
 }
 
 var (
-	// ErrBip32ExtendedKey indicates that a required BIP32 extended key was not provided.
 	ErrBip32ExtendedKey = errors.New("authenticator failed: expected a BIP32 extended key but none was provided")
-	// ErrEcPrivateKey indicates that a required EC private key was not provided.
-	ErrEcPrivateKey = errors.New("authenticator failed: expected an EC private key but none was provided")
+	ErrEcPrivateKey     = errors.New("authenticator failed: expected an EC private key but none was provided")
 )

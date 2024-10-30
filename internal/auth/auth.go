@@ -1,4 +1,3 @@
-// Package auth is responsible for handling the authentication of the requests to the server.
 package auth
 
 import (
@@ -19,7 +18,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models"
 )
 
-// GetSignedHex will sign all the inputs using the given xPriv key
 func GetSignedHex(dt *models.DraftTransaction, xPriv *bip32.ExtendedKey) (string, error) {
 	// Create transaction from hex
 	tx, err := trx.NewTransactionFromHex(dt.Hex)

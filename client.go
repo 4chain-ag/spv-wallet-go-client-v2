@@ -56,9 +56,7 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
-// Generates a hierarchical deterministic (HD) key from the provided xPub and constructs
-// the necessary configuration for the API instance. The SignRequest flag is set to false,
-// indicating that requests made with this instance will not be signed.
+// Requests made with this instance will not be signed, that's why we strongly recommend to use `WithXPriv` or `WithAccessKey` option instead.
 func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 	key, err := bip32.GetHDKeyFromExtendedPublicKey(xPub)
 	if err != nil {

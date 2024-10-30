@@ -2,39 +2,27 @@ package configs_test
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
+	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 )
 
-func TestAPI_SharedConfig(t *testing.T) {
-	type HTTPGetter interface {
-		Get(ctx context.Context, path string) ([]byte, error)
-	}
+func TestConfigsAPI_SharedConfig(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.DeactivateAndReset)
+
 	tests := map[string]struct {
-		HTTP             HTTPGetter
-		expectedErr      error
-		expectedResponse *response.SharedConfig
+		expectedErr error
+		expectedCfg *response.SharedConfig
 	}{
 		"shared config: HTTP GET /api/v1/configs/shared response: 200": {
-			HTTP: &SharedConfigAlwaysPass{
-				ExpectedResponse: &response.SharedConfig{
-					PaymailDomains: []string{
-						"john.doe.test.4chain.space",
-					},
-					ExperimentalFeatures: map[string]bool{
-						"pikeContactsEnabled": true,
-						"pikePaymentEnabled":  false,
-					},
-				},
-			},
-			expectedResponse: &response.SharedConfig{
+			expectedCfg: &response.SharedConfig{
 				PaymailDomains: []string{
 					"john.doe.test.4chain.space",
 				},
@@ -45,13 +33,6 @@ func TestAPI_SharedConfig(t *testing.T) {
 			},
 		},
 		"shared config: HTTP GET /api/v1/configs/shared response: 500": {
-			HTTP: &SharedConfigAlwaysFailure{
-				ExpectedErr: models.SPVError{
-					Message:    http.StatusText(http.StatusInternalServerError),
-					StatusCode: http.StatusInternalServerError,
-					Code:       models.UnknownErrorCode,
-				},
-			},
 			expectedErr: models.SPVError{
 				Message:    http.StatusText(http.StatusInternalServerError),
 				StatusCode: http.StatusInternalServerError,
@@ -60,46 +41,50 @@ func TestAPI_SharedConfig(t *testing.T) {
 		},
 	}
 
+	transport := httpmock.NewMockTransport()
+	cfg := client.Config{
+		Addr:      "http://localhost:3003",
+		Timeout:   time.Minute,
+		Transport: transport,
+	}
+	URL := cfg.Addr + "/api/v1/configs/shared"
+	SPV := newClientTestHelper(t, cfg)
+
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			addr := "http://localhost:3003"
-			API := configs.NewAPI(addr, tc.HTTP)
-			ctx := context.Background()
-
-			got, err := API.SharedConfig(ctx)
+			transport.RegisterResponder(http.MethodGet, URL, httpResponderTestHelper(t, tc.expectedCfg, tc.expectedErr))
+			got, err := SPV.SharedConfig(context.Background())
 			require.ErrorIs(t, err, tc.expectedErr)
-			require.Equal(t, tc.expectedResponse, got)
+			require.Equal(t, tc.expectedCfg, got)
 		})
 	}
 }
 
-// SharedConfigAlwaysPass stubs the HTTP client to simulate a successful response from
-// the SPV Wallet API's `/api/v1/configs/shared` endpoint. This is useful for testing
-// scenarios where a successful, predefined configuration response is needed.
-type SharedConfigAlwaysPass struct {
-	ExpectedResponse *response.SharedConfig
-}
+func httpResponderTestHelper(t *testing.T, expectedRes *response.SharedConfig, expectedErr error) httpmock.Responder {
+	t.Helper()
+	return func(r *http.Request) (*http.Response, error) {
+		if expectedErr != nil {
+			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, expectedErr)
+			if err != nil {
+				t.Fatalf("failed to create JSON error response: %s", err)
+			}
+			return resp, nil
+		}
 
-// Get simulates an HTTP GET request to the `/api/v1/configs/shared` endpoint and returns
-// a successful response with no error. It marshals a predefined configuration into JSON format,
-// mimicking the API's successful response.
-func (s *SharedConfigAlwaysPass) Get(ctx context.Context, path string) ([]byte, error) {
-	bb, err := json.Marshal(s.ExpectedResponse)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal error stub response: %w", err)
+		resp, err := httpmock.NewJsonResponse(http.StatusOK, expectedRes)
+		if err != nil {
+			t.Fatalf("failed to create JSON response: %s", err)
+		}
+		return resp, nil
 	}
-	return bb, nil
 }
 
-// SharedConfigAlwaysFailure stubs the HTTP client to simulate a failure response from
-// the SPV Wallet API's `/api/v1/configs/shared` endpoint. This is useful for testing
-// scenarios where a predefined error response is needed to verify error handling.
-type SharedConfigAlwaysFailure struct {
-	ExpectedErr error
-}
-
-// Get simulates an HTTP GET request to the `/api/v1/configs/shared` endpoint and returns
-// a simulated failure response, mimicking the error structure expected from the SPV Wallet API.
-func (s *SharedConfigAlwaysFailure) Get(ctx context.Context, path string) ([]byte, error) {
-	return nil, s.ExpectedErr
+func newClientTestHelper(t *testing.T, cfg client.Config) *client.Client {
+	t.Helper()
+	xPriv := "xprv9s21ZrQH143K3fqNnUmXmgfT9ToMtiq5cuKsVBG4E5UqVh4psHDY2XKsEfZKuV4FSZcPS9CYgEQiLUpW2xmHqHFyp23SvTkTCE153cCdwaj"
+	spv, err := client.NewWithXPriv(cfg, xPriv)
+	if err != nil {
+		t.Fatalf("failed to initialize spv wallet client with xpriv: %s", err)
+	}
+	return spv
 }

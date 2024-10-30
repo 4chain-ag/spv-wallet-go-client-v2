@@ -1,53 +1,52 @@
+// Package configs provides functionality to communicate with the SPV Wallet API
+// endpoints related to user configuration.
 package configs
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
+	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
 )
 
-// route defines the API endpoint path for accessing configurations in the SPV Wallet API.
-// This constant is appended to the base URL to form the complete path for configuration
-// requests.
 const route = "api/v1/configs"
 
-// HTTPGetter is an interface that defines methods for making HTTP GET request.
-type HTTPGetter interface {
-	Get(ctx context.Context, path string) ([]byte, error)
-}
-
-// API represents a client for interacting with an API at a specific base path,
-// using an HTTPGetter interface for making requests.
+// API represents a client for accessing user configuration API endpoints.
 type API struct {
-	addr string     // addr defines the base URL for the user configurations API.
-	cli  HTTPGetter // cli is used for intializing the external SPV Wallet API HTTP calls.
+	addr string        // Base address for the configuration endpoints.
+	cli  *resty.Client // HTTP client used for making request.
 }
 
 // SharedConfig fetches the shared configuration from the SPV Wallet API.
 // It constructs the request path and unmarshals the response into a SharedConfig struct.
 func (a *API) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
-	path := a.addr + "/shared"
-	body, err := a.cli.Get(ctx, path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get shared config from %s: %w", path, err)
-	}
+	var spvErr models.SPVError
+	var result response.SharedConfig
 
-	var dst response.SharedConfig
-	if err := json.Unmarshal(body, &dst); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal HTTP response into SharedConfig: %w", err)
+	resp, err := a.cli.
+		R().
+		SetContext(ctx).
+		SetResult(&result).
+		SetError(&spvErr).
+		Get(a.addr + "/shared")
+	if err != nil {
+		return nil, fmt.Errorf("HTTP error: %w", err)
 	}
-	return &dst, nil
+	if resp.IsError() {
+		return nil, spvErr
+	}
+	return &result, nil
 }
 
-// NewAPI constructs a new instance of the configurations API client (`API`) using
-// the provided SPV Wallet API address and HTTPGetter implementation. This client is
-// responsible for constructing HTTP requests and making calls to the appropriate
-// endpoints within the user configurations domain.
-func NewAPI(addr string, h HTTPGetter) *API {
+// NewAPI constructs a new instance of the configurations API client (`API`).
+// This client provides functionality for making HTTP requests to endpoints
+// within the user configurations domain. The client uses the provided SPV Wallet
+// API address as the base URL and relies on a `resty.Client` for handling HTTP requests.
+func NewAPI(addr string, cli *resty.Client) *API {
 	return &API{
 		addr: addr + "/" + route,
-		cli:  h,
+		cli:  cli,
 	}
 }

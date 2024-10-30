@@ -4,30 +4,34 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/httpx"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
 )
 
-// DefaultConfig defines default client options for local development.
-// This configuration is recommended for testing and development environments
-// only, as it uses a localhost address and a shorter timeout duration that
-// may not be suitable for production.
-var DefaultConfig = Config{
-	Addr:    "http://localhost:3003",
-	Timeout: 1 * time.Minute,
+// NewDefaultConfig returns a default configuration for connecting to the SPV Wallet API,
+// setting a one-minute timeout, using the default HTTP transport, and applying the
+// base API address as the addr value.
+func NewDefaultConfig(addr string) Config {
+	return Config{
+		Addr:      addr,
+		Timeout:   1 * time.Minute,
+		Transport: http.DefaultTransport,
+	}
 }
 
 // Config holds configuration settings for establishing a connection and handling
 // request details in the application.
 type Config struct {
-	Addr    string        // The base address of the SPV Wallet API.
-	Timeout time.Duration // Timeout duration for connection attempts.
+	Addr      string            // The base address of the SPV Wallet API.
+	Timeout   time.Duration     // The HTTP requests timeout duration.
+	Transport http.RoundTripper // Custom HTTP transport, allowing optional customization of the HTTP client behavior.
 }
 
 // Client provides methods for user-related and admin-related APIs.
@@ -36,7 +40,7 @@ type Config struct {
 // interact with both user and admin APIs without needing to manage the details
 // of the HTTP requests and responses directly.
 type Client struct {
-	userAPI *user.API
+	configsAPI *configs.API
 }
 
 // SharedConfig retrieves the shared configuration from the user configurations API.
@@ -44,34 +48,11 @@ type Client struct {
 // a response that can be unmarshaled into the response.SharedConfig struct.
 // If the request fails or the response cannot be decoded, an error will be returned.
 func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
-	res, err := c.userAPI.ConfigsAPI.SharedConfig(ctx)
+	res, err := c.configsAPI.SharedConfig(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve shared configuration from User Configs API: %w", err)
+		return nil, fmt.Errorf("failed to retrieve shared configuration from user configs API: %w", err)
 	}
 	return res, nil
-}
-
-func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
-	pk, err1 := ec.PrivateKeyFromWif(s)
-	if err1 == nil {
-		return pk, nil
-	}
-	pk, err2 := ec.PrivateKeyFromHex(s)
-	if err2 != nil {
-		return nil, errors.Join(err1, err2) // Join the errors from both attempts.
-	}
-	return pk, nil
-}
-
-// newClient initializes a new client instance with the given address and configuration.
-// This function creates a Resty HTTP client with the specified address and configuration
-// and initializes the client instance allowing for interaction with user-related and admin-related endpoints.
-func newClient(cfg httpx.Config) (*Client, error) {
-	cli, err := httpx.NewResty(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Resty client: %w", err)
-	}
-	return &Client{userAPI: user.NewAPI(cfg.Addr, cli)}, nil
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -83,14 +64,19 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate HD key from xPub: %w", err)
 	}
-	return newClient(httpx.Config{
-		Addr:    cfg.Addr,
-		Timeout: cfg.Timeout,
-		HeaderConfig: auth.HeaderConfig{
-			ExtendedKey: key,
-			SignRequest: false,
-		},
-	})
+	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
+	}
+	resty := resty.New().
+		SetTransport(cfg.Transport).
+		SetBaseURL(cfg.Addr).
+		SetTimeout(cfg.Timeout).
+		OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
+			return authenticator.Authenticate(r)
+		})
+
+	return &Client{configsAPI: configs.NewAPI(cfg.Addr, resty)}, nil
 }
 
 // NewWithXPriv creates a new client instance using an extended private key (xPriv).
@@ -99,16 +85,21 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 	key, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
+		return nil, fmt.Errorf("failed to generate HD key from xpriv: %w", err)
 	}
-	return newClient(httpx.Config{
-		Addr:    cfg.Addr,
-		Timeout: cfg.Timeout,
-		HeaderConfig: auth.HeaderConfig{
-			ExtendedKey: key,
-			SignRequest: true,
-		},
-	})
+	authenticator, err := auth.NewXprivAuthenticator(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
+	}
+	resty := resty.New().
+		SetTransport(cfg.Transport).
+		SetBaseURL(cfg.Addr).
+		SetTimeout(cfg.Timeout).
+		OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
+			return authenticator.Authenticate(r)
+		})
+
+	return &Client{configsAPI: configs.NewAPI(cfg.Addr, resty)}, nil
 }
 
 // NewWithAccessKey creates a new client instance using an access key.
@@ -120,12 +111,29 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to return private key from hex or WIF: %w", err)
 	}
-	return newClient(httpx.Config{
-		Addr:    cfg.Addr,
-		Timeout: cfg.Timeout,
-		HeaderConfig: auth.HeaderConfig{
-			PrivateKey:  key,
-			SignRequest: true,
-		},
-	})
+	authenticator, err := auth.NewAccessKeyAuthenticator(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
+	}
+	resty := resty.New().
+		SetTransport(cfg.Transport).
+		SetBaseURL(cfg.Addr).
+		SetTimeout(cfg.Timeout).
+		OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
+			return authenticator.Authenticate(r)
+		})
+
+	return &Client{configsAPI: configs.NewAPI(cfg.Addr, resty)}, nil
+}
+
+func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
+	pk, err1 := ec.PrivateKeyFromWif(s)
+	if err1 == nil {
+		return pk, nil
+	}
+	pk, err2 := ec.PrivateKeyFromHex(s)
+	if err2 != nil {
+		return nil, errors.Join(err1, err2)
+	}
+	return pk, nil
 }

@@ -52,7 +52,6 @@ func GetSignedHex(dt *models.DraftTransaction, xPriv *bip32.ExtendedKey) (string
 	return tx.String(), nil
 }
 
-// SetSignature will set the signature on the header for the request
 func setSignature(header *http.Header, xPriv *bip32.ExtendedKey, bodyString string) error {
 	// Create the signature
 	authData, err := createSignature(xPriv, bodyString)
@@ -103,7 +102,6 @@ func getDerivedKeyForDestination(xPriv *bip32.ExtendedKey, dst *models.Destinati
 	return priv, nil
 }
 
-// Generate unlocking script using private key
 func getUnlockingScript(privateKey *ec.PrivateKey) (*p2pkh.P2PKH, error) {
 	sigHashFlags := sighash.AllForkID
 	unlocked, err := p2pkh.Unlock(privateKey, &sigHashFlags)
@@ -113,7 +111,6 @@ func getUnlockingScript(privateKey *ec.PrivateKey) (*p2pkh.P2PKH, error) {
 	return unlocked, nil
 }
 
-// createSignature will create a signature for the given key & body contents
 func createSignature(xPriv *bip32.ExtendedKey, bodyString string) (payload *models.AuthPayload, err error) {
 	// Get the xPub
 	payload = new(models.AuthPayload)
@@ -140,7 +137,6 @@ func createSignature(xPriv *bip32.ExtendedKey, bodyString string) (payload *mode
 	return createSignatureCommon(payload, bodyString, privateKey)
 }
 
-// createSignatureCommon will create a signature
 func createSignatureCommon(payload *models.AuthPayload, bodyString string, privateKey *ec.PrivateKey) (*models.AuthPayload, error) {
 	// Create the auth header hash
 	payload.AuthHash = cryptoutil.Hash(bodyString)
@@ -161,26 +157,19 @@ func createSignatureCommon(payload *models.AuthPayload, bodyString string, priva
 	return payload, nil
 }
 
-// getSigningMessage will build the signing message byte array
 func getSigningMessage(xPub string, auth *models.AuthPayload) []byte {
 	message := fmt.Sprintf("%s%s%s%d", xPub, auth.AuthHash, auth.AuthNonce, auth.AuthTime)
 	return []byte(message)
 }
 
 func setSignatureHeaders(header *http.Header, authData *models.AuthPayload) {
-	// Create the auth header hash
 	header.Set(models.AuthHeaderHash, authData.AuthHash)
-	// Set the nonce
 	header.Set(models.AuthHeaderNonce, authData.AuthNonce)
-	// Set the time
 	header.Set(models.AuthHeaderTime, fmt.Sprintf("%d", authData.AuthTime))
-	// Set the signature
 	header.Set(models.AuthSignature, authData.Signature)
 }
 
-// createSignatureAccessKey will create a signature for the given access key & body contents
 func createSignatureAccessKey(privateKeyHex, bodyString string) (payload *models.AuthPayload, err error) {
-
 	var privateKey *ec.PrivateKey
 	if privateKey, err = ec.PrivateKeyFromHex(
 		privateKeyHex,

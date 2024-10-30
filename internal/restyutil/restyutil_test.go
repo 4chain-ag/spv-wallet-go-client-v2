@@ -50,7 +50,7 @@ func TestResponseAdapter_HandleErr(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			transport := httpmock.NewMockTransport()
-			transport.RegisterResponder(http.MethodGet, "/", httpResponderTestHelper(t, tc.expectedErr, tc.str))
+			transport.RegisterResponder(http.MethodGet, "/", httpResponderTestHelper(t, tc.expectedErr, tc.str, tc.statusCode))
 
 			cli := resty.
 				New().
@@ -64,20 +64,20 @@ func TestResponseAdapter_HandleErr(t *testing.T) {
 	}
 }
 
-func httpResponderTestHelper(t *testing.T, err error, s string) httpmock.Responder {
+func httpResponderTestHelper(t *testing.T, err error, s string, code int) httpmock.Responder {
 	t.Helper()
 	return func(r *http.Request) (*http.Response, error) {
 		switch {
 		case err != nil:
-			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, err)
+			resp, err := httpmock.NewJsonResponse(code, err)
 			if err != nil {
 				t.Fatalf("failed to create JSON error response: %s", err)
 			}
 			return resp, nil
 		case s != "":
-			return httpmock.NewStringResponse(http.StatusInternalServerError, s), nil
+			return httpmock.NewStringResponse(code, s), nil
 		default:
-			return httpmock.NewStringResponse(http.StatusOK, "{}"), nil
+			return httpmock.NewStringResponse(code, "{}"), nil
 		}
 	}
 }

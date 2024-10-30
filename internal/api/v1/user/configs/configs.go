@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
@@ -17,20 +18,18 @@ type API struct {
 }
 
 func (a *API) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
-	var spvErr models.SPVError
 	var result response.SharedConfig
-
-	resp, err := a.cli.
-		R().
-		SetContext(ctx).
-		SetResult(&result).
-		SetError(&spvErr).
-		Get(a.addr + "/shared")
+	response := restyutil.ResponseAdapter(func() (*resty.Response, error) {
+		return a.cli.
+			R().
+			SetContext(ctx).
+			SetResult(&result).
+			SetError(&models.SPVError{}).
+			Get(a.addr + "/shared")
+	})
+	err := response.HandleErr()
 	if err != nil {
-		return nil, fmt.Errorf("HTTP error: %w", err)
-	}
-	if resp.IsError() {
-		return nil, spvErr
+		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
 	return &result, nil
 }

@@ -15,6 +15,14 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+// Config holds configuration settings for establishing a connection and handling
+// request details in the application.
+type Config struct {
+	Addr      string            // The base address of the SPV Wallet API.
+	Timeout   time.Duration     // The HTTP requests timeout duration.
+	Transport http.RoundTripper // Custom HTTP transport, allowing optional customization of the HTTP client behavior.
+}
+
 // NewDefaultConfig returns a default configuration for connecting to the SPV Wallet API,
 // setting a one-minute timeout, using the default HTTP transport, and applying the
 // base API address as the addr value.
@@ -26,14 +34,6 @@ func NewDefaultConfig(addr string) Config {
 	}
 }
 
-// Config holds configuration settings for establishing a connection and handling
-// request details in the application.
-type Config struct {
-	Addr      string            // The base address of the SPV Wallet API.
-	Timeout   time.Duration     // The HTTP requests timeout duration.
-	Transport http.RoundTripper // Custom HTTP transport, allowing optional customization of the HTTP client behavior.
-}
-
 // Client provides methods for user-related and admin-related APIs.
 // This struct is designed to abstract and simplify the process of making HTTP calls
 // to the relevant endpoints. By utilizing this Client struct, developers can easily
@@ -41,18 +41,6 @@ type Config struct {
 // of the HTTP requests and responses directly.
 type Client struct {
 	configsAPI *configs.API
-}
-
-// SharedConfig retrieves the shared configuration from the user configurations API.
-// This method constructs an HTTP GET request to the "/shared" endpoint and expects
-// a response that can be unmarshaled into the response.SharedConfig struct.
-// If the request fails or the response cannot be decoded, an error will be returned.
-func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
-	res, err := c.configsAPI.SharedConfig(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve shared configuration from user configs API: %w", err)
-	}
-	return res, nil
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -66,15 +54,7 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
 	}
-	resty := resty.New().
-		SetTransport(cfg.Transport).
-		SetBaseURL(cfg.Addr).
-		SetTimeout(cfg.Timeout).
-		OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
-			return authenticator.Authenticate(r)
-		})
-
-	return &Client{configsAPI: configs.NewAPI(cfg.Addr, resty)}, nil
+	return newClient(cfg, authenticator), nil
 }
 
 // NewWithXPriv creates a new client instance using an extended private key (xPriv).
@@ -89,15 +69,7 @@ func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
 	}
-	resty := resty.New().
-		SetTransport(cfg.Transport).
-		SetBaseURL(cfg.Addr).
-		SetTimeout(cfg.Timeout).
-		OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
-			return authenticator.Authenticate(r)
-		})
-
-	return &Client{configsAPI: configs.NewAPI(cfg.Addr, resty)}, nil
+	return newClient(cfg, authenticator), nil
 }
 
 // NewWithAccessKey creates a new client instance using an access key.
@@ -113,15 +85,19 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}
-	resty := resty.New().
-		SetTransport(cfg.Transport).
-		SetBaseURL(cfg.Addr).
-		SetTimeout(cfg.Timeout).
-		OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
-			return authenticator.Authenticate(r)
-		})
+	return newClient(cfg, authenticator), nil
+}
 
-	return &Client{configsAPI: configs.NewAPI(cfg.Addr, resty)}, nil
+// SharedConfig retrieves the shared configuration from the user configurations API.
+// This method constructs an HTTP GET request to the "/shared" endpoint and expects
+// a response that can be unmarshaled into the response.SharedConfig struct.
+// If the request fails or the response cannot be decoded, an error will be returned.
+func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
+	res, err := c.configsAPI.SharedConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve shared configuration from user configs API: %w", err)
+	}
+	return res, nil
 }
 
 func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
@@ -134,4 +110,23 @@ func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
 		return nil, errors.Join(err1, err2)
 	}
 	return pk, nil
+}
+
+type authenticator interface {
+	Authenticate(r *resty.Request) error
+}
+
+func newClient(cfg Config, auth authenticator) *Client {
+	resty := resty.New().
+		SetTransport(cfg.Transport).
+		SetBaseURL(cfg.Addr).
+		SetTimeout(cfg.Timeout).
+		OnBeforeRequest(func(_ *resty.Client, r *resty.Request) error {
+			return auth.Authenticate(r)
+		})
+
+	cli := Client{
+		configsAPI: configs.NewAPI(cfg.Addr, resty),
+	}
+	return &cli
 }

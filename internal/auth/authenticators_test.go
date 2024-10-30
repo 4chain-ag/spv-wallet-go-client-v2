@@ -14,7 +14,7 @@ import (
 )
 
 func TestXpubAuthenticator_Authenticate(t *testing.T) {
-	key := extendedKey(t)
+	key := extendedKeyTestHelper(t)
 	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
 	require.NotNil(t, authenticator)
 	require.NoError(t, err)
@@ -25,8 +25,14 @@ func TestXpubAuthenticator_Authenticate(t *testing.T) {
 	xPubHeadersTestHelper(t, req.Header, key)
 }
 
+func TestXpubAuthenticator_New(t *testing.T) {
+	authenticator, err := auth.NewXpubOnlyAuthenticator(nil)
+	require.Nil(t, authenticator)
+	require.ErrorIs(t, err, auth.ErrBip32ExtendedKey)
+}
+
 func TestAccessKeyAuthenitcator_Authenticate(t *testing.T) {
-	key := privateKey(t)
+	key := privateKeyTestHelper(t)
 	authenticator, err := auth.NewAccessKeyAuthenticator(key)
 	require.NotNil(t, authenticator)
 	require.NoError(t, err)
@@ -37,8 +43,14 @@ func TestAccessKeyAuthenitcator_Authenticate(t *testing.T) {
 	accessKeyHeadersTestHelper(t, req.Header, hex.EncodeToString(key.PubKey().SerializeCompressed()))
 }
 
+func TestAccessKeyAuthenitcator_New(t *testing.T) {
+	authenticator, err := auth.NewAccessKeyAuthenticator(nil)
+	require.Nil(t, authenticator)
+	require.ErrorIs(t, err, auth.ErrEcPrivateKey)
+}
+
 func TestXprivAuthenitcator_Authenticate(t *testing.T) {
-	key := extendedKey(t)
+	key := extendedKeyTestHelper(t)
 	authenticator, err := auth.NewXprivAuthenticator(key)
 	require.NotNil(t, authenticator)
 	require.NoError(t, err)
@@ -49,7 +61,13 @@ func TestXprivAuthenitcator_Authenticate(t *testing.T) {
 	xPrivHeadersTestHelper(t, req.Header, key)
 }
 
-func extendedKey(t *testing.T) *bip32.ExtendedKey {
+func TestXprivAuthenitcator_New(t *testing.T) {
+	authenticator, err := auth.NewXprivAuthenticator(nil)
+	require.Nil(t, authenticator)
+	require.ErrorIs(t, err, auth.ErrBip32ExtendedKey)
+}
+
+func extendedKeyTestHelper(t *testing.T) *bip32.ExtendedKey {
 	t.Helper()
 	key, err := bip32.GenerateHDKey(compat.RecommendedSeedLength)
 	if err != nil {
@@ -58,7 +76,7 @@ func extendedKey(t *testing.T) *bip32.ExtendedKey {
 	return key
 }
 
-func privateKey(t *testing.T) *ec.PrivateKey {
+func privateKeyTestHelper(t *testing.T) *ec.PrivateKey {
 	t.Helper()
 	key, err := ec.NewPrivateKey()
 	if err != nil {

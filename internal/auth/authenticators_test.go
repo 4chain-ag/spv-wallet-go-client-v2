@@ -1,143 +1,124 @@
 package auth_test
 
 import (
-	"encoding/hex"
 	"net/http"
 	"testing"
 
-	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
-	compat "github.com/bitcoin-sv/go-sdk/compat/bip32"
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testutil"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
 
-func TestXpubAuthenticator_Authenticate(t *testing.T) {
-	key := extendedKeyTestHelper(t)
-	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
-	require.NotNil(t, authenticator)
-	require.NoError(t, err)
+const (
+	xAuthKey          = "X-Auth-Key"
+	xAuthXPubKey      = "X-Auth-Xpub"
+	xAuthHashKey      = "X-Auth-Hash"
+	xAuthNonceKey     = "X-Auth-Nonce"
+	xAuthTimeKey      = "X-Auth-Time"
+	xAuthSignatureKey = "X-Auth-Signature"
+)
 
-	req := resty.New().R()
-	err = authenticator.Authenticate(req)
-	require.NoError(t, err)
-	xPubHeadersTestHelper(t, req.Header, key)
-}
+func TestAccessKeyAuthenitcator_NewWithNilAccessKey(t *testing.T) {
+	// when:
+	authenticator, err := auth.NewAccessKeyAuthenticator(nil)
 
-func TestXpubAuthenticator_New(t *testing.T) {
-	authenticator, err := auth.NewXpubOnlyAuthenticator(nil)
+	// then:
 	require.Nil(t, authenticator)
-	require.ErrorIs(t, err, auth.ErrBip32ExtendedKey)
+	require.ErrorIs(t, err, auth.ErrEcPrivateKey)
 }
 
 func TestAccessKeyAuthenitcator_Authenticate(t *testing.T) {
-	key := privateKeyTestHelper(t)
+	// given:
+	key := testutil.PrivateKey(t)
 	authenticator, err := auth.NewAccessKeyAuthenticator(key)
 	require.NotNil(t, authenticator)
 	require.NoError(t, err)
 
 	req := resty.New().R()
+
+	// when:
 	err = authenticator.Authenticate(req)
+
+	// then:
 	require.NoError(t, err)
-	accessKeyHeadersTestHelper(t, req.Header, hex.EncodeToString(key.PubKey().SerializeCompressed()))
+	requireXAuthHeaderToBeSet(t, req.Header)
+	requireSignatureHeadersToBeSet(t, req.Header)
 }
 
-func TestAccessKeyAuthenitcator_New(t *testing.T) {
-	authenticator, err := auth.NewAccessKeyAuthenticator(nil)
+func TestXprivAuthenitcator_NewWithNilXpriv(t *testing.T) {
+	// when:
+	authenticator, err := auth.NewXprivAuthenticator(nil)
+
+	// then:
 	require.Nil(t, authenticator)
-	require.ErrorIs(t, err, auth.ErrEcPrivateKey)
+	require.ErrorIs(t, err, auth.ErrBip32ExtendedKey)
 }
 
 func TestXprivAuthenitcator_Authenticate(t *testing.T) {
-	key := extendedKeyTestHelper(t)
+	// given:
+	key := testutil.ExtendedKey(t)
 	authenticator, err := auth.NewXprivAuthenticator(key)
 	require.NotNil(t, authenticator)
 	require.NoError(t, err)
 
 	req := resty.New().R()
+
+	// when:
 	err = authenticator.Authenticate(req)
+
+	// then:
 	require.NoError(t, err)
-	xPrivHeadersTestHelper(t, req.Header, key)
+	requireXpubHeaderToBeSet(t, req.Header)
+	requireSignatureHeadersToBeSet(t, req.Header)
 }
 
-func TestXprivAuthenitcator_New(t *testing.T) {
-	authenticator, err := auth.NewXprivAuthenticator(nil)
+func TestXpubOnlyAuthenticator_NewWithNilXpub(t *testing.T) {
+	// when:
+	authenticator, err := auth.NewXpubOnlyAuthenticator(nil)
+
+	// then:
 	require.Nil(t, authenticator)
 	require.ErrorIs(t, err, auth.ErrBip32ExtendedKey)
 }
 
-func extendedKeyTestHelper(t *testing.T) *bip32.ExtendedKey {
-	t.Helper()
-	key, err := bip32.GenerateHDKey(compat.RecommendedSeedLength)
-	if err != nil {
-		t.Fatalf("test helper - failed to generate HD key from string: %sw", err)
-	}
-	return key
+func TestXpubOnlyAuthenticator_Authenticate(t *testing.T) {
+	// given:
+	key := testutil.ExtendedKey(t)
+
+	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
+	require.NotNil(t, authenticator)
+	require.NoError(t, err)
+
+	req := resty.New().R()
+
+	// when:
+	err = authenticator.Authenticate(req)
+
+	// then:
+	require.NoError(t, err)
+	requireXpubHeaderToBeSet(t, req.Header)
 }
 
-func privateKeyTestHelper(t *testing.T) *ec.PrivateKey {
-	t.Helper()
-	key, err := ec.NewPrivateKey()
-	if err != nil {
-		t.Fatalf("test helper - failed to create private key: %s", err)
-	}
-	return key
+func requireXAuthHeaderToBeSet(t *testing.T, h http.Header) {
+	require.Equal(t, []string{testutil.ExpectedAuthKey}, h[xAuthKey])
 }
 
-func xPubHeadersTestHelper(t *testing.T, h http.Header, key *compat.ExtendedKey) {
-	t.Helper()
-	xPub, err := key.Neuter()
-	if err != nil {
-		t.Fatalf("test helper - failed to get extended public key: %s", err)
-	}
-
-	actualXpub := h["X-Auth-Xpub"]
-	expectedXpub := []string{xPub.String()}
-	require.Equal(t, expectedXpub, actualXpub)
+func requireXpubHeaderToBeSet(t *testing.T, h http.Header) {
+	require.Equal(t, []string{testutil.ExpectedAuthXpub}, h[xAuthXPubKey])
 }
 
-func xPrivHeadersTestHelper(t *testing.T, h http.Header, key *compat.ExtendedKey) {
-	t.Helper()
-	xPub, err := key.Neuter()
-	if err != nil {
-		t.Fatalf("test helper - failed to get extended public key: %s", err)
+func requireSignatureHeadersToBeSet(t *testing.T, h http.Header) {
+	expected := []string{
+		xAuthHashKey,
+		xAuthNonceKey,
+		xAuthTimeKey,
+		xAuthSignatureKey,
 	}
 
-	expectedXpub := []string{xPub.String()}
-	expectedHeaders := []string{
-		"X-Auth-Xpub",
-		"X-Auth-Hash",
-		"X-Auth-Nonce",
-		"X-Auth-Time",
-		"X-Auth-Signature",
-	}
-	actualXpub := h["X-Auth-Xpub"]
-	actualHeaders := make([]string, 0, len(expectedHeaders))
+	actual := make([]string, 0, len(expected))
 	for k := range h {
-		actualHeaders = append(actualHeaders, k)
+		actual = append(actual, k)
 	}
-
-	require.ElementsMatch(t, expectedHeaders, actualHeaders)
-	require.Equal(t, expectedXpub, actualXpub)
-}
-
-func accessKeyHeadersTestHelper(t *testing.T, h http.Header, key string) {
-	t.Helper()
-	expectedAuthKey := []string{key}
-	expectedHeaders := []string{
-		"X-Auth-Key",
-		"X-Auth-Hash",
-		"X-Auth-Nonce",
-		"X-Auth-Time",
-		"X-Auth-Signature",
-	}
-	actualAuthKey := h["X-Auth-Key"]
-	actualHeaders := make([]string, 0, len(expectedHeaders))
-	for k := range h {
-		actualHeaders = append(actualHeaders, k)
-	}
-
-	require.ElementsMatch(t, expectedHeaders, actualHeaders)
-	require.Equal(t, expectedAuthKey, actualAuthKey)
+	require.Subset(t, actual, expected)
 }

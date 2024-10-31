@@ -28,7 +28,7 @@ func TestAccessKeyAuthenitcator_NewWithNilAccessKey(t *testing.T) {
 	require.ErrorIs(t, err, auth.ErrEcPrivateKey)
 }
 
-func TestAccessKeyAuthenitcator_Authenticate(t *testing.T) {
+func TestAccessKeyAuthenticator_Authenticate(t *testing.T) {
 	// given:
 	key := testutil.PrivateKey(t)
 	authenticator, err := auth.NewAccessKeyAuthenticator(key)

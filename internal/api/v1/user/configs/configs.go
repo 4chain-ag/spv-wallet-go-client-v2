@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
@@ -22,11 +21,11 @@ func (a *API) SharedConfig(ctx context.Context) (*response.SharedConfig, error) 
 		R().
 		SetContext(ctx).
 		SetResult(&result).
-		SetError(&models.SPVError{}).
 		Get(a.addr + "/shared")
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
+
 	return &result, nil
 }
 

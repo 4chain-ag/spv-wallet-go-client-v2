@@ -33,10 +33,12 @@ func GetSignedHex(dt *models.DraftTransaction, xPriv *bip32.ExtendedKey) (string
 		if err != nil {
 			return "", fmt.Errorf("failed to prepare locking script, %w", err)
 		}
+
 		unlockScript, err := prepareUnlockingScript(xPriv, &draftInput.Destination)
 		if err != nil {
 			return "", fmt.Errorf("failed to prepare unlocking script, %w", err)
 		}
+
 		err = tx.AddInputFrom(draftInput.TransactionID, draftInput.OutputIndex, lockingScript.String(), draftInput.Satoshis, unlockScript)
 		if err != nil {
 			return "", fmt.Errorf("failed to add inputs to transaction, %w", err)
@@ -47,6 +49,7 @@ func GetSignedHex(dt *models.DraftTransaction, xPriv *bip32.ExtendedKey) (string
 	if err != nil {
 		return "", fmt.Errorf("failed to sign transaction, %w", err)
 	}
+
 	return tx.String(), nil
 }
 
@@ -68,6 +71,7 @@ func prepareLockingScript(dst *models.Destination) (*script.Script, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create locking script from hex for destination: %w", err)
 	}
+
 	return lockingScript, nil
 }
 
@@ -76,6 +80,7 @@ func prepareUnlockingScript(xPriv *bip32.ExtendedKey, dst *models.Destination) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to get derived key for destination: %w", err)
 	}
+
 	return getUnlockingScript(key)
 }
 
@@ -85,6 +90,7 @@ func getDerivedKeyForDestination(xPriv *bip32.ExtendedKey, dst *models.Destinati
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive key for unlocking input, %w", err)
 	}
+
 	// Handle paymail destination derivation if applicable
 	if dst.PaymailExternalDerivationNum != nil {
 		derivedKey, err = derivedKey.Child(*dst.PaymailExternalDerivationNum)
@@ -92,11 +98,13 @@ func getDerivedKeyForDestination(xPriv *bip32.ExtendedKey, dst *models.Destinati
 			return nil, fmt.Errorf("failed to derive key for unlocking paymail input, %w", err)
 		}
 	}
+
 	// Get the private key from the derived key
 	priv, err := bip32.GetPrivateKeyFromHDKey(derivedKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get private key for unlocking paymail input, %w", err)
 	}
+
 	return priv, nil
 }
 
@@ -106,6 +114,7 @@ func getUnlockingScript(privateKey *ec.PrivateKey) (*p2pkh.P2PKH, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create unlocking script, %w", err)
 	}
+
 	return unlocked, nil
 }
 
@@ -168,12 +177,11 @@ func setSignatureHeaders(header *http.Header, authData *models.AuthPayload) {
 }
 
 func createSignatureAccessKey(privateKeyHex, bodyString string) (payload *models.AuthPayload, err error) {
-	var privateKey *ec.PrivateKey
-	if privateKey, err = ec.PrivateKeyFromHex(
-		privateKeyHex,
-	); err != nil {
+	privateKey, err := ec.PrivateKeyFromHex(privateKeyHex)
+	if err != nil {
 		return
 	}
+
 	publicKey := privateKey.PubKey()
 
 	// Get the AccessKey

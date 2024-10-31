@@ -21,6 +21,7 @@ func (x *XpubAuthenticator) Authenticate(r *resty.Request) error {
 	if err != nil {
 		return fmt.Errorf("failed to get extended public key: %w", err)
 	}
+
 	r.SetHeader(models.AuthHeader, xPub)
 	return nil
 }
@@ -35,12 +36,14 @@ func (x *XprivAuthenticator) Authenticate(r *resty.Request) error {
 	if err != nil {
 		return fmt.Errorf("failed to set xpub header: %w", err)
 	}
+
 	body := bodyString(r)
 	header := make(http.Header)
 	err = setSignature(&header, x.xpriv, body)
 	if err != nil {
 		return fmt.Errorf("failed to sign request with xpriv: %w", err)
 	}
+
 	r.SetHeaderMultiValues(header)
 	return nil
 }
@@ -57,6 +60,7 @@ func (a *AccessKeyAuthenticator) Authenticate(r *resty.Request) error {
 	if err != nil {
 		return fmt.Errorf("failed to sign request with access key: %w", err)
 	}
+
 	setSignatureHeaders(&r.Header, sign)
 	return nil
 }
@@ -81,6 +85,7 @@ func NewXprivAuthenticator(xpriv *bip32.ExtendedKey) (*XprivAuthenticator, error
 	if xpriv == nil {
 		return nil, ErrBip32ExtendedKey
 	}
+
 	x := XprivAuthenticator{
 		xpriv:    xpriv,
 		xpubAuth: &XpubAuthenticator{hdKey: xpriv},
@@ -92,6 +97,7 @@ func NewAccessKeyAuthenticator(accessKey *ec.PrivateKey) (*AccessKeyAuthenticato
 	if accessKey == nil {
 		return nil, ErrEcPrivateKey
 	}
+
 	a := AccessKeyAuthenticator{
 		priv: accessKey,
 		pub:  accessKey.PubKey(),
@@ -103,6 +109,7 @@ func NewXpubOnlyAuthenticator(xpub *bip32.ExtendedKey) (*XpubAuthenticator, erro
 	if xpub == nil {
 		return nil, ErrBip32ExtendedKey
 	}
+
 	x := XpubAuthenticator{hdKey: xpub}
 	return &x, nil
 }

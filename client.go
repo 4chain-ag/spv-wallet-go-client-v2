@@ -51,10 +51,12 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate HD key from xPub: %w", err)
 	}
+
 	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
 	}
+
 	return newClient(cfg, authenticator), nil
 }
 
@@ -66,10 +68,12 @@ func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate HD key from xpriv: %w", err)
 	}
+
 	authenticator, err := auth.NewXprivAuthenticator(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
 	}
+
 	return newClient(cfg, authenticator), nil
 }
 
@@ -82,10 +86,12 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to return private key from hex or WIF: %w", err)
 	}
+
 	authenticator, err := auth.NewAccessKeyAuthenticator(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}
+
 	return newClient(cfg, authenticator), nil
 }
 
@@ -98,6 +104,7 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve shared configuration from user configs API: %w", err)
 	}
+
 	return res, nil
 }
 
@@ -106,10 +113,12 @@ func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
 	if err1 == nil {
 		return pk, nil
 	}
+
 	pk, err2 := ec.PrivateKeyFromHex(s)
 	if err2 != nil {
 		return nil, errors.Join(err1, err2)
 	}
+
 	return pk, nil
 }
 
@@ -130,9 +139,11 @@ func newClient(cfg Config, auth authenticator) *Client {
 			if r.IsSuccess() {
 				return nil
 			}
+
 			if spvError, ok := r.Error().(*models.SPVError); ok && len(spvError.Code) > 0 {
 				return spvError
 			}
+
 			return fmt.Errorf("unrecognized error response from API; %s", r.Body())
 		})
 

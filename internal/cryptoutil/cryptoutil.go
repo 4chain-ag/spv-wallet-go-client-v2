@@ -29,6 +29,7 @@ func RandomHex(n int) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to read bytes after rand: %w", err)
 	}
+
 	return hex.EncodeToString(bb), nil
 }
 
@@ -66,6 +67,7 @@ func ParseChildNumsFromHex(hexHash string) ([]uint32, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse hex part %q: %w", hexHash[start:end], err)
 		}
+
 		nums = append(nums, num)
 	}
 	return nums, nil
@@ -76,10 +78,12 @@ func parseHexPart(part string) (uint32, error) {
 	if err != nil {
 		return 0, errors.Join(err, ErrHexHashPartIntParse)
 	}
+
 	u, err := Int64ToUint32(i % math.MaxInt32)
 	if err != nil {
 		return 0, fmt.Errorf("failed to convert int64 to uint32: %w", err)
 	}
+
 	return u, nil
 }
 

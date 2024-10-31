@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bitcoin-sv/spv-wallet/models"
 	"net/http"
 	"time"
 
@@ -117,16 +118,26 @@ type authenticator interface {
 }
 
 func newClient(cfg Config, auth authenticator) *Client {
-	resty := resty.New().
+	restyInstance := resty.New().
 		SetTransport(cfg.Transport).
 		SetBaseURL(cfg.Addr).
 		SetTimeout(cfg.Timeout).
 		OnBeforeRequest(func(_ *resty.Client, r *resty.Request) error {
 			return auth.Authenticate(r)
+		}).
+		SetError(models.SPVError{}).
+		OnAfterResponse(func(_ *resty.Client, r *resty.Response) error {
+			if r.IsSuccess() {
+				return nil
+			}
+			if spvError, ok := r.Error().(*models.SPVError); ok && len(spvError.Code) > 0 {
+				return spvError
+			}
+			return fmt.Errorf("unrecognized error response from API; %s", r.Body())
 		})
 
 	cli := Client{
-		configsAPI: configs.NewAPI(cfg.Addr, resty),
+		configsAPI: configs.NewAPI(cfg.Addr, restyInstance),
 	}
 	return &cli
 }

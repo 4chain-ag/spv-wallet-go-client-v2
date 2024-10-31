@@ -11,7 +11,6 @@ import (
 )
 
 func TestConfigsAPI_SharedConfig_API_ResponseWithStatusCode200(t *testing.T) {
-	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
 	// given:

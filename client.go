@@ -11,6 +11,7 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
@@ -117,16 +118,26 @@ type authenticator interface {
 }
 
 func newClient(cfg Config, auth authenticator) *Client {
-	resty := resty.New().
+	restyCli := resty.New().
 		SetTransport(cfg.Transport).
 		SetBaseURL(cfg.Addr).
 		SetTimeout(cfg.Timeout).
 		OnBeforeRequest(func(_ *resty.Client, r *resty.Request) error {
 			return auth.Authenticate(r)
+		}).
+		SetError(&models.SPVError{}).
+		OnAfterResponse(func(_ *resty.Client, r *resty.Response) error {
+			if r.IsSuccess() {
+				return nil
+			}
+			if spvError, ok := r.Error().(*models.SPVError); ok && len(spvError.Code) > 0 {
+				return spvError
+			}
+			return fmt.Errorf("unrecognized error response from API; %s", r.Body())
 		})
 
 	cli := Client{
-		configsAPI: configs.NewAPI(cfg.Addr, resty),
+		configsAPI: configs.NewAPI(cfg.Addr, restyCli),
 	}
 	return &cli
 }

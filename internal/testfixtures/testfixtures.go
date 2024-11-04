@@ -54,3 +54,11 @@ func GivenSPVWalletClient(t *testing.T) (*client.Client, *httpmock.MockTransport
 
 	return spv, transport
 }
+
+func Parse(s string) time.Time {
+	t, err := time.Parse(time.RFC3339Nano, s)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}

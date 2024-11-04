@@ -5,25 +5,23 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestConfigsAPI_SharedConfig_API_ResponseWithStatusCode200(t *testing.T) {
-	defer httpmock.DeactivateAndReset()
-
 	// given:
-	URL := testutil.TestAPIAddr + "/api/v1/configs/shared"
-	spv, transport := testutil.NewMockSPVClient(t)
+	URL := testfixtures.TestAPIAddr + "/api/v1/configs/shared"
+	wallet, transport := testfixtures.GivenSPVWalletClient(t)
 	file := httpmock.File("configstest/response_200_status_code.json")
 	transport.RegisterResponder(http.MethodGet, URL, httpmock.NewJsonResponderOrPanic(http.StatusOK, file))
 
 	// when:
 	ctx := context.Background()
-	res, err := spv.SharedConfig(ctx)
+	res, err := wallet.SharedConfig(ctx)
 
 	// then:
 	require.NoError(t, err)
-	require.JSONEq(t, file.String(), testutil.MarshalToString(t, res))
+	require.JSONEq(t, file.String(), testfixtures.MarshalToString(t, res))
 }

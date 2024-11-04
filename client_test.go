@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
@@ -45,15 +45,15 @@ func TestClient_OnAfterResponseErrMiddleware(t *testing.T) {
 		},
 	}
 
-	URL := testutil.TestAPIAddr + "/api/v1/configs/shared"
+	URL := testfixtures.TestAPIAddr + "/api/v1/configs/shared"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			cli, transport := testutil.NewMockSPVClient(t)
+			wallet, transport := testfixtures.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
 
 			// then:
-			got, err := cli.SharedConfig(context.Background())
+			got, err := wallet.SharedConfig(context.Background())
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.Equal(t, tc.expectedResponse, got)
 		})

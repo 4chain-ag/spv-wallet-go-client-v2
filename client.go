@@ -127,7 +127,15 @@ type authenticator interface {
 }
 
 func newClient(cfg Config, auth authenticator) *Client {
-	restyCli := resty.New().
+	restyCli := newRestyClient(cfg, auth)
+	cli := Client{
+		configsAPI: configs.NewAPI(cfg.Addr, restyCli),
+	}
+	return &cli
+}
+
+func newRestyClient(cfg Config, auth authenticator) *resty.Client {
+	return resty.New().
 		SetTransport(cfg.Transport).
 		SetBaseURL(cfg.Addr).
 		SetTimeout(cfg.Timeout).
@@ -144,11 +152,10 @@ func newClient(cfg Config, auth authenticator) *Client {
 				return spvError
 			}
 
-			return fmt.Errorf("unrecognized error response from API; %s", r.Body())
+			return fmt.Errorf("%w: %s", ErrUnrecognizedAPIResponse, r.Body())
 		})
-
-	cli := Client{
-		configsAPI: configs.NewAPI(cfg.Addr, restyCli),
-	}
-	return &cli
 }
+
+// ErrUnrecognizedAPIResponse indicates that the response received from the SPV Wallet API
+// does not match the expected expected format or structure.
+var ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")

@@ -105,7 +105,7 @@ func (a *API) Transactions(ctx context.Context, opts ...query.BuilderOption) ([]
 		R().
 		SetContext(ctx).
 		SetResult(&result).
-		SetQueryParams(query.PraseToMap(params)).
+		SetQueryParams(query.Parse(params)).
 		Get(a.addr)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)

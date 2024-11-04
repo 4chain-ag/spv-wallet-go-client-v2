@@ -68,7 +68,7 @@ func NewQueryBuilder(opts ...BuilderOption) *Builder {
 	return &qb
 }
 
-func PraseToMap(values url.Values) map[string]string {
+func Parse(values url.Values) map[string]string {
 	m := make(map[string]string)
 	for k, v := range values {
 		m[k] = v[0]

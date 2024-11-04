@@ -25,6 +25,7 @@ func (a *API) SharedConfig(ctx context.Context) (*response.SharedConfig, error) 
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
+
 	return &result, nil
 }
 

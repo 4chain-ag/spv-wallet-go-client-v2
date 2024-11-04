@@ -10,7 +10,10 @@ import (
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet-go-client/query"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
@@ -41,7 +44,8 @@ func NewDefaultConfig(addr string) Config {
 // interact with both user and admin APIs without needing to manage the details
 // of the HTTP requests and responses directly.
 type Client struct {
-	configsAPI *configs.API
+	configsAPI      *configs.API
+	transactionsAPI *transactions.API
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -108,6 +112,101 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 	return res, nil
 }
 
+// RecordTransactionArgs holds the arguments required to record a user transaction.
+// It contains metadata, the hex representation of the transaction, and the reference ID.
+type RecordTransactionArgs struct {
+	Metadata    query.Metadata // Metadata associated with the transaction.
+	Hex         string         // Hexadecimal string representation of the transaction.
+	ReferenceID string         // Reference ID for the transaction.
+}
+
+// ParseToRecordTransactionRequest converts RecordTransactionArgs to a RecordTransactionRequest
+// for SPV Wallet API consumption.
+func (r RecordTransactionArgs) ParseToRecordTransactionRequest() transactions.RecordTransactionRequest {
+	return transactions.RecordTransactionRequest{
+		Metadata:    r.Metadata,
+		Hex:         r.Hex,
+		ReferenceID: r.ReferenceID,
+	}
+}
+
+// DraftTransactionArgs holds the arguments required to create user draft transaction.
+// It includes the transaction configuration and associated metadata.
+type DraftTransactionArgs struct {
+	Config   response.TransactionConfig // Configuration for the transaction.
+	Metadata query.Metadata             // Metadata related to the transaction.
+}
+
+// ParseToDraftTransactionRequest converts DraftTransactionArgs to a DraftTransactionRequest
+// for SPV Wallet API consumption.
+func (d DraftTransactionArgs) ParseToDraftTransactionRequest() transactions.DraftTransactionRequest {
+	return transactions.DraftTransactionRequest{
+		Config:   d.Config,
+		Metadata: d.Metadata,
+	}
+}
+
+// UpdateTransactionMetadataArgs holds the arguments required to update a user transaction's metadata.
+// It contains the transaction ID and the new metadata.
+type UpdateTransactionMetadataArgs struct {
+	ID       string         // Unique identifier of the transaction to be updated.
+	Metadata query.Metadata // New metadata to associate with the transaction.
+}
+
+// ParseUpdateTransactionMetadataRequest converts UpdateTransactionMetadataArgs to an
+// UpdateTransactionMetadataRequest for SPV Wallet API consumption.
+func (u UpdateTransactionMetadataArgs) ParseUpdateTransactionMetadataRequest() transactions.UpdateTransactionMetadataRequest {
+	return transactions.UpdateTransactionMetadataRequest{
+		ID:       u.ID,
+		Metadata: u.Metadata,
+	}
+}
+
+func (c *Client) DraftTransaction(ctx context.Context, args DraftTransactionArgs) (*response.DraftTransaction, error) {
+	res, err := c.transactionsAPI.DraftTransaction(ctx, args.ParseToDraftTransactionRequest())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create draft transaction by call user transactions API: %w", err)
+	}
+
+	return res, nil
+}
+
+func (c *Client) RecordTransaction(ctx context.Context, args RecordTransactionArgs) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.RecordTransaction(ctx, args.ParseToRecordTransactionRequest())
+	if err != nil {
+		return nil, fmt.Errorf("failed to record transaction with reference ID: %s by call user transactions API: %w", args.ReferenceID, err)
+	}
+
+	return res, nil
+}
+
+func (c *Client) UpdateTransactionMetadata(ctx context.Context, args UpdateTransactionMetadataArgs) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.UpdateTransactionMetadata(ctx, args.ParseUpdateTransactionMetadataRequest())
+	if err != nil {
+		return nil, fmt.Errorf("failed to update transactions metadata by call user user transactions API: %w", err)
+	}
+
+	return res, nil
+}
+
+func (c *Client) Transactions(ctx context.Context, opts ...query.BuilderOption) ([]*response.Transaction, error) {
+	res, err := c.transactionsAPI.Transactions(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve transactions from user transactions API: %w", err)
+	}
+
+	return res, nil
+}
+
+func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.Transaction(ctx, ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve transaction with ID: %s from user transactions API: %w", ID, err)
+	}
+
+	return res, nil
+}
+
 func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
 	pk, err1 := ec.PrivateKeyFromWif(s)
 	if err1 == nil {
@@ -129,7 +228,8 @@ type authenticator interface {
 func newClient(cfg Config, auth authenticator) *Client {
 	restyCli := newRestyClient(cfg, auth)
 	cli := Client{
-		configsAPI: configs.NewAPI(cfg.Addr, restyCli),
+		configsAPI:      configs.NewAPI(cfg.Addr, restyCli),
+		transactionsAPI: transactions.NewAPI(cfg.Addr, restyCli),
 	}
 	return &cli
 }

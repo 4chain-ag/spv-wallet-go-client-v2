@@ -1,4 +1,4 @@
-package transactions_test
+package query_test
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/transactions"
+	"github.com/bitcoin-sv/spv-wallet-go-client/query"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
@@ -15,13 +15,13 @@ func TestQueryBuilder(t *testing.T) {
 	type filters struct {
 		TransactionFilter filter.TransactionFilter
 		QueryParamsFilter filter.QueryParams
-		MetadataFilter    transactions.Metadata
+		MetadataFilter    query.Metadata
 	}
 	tests := map[string]struct {
 		filters        filters
 		expectedParams url.Values
 		expectedErr    error
-		builder        transactions.FilterQueryBuilder
+		builder        query.FilterQueryBuilder
 	}{
 		"query bilder: empty filters": {
 			filters:        filters{},
@@ -73,7 +73,7 @@ func TestQueryBuilder(t *testing.T) {
 				"metadata[key2]": []string{"1024"},
 			},
 			filters: filters{
-				MetadataFilter: transactions.Metadata{
+				MetadataFilter: query.Metadata{
 					"key1": "value1",
 					"key2": 1024,
 				},
@@ -100,7 +100,7 @@ func TestQueryBuilder(t *testing.T) {
 						},
 					},
 				},
-				MetadataFilter: transactions.Metadata{
+				MetadataFilter: query.Metadata{
 					"key1": "value1",
 					"key2": 1024,
 				},
@@ -129,19 +129,19 @@ func TestQueryBuilder(t *testing.T) {
 				},
 			},
 			builder:     &filterQueryBuilderFailureStub{},
-			expectedErr: transactions.ErrFilterQueryBuilder,
+			expectedErr: query.ErrFilterQueryBuilder,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			opts := []transactions.QueryBuilderOption{
-				transactions.WithMetadataFilter(tc.filters.MetadataFilter),
-				transactions.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
-				transactions.WithTransactionFilter(tc.filters.TransactionFilter),
-				transactions.WithFilterQueryBuilder(tc.builder),
+			opts := []query.BuilderOption{
+				query.WithMetadataFilter(tc.filters.MetadataFilter),
+				query.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
+				query.WithTransactionFilter(tc.filters.TransactionFilter),
+				query.WithFilterQueryBuilder(tc.builder),
 			}
-			qb := transactions.NewQueryBuilder(opts...)
+			qb := query.NewQueryBuilder(opts...)
 			got, err := qb.Build()
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.Equal(t, tc.expectedParams, got)

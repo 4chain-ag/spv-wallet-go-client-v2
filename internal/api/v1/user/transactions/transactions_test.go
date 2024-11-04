@@ -59,5 +59,4 @@ func TestTransactionsAPI_Transactions_APIResponses(t *testing.T) {
 			require.EqualValues(t, tc.expectedResponse, got)
 		})
 	}
-
 }

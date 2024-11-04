@@ -1,7 +1,6 @@
 package testfixtures
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -54,14 +53,4 @@ func GivenSPVWalletClient(t *testing.T) (*client.Client, *httpmock.MockTransport
 	}
 
 	return spv, transport
-}
-
-func MarshalToString(t *testing.T, actual any) string {
-	t.Helper()
-	bb, err := json.Marshal(actual)
-	if err != nil {
-		t.Fatalf("test helper - failed to marshal actual response")
-	}
-
-	return string(bb)
 }

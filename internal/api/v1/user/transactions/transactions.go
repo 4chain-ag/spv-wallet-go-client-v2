@@ -94,7 +94,7 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	return &result, nil
 }
 
-func (a *API) Transactions(ctx context.Context, opts ...query.BuilderOption) ([]*response.Transaction, error) {
+func (a *API) Transactions(ctx context.Context, opts ...query.QueryBuilderOption) ([]*response.Transaction, error) {
 	params, err := query.NewQueryBuilder(opts...).Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create transactions query params: %w", err)

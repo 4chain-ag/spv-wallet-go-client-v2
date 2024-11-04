@@ -7,33 +7,33 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
 
-type BuilderOption func(*Builder)
+type QueryBuilderOption func(*QueryBuilder)
 
-func WithQueryParamsFilter(q filter.QueryParams) BuilderOption {
-	return func(b *Builder) {
-		b.builders = append(b.builders, &QueryParamsFilterQueryBuilder{q})
+func WithQueryParamsFilter(q filter.QueryParams) QueryBuilderOption {
+	return func(qb *QueryBuilder) {
+		qb.builders = append(qb.builders, &QueryParamsFilterQueryBuilder{q})
 	}
 }
 
-func WithMetadataFilter(m Metadata) BuilderOption {
-	return func(b *Builder) {
-		b.builders = append(b.builders, &MetadataFilterQueryBuilder{MaxDepth: DefaultMaxDepth, Metadata: m})
+func WithMetadataFilter(m Metadata) QueryBuilderOption {
+	return func(qb *QueryBuilder) {
+		qb.builders = append(qb.builders, &MetadataFilterQueryBuilder{MaxDepth: DefaultMaxDepth, Metadata: m})
 	}
 }
 
-func WithTransactionFilter(tf filter.TransactionFilter) BuilderOption {
-	return func(b *Builder) {
-		b.builders = append(b.builders, &TransactionFilterQueryBuilder{
+func WithTransactionFilter(tf filter.TransactionFilter) QueryBuilderOption {
+	return func(qb *QueryBuilder) {
+		qb.builders = append(qb.builders, &TransactionFilterQueryBuilder{
 			TransactionFilter:       tf,
 			ModelFilterQueryBuilder: ModelFilterQueryBuilder{ModelFilter: tf.ModelFilter},
 		})
 	}
 }
 
-func WithFilterQueryBuilder(b FilterQueryBuilder) BuilderOption {
-	return func(b *Builder) {
+func WithFilterQueryBuilder(b FilterQueryBuilder) QueryBuilderOption {
+	return func(qb *QueryBuilder) {
 		if b != nil {
-			b.builders = append(b.builders, b)
+			qb.builders = append(qb.builders, b)
 		}
 	}
 }
@@ -42,11 +42,11 @@ type FilterQueryBuilder interface {
 	Build() (url.Values, error)
 }
 
-type Builder struct {
+type QueryBuilder struct {
 	builders []FilterQueryBuilder
 }
 
-func (q *Builder) Build() (url.Values, error) {
+func (q *QueryBuilder) Build() (url.Values, error) {
 	params := NewExtendedURLValues()
 	for _, b := range q.builders {
 		bparams, err := b.Build()
@@ -60,13 +60,15 @@ func (q *Builder) Build() (url.Values, error) {
 	return params.Values, nil
 }
 
-func NewQueryBuilder(opts ...BuilderOption) *Builder {
-	var qb Builder
+func NewQueryBuilder(opts ...QueryBuilderOption) *QueryBuilder {
+	var qb QueryBuilder
 	for _, o := range opts {
 		o(&qb)
 	}
 	return &qb
 }
+
+var ErrFilterQueryBuilder = errors.New("transactions - filter query builder - build op failure")
 
 func Parse(values url.Values) map[string]string {
 	m := make(map[string]string)
@@ -75,5 +77,3 @@ func Parse(values url.Values) map[string]string {
 	}
 	return m
 }
-
-var ErrFilterQueryBuilder = errors.New("filter query builder - build query failure")

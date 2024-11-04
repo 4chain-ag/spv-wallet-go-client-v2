@@ -188,7 +188,7 @@ func (c *Client) UpdateTransactionMetadata(ctx context.Context, args UpdateTrans
 	return res, nil
 }
 
-func (c *Client) Transactions(ctx context.Context, opts ...query.BuilderOption) ([]*response.Transaction, error) {
+func (c *Client) Transactions(ctx context.Context, opts ...query.QueryBuilderOption) ([]*response.Transaction, error) {
 	res, err := c.transactionsAPI.Transactions(ctx, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve transactions from user transactions API: %w", err)

@@ -135,7 +135,7 @@ func TestQueryBuilder(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			opts := []query.BuilderOption{
+			opts := []query.QueryBuilderOption{
 				query.WithMetadataFilter(tc.filters.MetadataFilter),
 				query.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
 				query.WithTransactionFilter(tc.filters.TransactionFilter),

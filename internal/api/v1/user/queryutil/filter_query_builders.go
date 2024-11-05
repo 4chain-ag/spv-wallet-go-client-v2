@@ -1,4 +1,4 @@
-package query
+package queryutil
 
 import (
 	"errors"
@@ -29,6 +29,7 @@ func (m *MetadataFilterQueryBuilder) Build() (url.Values, error) {
 		if err := m.dfs(0, &path, v, &sb, pref); err != nil {
 			return nil, err
 		}
+
 		path.Reset()
 	}
 
@@ -38,6 +39,7 @@ func (m *MetadataFilterQueryBuilder) Build() (url.Values, error) {
 		if len(s) == 0 {
 			continue
 		}
+
 		p := strings.Split(s, "=")
 		params.Add(p[0], p[1])
 	}
@@ -50,19 +52,16 @@ func (m *MetadataFilterQueryBuilder) dfs(depth int, path *strings.Builder, val a
 	}
 
 	t := reflect.TypeOf(val)
-	switch t.Kind() {
-	case reflect.Map:
-		if err := m.mapDfs(depth+1, val, path, ans, pref); err != nil {
-			return err
-		}
-	case reflect.Slice:
-		if err := m.sliceDfs(depth+1, val, path, ans, pref); err != nil {
-			return err
-		}
-	default:
-		path.WriteString(fmt.Sprintf("=%v&", val))
-		ans.WriteString(path.String())
+	if t.Kind() == reflect.Map {
+		return m.mapDfs(depth+1, val, path, ans, pref)
 	}
+
+	if t.Kind() == reflect.Slice {
+		return m.sliceDfs(depth+1, val, path, ans, pref)
+	}
+
+	path.WriteString(fmt.Sprintf("=%v&", val))
+	ans.WriteString(path.String())
 	return nil
 }
 
@@ -74,6 +73,7 @@ func (m *MetadataFilterQueryBuilder) mapDfs(depth int, val any, path *strings.Bu
 		if err := m.dfs(depth+1, path, mpv.Interface(), ans, pref); err != nil {
 			return err
 		}
+
 		// Reset path after processing each map entry (backtracking).
 		str := path.String()
 		trim := str[:strings.LastIndex(str, "[")]
@@ -91,6 +91,7 @@ func (m *MetadataFilterQueryBuilder) sliceDfs(depth int, val any, path *strings.
 		if err := m.dfs(depth+1, path, slv.Interface(), ans, pref); err != nil {
 			return err
 		}
+
 		// Reset path after processing each slice element (backtracking).
 		str := path.String()
 		trim := str[:strings.LastIndex(str, "[]")]
@@ -106,6 +107,7 @@ func TrimLastAmpersand(s string) string {
 	if len(s) > 0 && s[len(s)-1] == '&' {
 		return s[:len(s)-1]
 	}
+
 	return s
 }
 
@@ -171,11 +173,13 @@ func (e *ExtendedURLValues) AddPair(key string, val any) {
 	if val == nil || len(key) == 0 {
 		return
 	}
+
 	write := func(v any) { e.Add(key, fmt.Sprintf("%v", v)) }
 	writeRange := func(v filter.TimeRange) {
 		if v.From != nil && !v.From.IsZero() {
 			e.Add(fmt.Sprintf("%s[from]", key), v.From.Format(time.RFC3339))
 		}
+
 		if v.To != nil && !v.To.IsZero() {
 			e.Add(fmt.Sprintf("%s[to]", key), v.To.Format(time.RFC3339))
 		}
@@ -186,26 +190,32 @@ func (e *ExtendedURLValues) AddPair(key string, val any) {
 		if v > 0 {
 			write(v)
 		}
+
 	case string:
 		if len(v) > 0 {
 			write(v)
 		}
+
 	case *string:
 		if v != nil && len(*v) > 0 {
 			write(*v)
 		}
+
 	case *uint64:
 		if v != nil && *v > 0 {
 			write(*v)
 		}
+
 	case *uint32:
 		if v != nil && *v > 0 {
 			write(*v)
 		}
+
 	case *bool:
 		if v != nil {
 			write(*v)
 		}
+
 	case *filter.TimeRange:
 		if v != nil {
 			writeRange(*v)

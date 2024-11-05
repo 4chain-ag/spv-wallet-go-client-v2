@@ -1,66 +1,67 @@
-package query_test
+package queryutil_test
 
 import (
 	"net/url"
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/query"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
 
-func TestMetadataFilterQueryBuilder(t *testing.T) {
+func TestMetadataFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
-		metadata       query.Metadata
+		metadata       queryutil.Metadata
 		expectedParams url.Values
 		expectedErr    error
 		depth          int
 	}{
 		"metadata: empty map": {
-			depth:          query.DefaultMaxDepth,
+			depth:          queryutil.DefaultMaxDepth,
 			expectedParams: make(url.Values),
 		},
 		"metadata: map entry [key]=value1": {
-			depth: query.DefaultMaxDepth,
+			depth: queryutil.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key]": []string{"value1"},
 			},
-			metadata: query.Metadata{
+			metadata: queryutil.Metadata{
 				"key": "value1",
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=1024": {
-			depth: query.DefaultMaxDepth,
+			depth: queryutil.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]": []string{"value1"},
 				"metadata[key2]": []string{"1024"},
 			},
-			metadata: query.Metadata{
+			metadata: queryutil.Metadata{
 				"key1": "value1",
 				"key2": 1024,
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=[]{value2,value3,value4}": {
-			depth: query.DefaultMaxDepth,
+			depth: queryutil.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]":   []string{"value1"},
 				"metadata[key2][]": []string{"value2", "value3", "value4"},
 			},
-			metadata: query.Metadata{
+			metadata: queryutil.Metadata{
 				"key1": "value1",
 				"key2": []string{"value2", "value3", "value4"},
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=[]{value2, value3, value4}, [key3]=value5, [key4]=[]{value6,value7,value8}": {
-			depth: query.DefaultMaxDepth,
+			depth: queryutil.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]":   []string{"value1"},
 				"metadata[key2][]": []string{"value2", "value3", "value4"},
 				"metadata[key3]":   []string{"value5"},
 				"metadata[key4][]": []string{"value6", "value7", "value8"},
 			},
-			metadata: query.Metadata{
+			metadata: queryutil.Metadata{
 				"key1": "value1",
 				"key2": []string{"value2", "value3", "value4"},
 				"key3": "value5",
@@ -68,26 +69,26 @@ func TestMetadataFilterQueryBuilder(t *testing.T) {
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=[]{value1,value2,value3,value4}, [key3][key3_nested]=value5, [key4][key4_nested]=[]{6,7}": {
-			depth: query.DefaultMaxDepth,
+			depth: queryutil.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]":                []string{"value1"},
 				"metadata[key2][]":              []string{"value2", "value3", "value4"},
 				"metadata[key3][key3_nested]":   []string{"value5"},
 				"metadata[key4][key4_nested][]": []string{"6", "7"},
 			},
-			metadata: query.Metadata{
+			metadata: queryutil.Metadata{
 				"key1": "value1",
 				"key2": []string{"value2", "value3", "value4"},
-				"key3": query.Metadata{
+				"key3": queryutil.Metadata{
 					"key3_nested": "value5",
 				},
-				"key4": query.Metadata{
+				"key4": queryutil.Metadata{
 					"key4_nested": []int{6, 7},
 				},
 			},
 		},
 		"metadata: 11 map entries, complex nesting, max depth set to 100": {
-			depth: query.DefaultMaxDepth,
+			depth: queryutil.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1][key2][key3][key1]":                                             []string{"abc"},
 				"metadata[key1][key2][key3][key2][key1]":                                       []string{"9"},
@@ -99,26 +100,26 @@ func TestMetadataFilterQueryBuilder(t *testing.T) {
 				"metadata[key1][key2][key3][key3][key1][key2][key4][key1][key1][key3][key1][]": []string{"5", "6", "7", "8"},
 				"metadata[key1][key2][key3][key3][key1][key2][key4][key1][key1][key3][key2][]": []string{"a", "b", "c"},
 			},
-			metadata: query.Metadata{
-				"key1": query.Metadata{
-					"key2": query.Metadata{
-						"key3": query.Metadata{
+			metadata: queryutil.Metadata{
+				"key1": queryutil.Metadata{
+					"key2": queryutil.Metadata{
+						"key3": queryutil.Metadata{
 							"key1": "abc",
-							"key2": query.Metadata{
+							"key2": queryutil.Metadata{
 								"key1": 9,
 							},
-							"key3": query.Metadata{
-								"key1": query.Metadata{
-									"key2": query.Metadata{
+							"key3": queryutil.Metadata{
+								"key1": queryutil.Metadata{
+									"key2": queryutil.Metadata{
 										"key1": []int{1, 2, 3, 4},
 										"key2": 10,
 										"key3": "abc",
-										"key4": query.Metadata{
-											"key1": query.Metadata{
-												"key1": query.Metadata{
+										"key4": queryutil.Metadata{
+											"key1": queryutil.Metadata{
+												"key1": queryutil.Metadata{
 													"key1": 2,
 													"key2": "cde",
-													"key3": query.Metadata{
+													"key3": queryutil.Metadata{
 														"key1": []int{5, 6, 7, 8},
 														"key2": []string{"a", "b", "c"},
 													},
@@ -134,23 +135,23 @@ func TestMetadataFilterQueryBuilder(t *testing.T) {
 			},
 		},
 		"metadata: map entries depth exceeded - map entries: 4, max depth: 3": {
-			metadata: query.Metadata{
-				"key1": query.Metadata{
-					"key2": query.Metadata{
-						"key3": query.Metadata{
+			metadata: queryutil.Metadata{
+				"key1": queryutil.Metadata{
+					"key2": queryutil.Metadata{
+						"key3": queryutil.Metadata{
 							"key4": "value1",
 						},
 					},
 				},
 			},
 			depth:       3,
-			expectedErr: query.ErrMetadataFilterMaxDepthExceeded,
+			expectedErr: queryutil.ErrMetadataFilterMaxDepthExceeded,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mp := query.MetadataFilterQueryBuilder{
+			mp := queryutil.MetadataFilterQueryBuilder{
 				MaxDepth: tc.depth,
 				Metadata: tc.metadata,
 			}
@@ -161,7 +162,7 @@ func TestMetadataFilterQueryBuilder(t *testing.T) {
 	}
 }
 
-func TestModelFilterQueryBuilder(t *testing.T) {
+func TestModelFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
 		filter         filter.ModelFilter
 		expectedParams url.Values
@@ -172,7 +173,7 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 				"includeDeleted": []string{"true"},
 			},
 			filter: filter.ModelFilter{
-				IncludeDeleted: ptr(true),
+				IncludeDeleted: testfixtures.Ptr(true),
 			},
 		},
 		"model filter: filter with only created range 'from' field set": {
@@ -181,7 +182,7 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				CreatedRange: &filter.TimeRange{
-					From: ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+					From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -191,7 +192,7 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				CreatedRange: &filter.TimeRange{
-					To: ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+					To: testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -202,8 +203,8 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				CreatedRange: &filter.TimeRange{
-					From: ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-					To:   ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+					From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+					To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -213,7 +214,7 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				UpdatedRange: &filter.TimeRange{
-					From: ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+					From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -223,7 +224,7 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				UpdatedRange: &filter.TimeRange{
-					To: ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+					To: testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -234,8 +235,8 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				UpdatedRange: &filter.TimeRange{
-					From: ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-					To:   ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+					From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+					To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -248,21 +249,21 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 				"updatedRange[to]":   []string{"2021-02-02T00:00:00Z"},
 			},
 			filter: filter.ModelFilter{
-				IncludeDeleted: ptr(true),
+				IncludeDeleted: testfixtures.Ptr(true),
 				CreatedRange: &filter.TimeRange{
-					From: ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-					To:   ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+					From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+					To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
 				UpdatedRange: &filter.TimeRange{
-					From: ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-					To:   ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+					From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+					To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := query.ModelFilterQueryBuilder{ModelFilter: tc.filter}
+			m := queryutil.ModelFilterQueryBuilder{ModelFilter: tc.filter}
 			got, err := m.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
@@ -270,11 +271,7 @@ func TestModelFilterQueryBuilder(t *testing.T) {
 	}
 }
 
-func ptr[T any](value T) *T {
-	return &value
-}
-
-func TestQueryParamsFilterQueryBuilder(t *testing.T) {
+func TestQueryParamsFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
 		filter         filter.QueryParams
 		expectedParams url.Values
@@ -330,7 +327,7 @@ func TestQueryParamsFilterQueryBuilder(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			qp := query.QueryParamsFilterQueryBuilder{
+			qp := queryutil.QueryParamsFilterQueryBuilder{
 				QueryParamsFilter: tc.filter,
 			}
 			got, err := qp.Build()
@@ -340,7 +337,7 @@ func TestQueryParamsFilterQueryBuilder(t *testing.T) {
 	}
 }
 
-func TestTransactionFilterQueryBuilder(t *testing.T) {
+func TestTransactionFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
 		filter         filter.TransactionFilter
 		expectedParams url.Values
@@ -348,16 +345,16 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 	}{
 		"transaction filter: zero values": {
 			filter: filter.TransactionFilter{
-				Id:              ptr(""),
-				Hex:             ptr(""),
-				BlockHash:       ptr(""),
-				BlockHeight:     ptr(uint64(0)),
-				Fee:             ptr(uint64(0)),
-				NumberOfInputs:  ptr(uint32(0)),
-				NumberOfOutputs: ptr(uint32(0)),
-				DraftID:         ptr(""),
-				TotalValue:      ptr(uint64(0)),
-				Status:          ptr(""),
+				Id:              testfixtures.Ptr(""),
+				Hex:             testfixtures.Ptr(""),
+				BlockHash:       testfixtures.Ptr(""),
+				BlockHeight:     testfixtures.Ptr(uint64(0)),
+				Fee:             testfixtures.Ptr(uint64(0)),
+				NumberOfInputs:  testfixtures.Ptr(uint32(0)),
+				NumberOfOutputs: testfixtures.Ptr(uint32(0)),
+				DraftID:         testfixtures.Ptr(""),
+				TotalValue:      testfixtures.Ptr(uint64(0)),
+				Status:          testfixtures.Ptr(""),
 				ModelFilter: filter.ModelFilter{
 					CreatedRange: &filter.TimeRange{},
 					UpdatedRange: &filter.TimeRange{},
@@ -367,7 +364,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'id' field set": {
 			filter: filter.TransactionFilter{
-				Id: ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				Id: testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
 			},
 			expectedParams: url.Values{
 				"id": []string{"d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"},
@@ -375,7 +372,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'hex' field set": {
 			filter: filter.TransactionFilter{
-				Hex: ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
+				Hex: testfixtures.Ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
 			},
 			expectedParams: url.Values{
 				"hex": []string{"001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"},
@@ -383,7 +380,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'block hash' field set": {
 			filter: filter.TransactionFilter{
-				BlockHash: ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
+				BlockHash: testfixtures.Ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
 			},
 			expectedParams: url.Values{
 				"blockHash": []string{"0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"},
@@ -391,7 +388,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'block height' field set": {
 			filter: filter.TransactionFilter{
-				BlockHeight: ptr(uint64(839376)),
+				BlockHeight: testfixtures.Ptr(uint64(839376)),
 			},
 			expectedParams: url.Values{
 				"blockHeight": []string{"839376"},
@@ -399,7 +396,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'fee' field set": {
 			filter: filter.TransactionFilter{
-				Fee: ptr(uint64(1)),
+				Fee: testfixtures.Ptr(uint64(1)),
 			},
 			expectedParams: url.Values{
 				"fee": []string{"1"},
@@ -407,7 +404,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'number of inputs' field set": {
 			filter: filter.TransactionFilter{
-				NumberOfInputs: ptr(uint32(10)),
+				NumberOfInputs: testfixtures.Ptr(uint32(10)),
 			},
 			expectedParams: url.Values{
 				"numberOfInputs": []string{"10"},
@@ -415,7 +412,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'number of outputs' field set": {
 			filter: filter.TransactionFilter{
-				NumberOfOutputs: ptr(uint32(20)),
+				NumberOfOutputs: testfixtures.Ptr(uint32(20)),
 			},
 			expectedParams: url.Values{
 				"numberOfOutputs": []string{"20"},
@@ -423,7 +420,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'draft id' field set": {
 			filter: filter.TransactionFilter{
-				DraftID: ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				DraftID: testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
 			},
 			expectedParams: url.Values{
 				"draftId": []string{"d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"},
@@ -431,7 +428,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'total value' field set": {
 			filter: filter.TransactionFilter{
-				TotalValue: ptr(uint64(100000000)),
+				TotalValue: testfixtures.Ptr(uint64(100000000)),
 			},
 			expectedParams: url.Values{
 				"totalValue": []string{"100000000"},
@@ -439,7 +436,7 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: filter with only 'status' field set": {
 			filter: filter.TransactionFilter{
-				Status: ptr("RECEIVED"),
+				Status: testfixtures.Ptr("RECEIVED"),
 			},
 			expectedParams: url.Values{
 				"status": []string{"RECEIVED"},
@@ -448,14 +445,14 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		"transaction filter: filter with only 'model filter' fields set": {
 			filter: filter.TransactionFilter{
 				ModelFilter: filter.ModelFilter{
-					IncludeDeleted: ptr(true),
+					IncludeDeleted: testfixtures.Ptr(true),
 					CreatedRange: &filter.TimeRange{
-						From: ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-						To:   ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+						From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+						To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 					},
 					UpdatedRange: &filter.TimeRange{
-						From: ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-						To:   ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+						From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+						To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 					},
 				},
 			},
@@ -469,25 +466,25 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 		},
 		"transaction filter: all fields set": {
 			filter: filter.TransactionFilter{
-				Id:              ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
-				Hex:             ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
-				BlockHash:       ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
-				BlockHeight:     ptr(uint64(839376)),
-				Fee:             ptr(uint64(1)),
-				NumberOfInputs:  ptr(uint32(10)),
-				NumberOfOutputs: ptr(uint32(20)),
-				DraftID:         ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
-				TotalValue:      ptr(uint64(100000000)),
-				Status:          ptr("RECEIVED"),
+				Id:              testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				Hex:             testfixtures.Ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
+				BlockHash:       testfixtures.Ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
+				BlockHeight:     testfixtures.Ptr(uint64(839376)),
+				Fee:             testfixtures.Ptr(uint64(1)),
+				NumberOfInputs:  testfixtures.Ptr(uint32(10)),
+				NumberOfOutputs: testfixtures.Ptr(uint32(20)),
+				DraftID:         testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				TotalValue:      testfixtures.Ptr(uint64(100000000)),
+				Status:          testfixtures.Ptr("RECEIVED"),
 				ModelFilter: filter.ModelFilter{
-					IncludeDeleted: ptr(true),
+					IncludeDeleted: testfixtures.Ptr(true),
 					CreatedRange: &filter.TimeRange{
-						From: ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-						To:   ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+						From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+						To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 					},
 					UpdatedRange: &filter.TimeRange{
-						From: ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-						To:   ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+						From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+						To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 					},
 				},
 			},
@@ -513,8 +510,8 @@ func TestTransactionFilterQueryBuilder(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			tfp := query.TransactionFilterQueryBuilder{
-				ModelFilterQueryBuilder: query.ModelFilterQueryBuilder{ModelFilter: tc.filter.ModelFilter},
+			tfp := queryutil.TransactionFilterQueryBuilder{
+				ModelFilterQueryBuilder: queryutil.ModelFilterQueryBuilder{ModelFilter: tc.filter.ModelFilter},
 				TransactionFilter:       tc.filter,
 			}
 			got, err := tfp.Build()

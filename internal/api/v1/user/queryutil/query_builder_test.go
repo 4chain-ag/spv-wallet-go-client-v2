@@ -1,4 +1,4 @@
-package query_test
+package queryutil_test
 
 import (
 	"errors"
@@ -6,22 +6,23 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/query"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
 
-func TestQueryBuilder(t *testing.T) {
+func TestQueryBuilder_Build(t *testing.T) {
 	type filters struct {
 		TransactionFilter filter.TransactionFilter
 		QueryParamsFilter filter.QueryParams
-		MetadataFilter    query.Metadata
+		MetadataFilter    queryutil.Metadata
 	}
 	tests := map[string]struct {
 		filters        filters
 		expectedParams url.Values
 		expectedErr    error
-		builder        query.FilterQueryBuilder
+		builder        queryutil.FilterQueryBuilder
 	}{
 		"query bilder: empty filters": {
 			filters:        filters{},
@@ -47,14 +48,14 @@ func TestQueryBuilder(t *testing.T) {
 			filters: filters{
 				TransactionFilter: filter.TransactionFilter{
 					ModelFilter: filter.ModelFilter{
-						IncludeDeleted: ptr(true),
+						IncludeDeleted: testfixtures.Ptr(true),
 						CreatedRange: &filter.TimeRange{
-							From: ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-							To:   ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+							From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 						},
 						UpdatedRange: &filter.TimeRange{
-							From: ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-							To:   ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+							From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 						},
 					},
 				},
@@ -73,7 +74,7 @@ func TestQueryBuilder(t *testing.T) {
 				"metadata[key2]": []string{"1024"},
 			},
 			filters: filters{
-				MetadataFilter: query.Metadata{
+				MetadataFilter: queryutil.Metadata{
 					"key1": "value1",
 					"key2": 1024,
 				},
@@ -89,18 +90,18 @@ func TestQueryBuilder(t *testing.T) {
 				},
 				TransactionFilter: filter.TransactionFilter{
 					ModelFilter: filter.ModelFilter{
-						IncludeDeleted: ptr(true),
+						IncludeDeleted: testfixtures.Ptr(true),
 						CreatedRange: &filter.TimeRange{
-							From: ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-							To:   ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+							From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 						},
 						UpdatedRange: &filter.TimeRange{
-							From: ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-							To:   ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+							From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 						},
 					},
 				},
-				MetadataFilter: query.Metadata{
+				MetadataFilter: queryutil.Metadata{
 					"key1": "value1",
 					"key2": 1024,
 				},
@@ -129,19 +130,22 @@ func TestQueryBuilder(t *testing.T) {
 				},
 			},
 			builder:     &filterQueryBuilderFailureStub{},
-			expectedErr: query.ErrFilterQueryBuilder,
+			expectedErr: queryutil.ErrFilterQueryBuilder,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			opts := []query.QueryBuilderOption{
-				query.WithMetadataFilter(tc.filters.MetadataFilter),
-				query.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
-				query.WithTransactionFilter(tc.filters.TransactionFilter),
-				query.WithFilterQueryBuilder(tc.builder),
+			// when:
+			opts := []queryutil.QueryBuilderOption{
+				queryutil.WithMetadataFilter(tc.filters.MetadataFilter),
+				queryutil.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
+				queryutil.WithTransactionFilter(tc.filters.TransactionFilter),
+				queryutil.WithFilterQueryBuilder(tc.builder),
 			}
-			qb := query.NewQueryBuilder(opts...)
+			qb := queryutil.NewQueryBuilder(opts...)
+
+			// then:
 			got, err := qb.Build()
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.Equal(t, tc.expectedParams, got)

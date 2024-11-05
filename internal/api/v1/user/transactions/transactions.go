@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/query"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
@@ -13,18 +13,18 @@ const route = "api/v1/transactions"
 
 type DraftTransactionRequest struct {
 	Config   response.TransactionConfig `json:"config"`
-	Metadata query.Metadata             `json:"metadata"`
+	Metadata queryutil.Metadata         `json:"metadata"`
 }
 
 type RecordTransactionRequest struct {
-	Metadata    query.Metadata `json:"metadata"`
-	Hex         string         `json:"hex"`
-	ReferenceID string         `json:"referenceId"`
+	Metadata    queryutil.Metadata `json:"metadata"`
+	Hex         string             `json:"hex"`
+	ReferenceID string             `json:"referenceId"`
 }
 
 type UpdateTransactionMetadataRequest struct {
-	ID       string         `json:"-"`
-	Metadata query.Metadata `json:"metadata"`
+	ID       string             `json:"-"`
+	Metadata queryutil.Metadata `json:"metadata"`
 }
 
 type API struct {
@@ -94,8 +94,8 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	return &result, nil
 }
 
-func (a *API) Transactions(ctx context.Context, opts ...query.QueryBuilderOption) ([]*response.Transaction, error) {
-	params, err := query.NewQueryBuilder(opts...).Build()
+func (a *API) Transactions(ctx context.Context, opts ...queryutil.QueryBuilderOption) ([]*response.Transaction, error) {
+	params, err := queryutil.NewQueryBuilder(opts...).Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create transactions query params: %w", err)
 	}
@@ -105,7 +105,7 @@ func (a *API) Transactions(ctx context.Context, opts ...query.QueryBuilderOption
 		R().
 		SetContext(ctx).
 		SetResult(&result).
-		SetQueryParams(query.Parse(params)).
+		SetQueryParams(queryutil.ParseToMap(params)).
 		Get(a.addr)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)

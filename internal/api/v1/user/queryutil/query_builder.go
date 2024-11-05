@@ -1,4 +1,4 @@
-package query
+package queryutil
 
 import (
 	"errors"
@@ -53,6 +53,7 @@ func (q *QueryBuilder) Build() (url.Values, error) {
 		if err != nil {
 			return nil, errors.Join(err, ErrFilterQueryBuilder)
 		}
+
 		if len(bparams) > 0 {
 			params.Append(bparams)
 		}
@@ -68,9 +69,9 @@ func NewQueryBuilder(opts ...QueryBuilderOption) *QueryBuilder {
 	return &qb
 }
 
-var ErrFilterQueryBuilder = errors.New("transactions - filter query builder - build op failure")
+var ErrFilterQueryBuilder = errors.New("filter query builder - build operation failure")
 
-func Parse(values url.Values) map[string]string {
+func ParseToMap(values url.Values) map[string]string {
 	m := make(map[string]string)
 	for k, v := range values {
 		m[k] = v[0]

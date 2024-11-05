@@ -6,9 +6,8 @@ import (
 	"testing"
 
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
-
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
-	"github.com/bitcoin-sv/spv-wallet-go-client/query"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
@@ -84,7 +83,7 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 			// then:
 			got, err := wallet.UpdateTransactionMetadata(context.Background(), client.UpdateTransactionMetadataArgs{
 				ID: ID,
-				Metadata: query.Metadata{
+				Metadata: queryutil.Metadata{
 					"example_key1": "example_key10_val",
 					"example_key2": "example_key20_val",
 				},

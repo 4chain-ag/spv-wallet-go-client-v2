@@ -10,10 +10,11 @@ import (
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
-	"github.com/bitcoin-sv/spv-wallet-go-client/query"
 	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
@@ -114,9 +115,9 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 // RecordTransactionArgs holds the arguments required to record a user transaction.
 // It contains metadata, the hex representation of the transaction, and the reference ID.
 type RecordTransactionArgs struct {
-	Metadata    query.Metadata // Metadata associated with the transaction.
-	Hex         string         // Hexadecimal string representation of the transaction.
-	ReferenceID string         // Reference ID for the transaction.
+	Metadata    queryutil.Metadata // Metadata associated with the transaction.
+	Hex         string             // Hexadecimal string representation of the transaction.
+	ReferenceID string             // Reference ID for the transaction.
 }
 
 // ParseToRecordTransactionRequest converts RecordTransactionArgs to a RecordTransactionRequest
@@ -133,7 +134,7 @@ func (r RecordTransactionArgs) ParseToRecordTransactionRequest() transactions.Re
 // It includes the transaction configuration and associated metadata.
 type DraftTransactionArgs struct {
 	Config   response.TransactionConfig // Configuration for the transaction.
-	Metadata query.Metadata             // Metadata related to the transaction.
+	Metadata queryutil.Metadata         // Metadata related to the transaction.
 }
 
 // ParseToDraftTransactionRequest converts DraftTransactionArgs to a DraftTransactionRequest
@@ -148,8 +149,8 @@ func (d DraftTransactionArgs) ParseToDraftTransactionRequest() transactions.Draf
 // UpdateTransactionMetadataArgs holds the arguments required to update a user transaction's metadata.
 // It contains the transaction ID and the new metadata.
 type UpdateTransactionMetadataArgs struct {
-	ID       string         // Unique identifier of the transaction to be updated.
-	Metadata query.Metadata // New metadata to associate with the transaction.
+	ID       string             // Unique identifier of the transaction to be updated.
+	Metadata queryutil.Metadata // New metadata to associate with the transaction.
 }
 
 // ParseUpdateTransactionMetadataRequest converts UpdateTransactionMetadataArgs to an
@@ -161,6 +162,10 @@ func (u UpdateTransactionMetadataArgs) ParseUpdateTransactionMetadataRequest() t
 	}
 }
 
+// DraftTransaction creates a new draft transaction using the user transactions API.
+// This method sends an HTTP POST request to the "/draft" endpoint and expects
+// a response that can be unmarshaled into a response.DraftTransaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) DraftTransaction(ctx context.Context, args DraftTransactionArgs) (*response.DraftTransaction, error) {
 	res, err := c.transactionsAPI.DraftTransaction(ctx, args.ParseToDraftTransactionRequest())
 	if err != nil {
@@ -170,6 +175,10 @@ func (c *Client) DraftTransaction(ctx context.Context, args DraftTransactionArgs
 	return res, nil
 }
 
+// RecordTransaction submits a transaction for recording using the user transactions API.
+// This method sends an HTTP POST request to the "/transactions" endpoint, expecting
+// a response that can be unmarshaled into a response.Transaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) RecordTransaction(ctx context.Context, args RecordTransactionArgs) (*response.Transaction, error) {
 	res, err := c.transactionsAPI.RecordTransaction(ctx, args.ParseToRecordTransactionRequest())
 	if err != nil {
@@ -179,6 +188,10 @@ func (c *Client) RecordTransaction(ctx context.Context, args RecordTransactionAr
 	return res, nil
 }
 
+// UpdateTransactionMetadata updates the metadata of a transaction using the user transactions API.
+// This method sends an HTTP PATCH request with updated metadata and expects a response
+// that can be unmarshaled into a response.Transaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) UpdateTransactionMetadata(ctx context.Context, args UpdateTransactionMetadataArgs) (*response.Transaction, error) {
 	res, err := c.transactionsAPI.UpdateTransactionMetadata(ctx, args.ParseUpdateTransactionMetadataRequest())
 	if err != nil {
@@ -188,8 +201,14 @@ func (c *Client) UpdateTransactionMetadata(ctx context.Context, args UpdateTrans
 	return res, nil
 }
 
-func (c *Client) Transactions(ctx context.Context, opts ...query.QueryBuilderOption) ([]*response.Transaction, error) {
-	res, err := c.transactionsAPI.Transactions(ctx, opts...)
+// Transactions retrieves a list of transactions using the user transactions API.
+// This method applies optional query parameters and expects a response that can be
+// unmarshaled into a slice of response.Transaction pointers.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) Transactions(ctx context.Context, opts ...QueryOption) ([]*response.Transaction, error) {
+	var params Query
+	params.apply(opts...)
+	res, err := c.transactionsAPI.Transactions(ctx, params.queryBuilderOptions()...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve transactions from user transactions API: %w", err)
 	}
@@ -197,6 +216,9 @@ func (c *Client) Transactions(ctx context.Context, opts ...query.QueryBuilderOpt
 	return res, nil
 }
 
+// Transaction retrieves a specific transaction by its ID using the user transactions API.
+// This method expects a response that can be unmarshaled into a response.Transaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transaction, error) {
 	res, err := c.transactionsAPI.Transaction(ctx, ID)
 	if err != nil {
@@ -204,6 +226,73 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	}
 
 	return res, nil
+}
+
+// ErrUnrecognizedAPIResponse indicates that the response received from the SPV Wallet API
+// does not match the expected expected format or structure.
+var ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")
+
+// Query holds the optional arguments used to construct query parameters list
+// for specific SPV Wallet API HTTP GET endpoint.
+//
+// Fields:
+//
+//   - QueryParamsFilter: Specifies general query parameters, such as pagination settings
+//     (e.g., page number, page size) and sort order. These parameters are used to control
+//     the structure of the transaction query results.
+//
+//   - MetadataFilter: A map for filtering transactions based on specific metadata attributes.
+//     Keys in the map represent metadata fields, and their associated values are used to match
+//     corresponding transaction metadata.
+//
+//   - TransactionFilter: Contains transaction-specific criteria, such as BlockHeight, BlockHash,
+//     transaction status, and other transaction-related parameters.
+//
+// All fields are optional, allowing fine-grained control over the transaction query without
+// requiring any specific filter.
+type Query struct {
+	QueryParamsFilter filter.QueryParams       // Standard query parameters for pagination, sorting, etc.
+	MetadataFilter    map[string]any           // Filter for specific metadata attributes.
+	TransactionFilter filter.TransactionFilter // Transaction-specific filter criteria.
+}
+
+func (q *Query) apply(opts ...QueryOption) {
+	for _, o := range opts {
+		o(q)
+	}
+}
+
+func (q Query) queryBuilderOptions() []queryutil.QueryBuilderOption {
+	return []queryutil.QueryBuilderOption{
+		queryutil.WithMetadataFilter(q.MetadataFilter),
+		queryutil.WithQueryParamsFilter(q.QueryParamsFilter),
+		queryutil.WithTransactionFilter(q.TransactionFilter),
+	}
+}
+
+// QueryOption represents a functional option to create specific query params list.
+type QueryOption func(*Query)
+
+// WithMetadataFilter configures the TransactionsQuery instance to filter based on specific metadata attributes.
+func WithMetadataFilter(m map[string]any) QueryOption {
+	return func(q *Query) {
+		q.MetadataFilter = m
+	}
+}
+
+// WithQueryParamsFilter sets the general query parameters, such as pagination, sort order, etc.,
+// for the TransactionsQuery instance.
+func WithQueryParamsFilter(qp filter.QueryParams) QueryOption {
+	return func(q *Query) {
+		q.QueryParamsFilter = qp
+	}
+}
+
+// WithTransactionFilter accepts a filter.TransactionFilter value containing criteria such as BlockHeight, BlockHash, transaction status, etc.
+func WithTransactionFilter(t filter.TransactionFilter) QueryOption {
+	return func(q *Query) {
+		q.TransactionFilter = t
+	}
 }
 
 func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
@@ -254,7 +343,3 @@ func newRestyClient(cfg Config, auth authenticator) *resty.Client {
 			return fmt.Errorf("%w: %s", ErrUnrecognizedAPIResponse, r.Body())
 		})
 }
-
-// ErrUnrecognizedAPIResponse indicates that the response received from the SPV Wallet API
-// does not match the expected expected format or structure.
-var ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")

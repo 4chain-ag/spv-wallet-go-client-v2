@@ -55,7 +55,7 @@ func (a *API) RecordTransaction(ctx context.Context, r RecordTransactionRequest)
 		SetContext(ctx).
 		SetResult(&result).
 		SetBody(r).
-		Patch(a.addr)
+		Post(a.addr)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}

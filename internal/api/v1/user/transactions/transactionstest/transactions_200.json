@@ -2,14 +2,14 @@
     "content": [
         {
             "createdAt": "2024-10-07T14:03:26.736816Z",
-            "updatedAt": "2024-11-04T14:14:02.561175Z",
+            "updatedAt": "2024-10-07T14:03:26.736816Z",
             "deletedAt": null,
             "metadata": {
                 "domain": "john.doe.test.4chain.space",
                 "example_key1": "example_key10_val",
                 "ip_address": "127.0.0.01",
                 "p2p_tx_metadata": {
-                    "pubkey": "3fa7af5b-4568-4873-86da-0aa442ca91dd",
+                    "pubkey": "3efe9fcb-859c-47f1-b85f-0fa8b1eee065",
                     "sender": "john.doe@handcash.io"
                 },
                 "paymail_request": "HandleReceivedP2pTransaction",
@@ -34,8 +34,8 @@
             "direction": "incoming"
         },
         {
-            "createdAt": "2024-01-02T14:03:26.736816Z",
-            "updatedAt": "2024-01-04T14:14:02.561175Z",
+            "createdAt": "2024-10-07T14:03:26.736816Z",
+            "updatedAt": "2024-10-07T14:03:26.736816Z",
             "deletedAt": null,
             "metadata": {
                 "domain": "jane.doe.test.4chain.space",

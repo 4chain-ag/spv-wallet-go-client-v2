@@ -12,9 +12,9 @@ tasks:
       - echo "Generating keys - end"
 
   user_shared_config:
-     desc: Fetch shared config from SPV Wallet API.
-     silent: true 
-     cmds:
+    desc: Fetch shared config from SPV Wallet API.
+    silent: true 
+    cmds:
       - echo "Fetching shared config - start"
       - go run ./api/v1/users/configs/shared_config.go
       - echo "Fetching shared config - end"

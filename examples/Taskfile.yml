@@ -1,0 +1,20 @@
+version: '3'
+
+tasks:
+  generate_keys:
+    desc: Generate keys for SPV Wallet API access.
+    silent: true
+    cmds:
+      - echo "Generating keys - start"
+      - echo "=================================================================="
+      - go run ./keysgen/keysgen.go
+      - echo "=================================================================="
+      - echo "Generating keys - end"
+
+  user_shared_config:
+     desc: Fetch shared config from SPV Wallet API.
+     silent: true 
+     cmds:
+      - echo "Fetching shared config - start"
+      - go run ./api/v1/users/configs/shared_config.go
+      - echo "Fetching shared config - end"

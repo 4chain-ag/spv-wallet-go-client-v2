@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
+	"github.com/bitcoin-sv/spv-wallet-go-client/query"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
@@ -13,18 +14,18 @@ const route = "api/v1/transactions"
 
 type DraftTransactionRequest struct {
 	Config   response.TransactionConfig `json:"config"`
-	Metadata queryutil.Metadata         `json:"metadata"`
+	Metadata querybuilders.Metadata     `json:"metadata"`
 }
 
 type RecordTransactionRequest struct {
-	Metadata    queryutil.Metadata `json:"metadata"`
-	Hex         string             `json:"hex"`
-	ReferenceID string             `json:"referenceId"`
+	Metadata    querybuilders.Metadata `json:"metadata"`
+	Hex         string                 `json:"hex"`
+	ReferenceID string                 `json:"referenceId"`
 }
 
 type UpdateTransactionMetadataRequest struct {
-	ID       string             `json:"-"`
-	Metadata queryutil.Metadata `json:"metadata"`
+	ID       string                 `json:"-"`
+	Metadata querybuilders.Metadata `json:"metadata"`
 }
 
 type API struct {
@@ -32,7 +33,7 @@ type API struct {
 	cli  *resty.Client
 }
 
-func (a *API) DraftTransaction(ctx context.Context, r DraftTransactionRequest) (*response.DraftTransaction, error) {
+func (a *API) DraftTransaction(ctx context.Context, r *DraftTransactionRequest) (*response.DraftTransaction, error) {
 	var result response.DraftTransaction
 
 	URL := a.addr + "/drafts"
@@ -48,7 +49,7 @@ func (a *API) DraftTransaction(ctx context.Context, r DraftTransactionRequest) (
 	return &result, nil
 }
 
-func (a *API) RecordTransaction(ctx context.Context, r RecordTransactionRequest) (*response.Transaction, error) {
+func (a *API) RecordTransaction(ctx context.Context, r *RecordTransactionRequest) (*response.Transaction, error) {
 	var result response.Transaction
 
 	_, err := a.cli.R().
@@ -63,7 +64,7 @@ func (a *API) RecordTransaction(ctx context.Context, r RecordTransactionRequest)
 	return &result, nil
 }
 
-func (a *API) UpdateTransactionMetadata(ctx context.Context, r UpdateTransactionMetadataRequest) (*response.Transaction, error) {
+func (a *API) UpdateTransactionMetadata(ctx context.Context, r *UpdateTransactionMetadataRequest) (*response.Transaction, error) {
 	var result response.Transaction
 
 	URL := a.addr + "/" + r.ID
@@ -94,8 +95,18 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	return &result, nil
 }
 
-func (a *API) Transactions(ctx context.Context, opts ...queryutil.QueryBuilderOption) ([]*response.Transaction, error) {
-	params, err := queryutil.NewQueryBuilder(opts...).Build()
+func (a *API) Transactions(ctx context.Context, transactionsOpts ...query.TransctionsQueryOption) ([]*response.Transaction, error) {
+	var query query.TransactionsQuery
+	for _, o := range transactionsOpts {
+		o(&query)
+	}
+
+	builderOpts := []querybuilders.QueryBuilderOption{
+		querybuilders.WithMetadataFilter(query.Metadata),
+		querybuilders.WithQueryParamsFilter(query.QueryParams),
+		querybuilders.WithTransactionFilter(query.Filter),
+	}
+	params, err := querybuilders.NewQueryBuilder(builderOpts...).Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create transactions query params: %w", err)
 	}
@@ -105,7 +116,7 @@ func (a *API) Transactions(ctx context.Context, opts ...queryutil.QueryBuilderOp
 		R().
 		SetContext(ctx).
 		SetResult(&result).
-		SetQueryParams(queryutil.ParseToMap(params)).
+		SetQueryParams(querybuilders.ParseToMap(params)).
 		Get(a.addr)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)

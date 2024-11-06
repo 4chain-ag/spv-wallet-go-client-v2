@@ -1,4 +1,4 @@
-package queryutil_test
+package querybuilders_test
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
@@ -16,19 +16,19 @@ func TestQueryBuilder_Build(t *testing.T) {
 	type filters struct {
 		TransactionFilter filter.TransactionFilter
 		QueryParamsFilter filter.QueryParams
-		MetadataFilter    queryutil.Metadata
+		MetadataFilter    querybuilders.Metadata
 	}
 	tests := map[string]struct {
 		filters        filters
 		expectedParams url.Values
 		expectedErr    error
-		builder        queryutil.FilterQueryBuilder
+		builder        querybuilders.FilterQueryBuilder
 	}{
 		"query bilder: empty filters": {
 			filters:        filters{},
 			expectedParams: make(url.Values),
 		},
-		"query builder: HTTP GET transactions query with query params filter-only": {
+		"query builder: URL values with query params filter-only": {
 			filters: filters{
 				QueryParamsFilter: filter.QueryParams{
 					Page:          10,
@@ -44,7 +44,7 @@ func TestQueryBuilder_Build(t *testing.T) {
 				"sort":   []string{"asc"},
 			},
 		},
-		"query builder: HTTP GET transactions query with transaction filter-only": {
+		"query builder: URL values with transaction filter-only": {
 			filters: filters{
 				TransactionFilter: filter.TransactionFilter{
 					ModelFilter: filter.ModelFilter{
@@ -68,19 +68,19 @@ func TestQueryBuilder_Build(t *testing.T) {
 				"updatedRange[to]":   []string{"2021-02-02T00:00:00Z"},
 			},
 		},
-		"query builder: HTTP GET transactions query with metadata filter-only": {
+		"query builder: URL values with metadata filter-only": {
 			expectedParams: url.Values{
 				"metadata[key1]": []string{"value1"},
 				"metadata[key2]": []string{"1024"},
 			},
 			filters: filters{
-				MetadataFilter: queryutil.Metadata{
+				MetadataFilter: querybuilders.Metadata{
 					"key1": "value1",
 					"key2": 1024,
 				},
 			},
 		},
-		"query builder: HTTP GET transactions query all filters set": {
+		"query builder: URL values with all filters set": {
 			filters: filters{
 				QueryParamsFilter: filter.QueryParams{
 					Page:          10,
@@ -101,7 +101,7 @@ func TestQueryBuilder_Build(t *testing.T) {
 						},
 					},
 				},
-				MetadataFilter: queryutil.Metadata{
+				MetadataFilter: querybuilders.Metadata{
 					"key1": "value1",
 					"key2": 1024,
 				},
@@ -130,20 +130,20 @@ func TestQueryBuilder_Build(t *testing.T) {
 				},
 			},
 			builder:     &filterQueryBuilderFailureStub{},
-			expectedErr: queryutil.ErrFilterQueryBuilder,
+			expectedErr: querybuilders.ErrFilterQueryBuilder,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			opts := []queryutil.QueryBuilderOption{
-				queryutil.WithMetadataFilter(tc.filters.MetadataFilter),
-				queryutil.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
-				queryutil.WithTransactionFilter(tc.filters.TransactionFilter),
-				queryutil.WithFilterQueryBuilder(tc.builder),
+			opts := []querybuilders.QueryBuilderOption{
+				querybuilders.WithMetadataFilter(tc.filters.MetadataFilter),
+				querybuilders.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
+				querybuilders.WithTransactionFilter(tc.filters.TransactionFilter),
+				querybuilders.WithFilterQueryBuilder(tc.builder),
 			}
-			qb := queryutil.NewQueryBuilder(opts...)
+			qb := querybuilders.NewQueryBuilder(opts...)
 
 			// then:
 			got, err := qb.Build()

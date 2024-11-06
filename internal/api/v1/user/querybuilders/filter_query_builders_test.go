@@ -1,11 +1,11 @@
-package queryutil_test
+package querybuilders_test
 
 import (
 	"net/url"
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
@@ -13,55 +13,55 @@ import (
 
 func TestMetadataFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
-		metadata       queryutil.Metadata
+		metadata       querybuilders.Metadata
 		expectedParams url.Values
 		expectedErr    error
 		depth          int
 	}{
 		"metadata: empty map": {
-			depth:          queryutil.DefaultMaxDepth,
+			depth:          querybuilders.DefaultMaxDepth,
 			expectedParams: make(url.Values),
 		},
 		"metadata: map entry [key]=value1": {
-			depth: queryutil.DefaultMaxDepth,
+			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key]": []string{"value1"},
 			},
-			metadata: queryutil.Metadata{
+			metadata: querybuilders.Metadata{
 				"key": "value1",
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=1024": {
-			depth: queryutil.DefaultMaxDepth,
+			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]": []string{"value1"},
 				"metadata[key2]": []string{"1024"},
 			},
-			metadata: queryutil.Metadata{
+			metadata: querybuilders.Metadata{
 				"key1": "value1",
 				"key2": 1024,
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=[]{value2,value3,value4}": {
-			depth: queryutil.DefaultMaxDepth,
+			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]":   []string{"value1"},
 				"metadata[key2][]": []string{"value2", "value3", "value4"},
 			},
-			metadata: queryutil.Metadata{
+			metadata: querybuilders.Metadata{
 				"key1": "value1",
 				"key2": []string{"value2", "value3", "value4"},
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=[]{value2, value3, value4}, [key3]=value5, [key4]=[]{value6,value7,value8}": {
-			depth: queryutil.DefaultMaxDepth,
+			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]":   []string{"value1"},
 				"metadata[key2][]": []string{"value2", "value3", "value4"},
 				"metadata[key3]":   []string{"value5"},
 				"metadata[key4][]": []string{"value6", "value7", "value8"},
 			},
-			metadata: queryutil.Metadata{
+			metadata: querybuilders.Metadata{
 				"key1": "value1",
 				"key2": []string{"value2", "value3", "value4"},
 				"key3": "value5",
@@ -69,26 +69,26 @@ func TestMetadataFilterQueryBuilder_Build(t *testing.T) {
 			},
 		},
 		"metadata: map entries [key1]=value1, [key2]=[]{value1,value2,value3,value4}, [key3][key3_nested]=value5, [key4][key4_nested]=[]{6,7}": {
-			depth: queryutil.DefaultMaxDepth,
+			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]":                []string{"value1"},
 				"metadata[key2][]":              []string{"value2", "value3", "value4"},
 				"metadata[key3][key3_nested]":   []string{"value5"},
 				"metadata[key4][key4_nested][]": []string{"6", "7"},
 			},
-			metadata: queryutil.Metadata{
+			metadata: querybuilders.Metadata{
 				"key1": "value1",
 				"key2": []string{"value2", "value3", "value4"},
-				"key3": queryutil.Metadata{
+				"key3": querybuilders.Metadata{
 					"key3_nested": "value5",
 				},
-				"key4": queryutil.Metadata{
+				"key4": querybuilders.Metadata{
 					"key4_nested": []int{6, 7},
 				},
 			},
 		},
 		"metadata: 11 map entries, complex nesting, max depth set to 100": {
-			depth: queryutil.DefaultMaxDepth,
+			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1][key2][key3][key1]":                                             []string{"abc"},
 				"metadata[key1][key2][key3][key2][key1]":                                       []string{"9"},
@@ -100,26 +100,26 @@ func TestMetadataFilterQueryBuilder_Build(t *testing.T) {
 				"metadata[key1][key2][key3][key3][key1][key2][key4][key1][key1][key3][key1][]": []string{"5", "6", "7", "8"},
 				"metadata[key1][key2][key3][key3][key1][key2][key4][key1][key1][key3][key2][]": []string{"a", "b", "c"},
 			},
-			metadata: queryutil.Metadata{
-				"key1": queryutil.Metadata{
-					"key2": queryutil.Metadata{
-						"key3": queryutil.Metadata{
+			metadata: querybuilders.Metadata{
+				"key1": querybuilders.Metadata{
+					"key2": querybuilders.Metadata{
+						"key3": querybuilders.Metadata{
 							"key1": "abc",
-							"key2": queryutil.Metadata{
+							"key2": querybuilders.Metadata{
 								"key1": 9,
 							},
-							"key3": queryutil.Metadata{
-								"key1": queryutil.Metadata{
-									"key2": queryutil.Metadata{
+							"key3": querybuilders.Metadata{
+								"key1": querybuilders.Metadata{
+									"key2": querybuilders.Metadata{
 										"key1": []int{1, 2, 3, 4},
 										"key2": 10,
 										"key3": "abc",
-										"key4": queryutil.Metadata{
-											"key1": queryutil.Metadata{
-												"key1": queryutil.Metadata{
+										"key4": querybuilders.Metadata{
+											"key1": querybuilders.Metadata{
+												"key1": querybuilders.Metadata{
 													"key1": 2,
 													"key2": "cde",
-													"key3": queryutil.Metadata{
+													"key3": querybuilders.Metadata{
 														"key1": []int{5, 6, 7, 8},
 														"key2": []string{"a", "b", "c"},
 													},
@@ -135,23 +135,23 @@ func TestMetadataFilterQueryBuilder_Build(t *testing.T) {
 			},
 		},
 		"metadata: map entries depth exceeded - map entries: 4, max depth: 3": {
-			metadata: queryutil.Metadata{
-				"key1": queryutil.Metadata{
-					"key2": queryutil.Metadata{
-						"key3": queryutil.Metadata{
+			metadata: querybuilders.Metadata{
+				"key1": querybuilders.Metadata{
+					"key2": querybuilders.Metadata{
+						"key3": querybuilders.Metadata{
 							"key4": "value1",
 						},
 					},
 				},
 			},
 			depth:       3,
-			expectedErr: queryutil.ErrMetadataFilterMaxDepthExceeded,
+			expectedErr: querybuilders.ErrMetadataFilterMaxDepthExceeded,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mp := queryutil.MetadataFilterQueryBuilder{
+			mp := querybuilders.MetadataFilterQueryBuilder{
 				MaxDepth: tc.depth,
 				Metadata: tc.metadata,
 			}
@@ -263,7 +263,7 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := queryutil.ModelFilterQueryBuilder{ModelFilter: tc.filter}
+			m := querybuilders.ModelFilterQueryBuilder{ModelFilter: tc.filter}
 			got, err := m.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
@@ -327,7 +327,7 @@ func TestQueryParamsFilterQueryBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			qp := queryutil.QueryParamsFilterQueryBuilder{
+			qp := querybuilders.QueryParamsFilterQueryBuilder{
 				QueryParamsFilter: tc.filter,
 			}
 			got, err := qp.Build()
@@ -510,8 +510,8 @@ func TestTransactionFilterQueryBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			tfp := queryutil.TransactionFilterQueryBuilder{
-				ModelFilterQueryBuilder: queryutil.ModelFilterQueryBuilder{ModelFilter: tc.filter.ModelFilter},
+			tfp := querybuilders.TransactionFilterQueryBuilder{
+				ModelFilterQueryBuilder: querybuilders.ModelFilterQueryBuilder{ModelFilter: tc.filter.ModelFilter},
 				TransactionFilter:       tc.filter,
 			}
 			got, err := tfp.Build()

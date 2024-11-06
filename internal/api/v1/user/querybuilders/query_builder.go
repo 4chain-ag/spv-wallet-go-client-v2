@@ -1,4 +1,4 @@
-package queryutil
+package querybuilders
 
 import (
 	"errors"
@@ -10,23 +10,31 @@ import (
 type QueryBuilderOption func(*QueryBuilder)
 
 func WithQueryParamsFilter(q filter.QueryParams) QueryBuilderOption {
+	var zero filter.QueryParams
 	return func(qb *QueryBuilder) {
-		qb.builders = append(qb.builders, &QueryParamsFilterQueryBuilder{q})
+		if q != zero {
+			qb.builders = append(qb.builders, &QueryParamsFilterQueryBuilder{q})
+		}
 	}
 }
 
 func WithMetadataFilter(m Metadata) QueryBuilderOption {
 	return func(qb *QueryBuilder) {
-		qb.builders = append(qb.builders, &MetadataFilterQueryBuilder{MaxDepth: DefaultMaxDepth, Metadata: m})
+		if m != nil {
+			qb.builders = append(qb.builders, &MetadataFilterQueryBuilder{MaxDepth: DefaultMaxDepth, Metadata: m})
+		}
 	}
 }
 
 func WithTransactionFilter(tf filter.TransactionFilter) QueryBuilderOption {
+	var zero filter.TransactionFilter
 	return func(qb *QueryBuilder) {
-		qb.builders = append(qb.builders, &TransactionFilterQueryBuilder{
-			TransactionFilter:       tf,
-			ModelFilterQueryBuilder: ModelFilterQueryBuilder{ModelFilter: tf.ModelFilter},
-		})
+		if tf != zero {
+			qb.builders = append(qb.builders, &TransactionFilterQueryBuilder{
+				TransactionFilter:       tf,
+				ModelFilterQueryBuilder: ModelFilterQueryBuilder{ModelFilter: tf.ModelFilter},
+			})
+		}
 	}
 }
 

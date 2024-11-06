@@ -2,11 +2,12 @@ package transactions_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/queryutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
@@ -15,6 +16,7 @@ import (
 )
 
 func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
+	ID := "1024"
 	tests := map[string]struct {
 		code             int
 		responder        httpmock.Responder
@@ -22,7 +24,7 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 		expectedResponse *response.Transaction
 		expectedErr      error
 	}{
-		"HTTP PATCH /api/v1/transactions/1024 response: 200": {
+		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s response: 200", ID): {
 			expectedResponse: &response.Transaction{
 				Model: response.Model{
 					CreatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
@@ -57,7 +59,7 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 			code:      http.StatusOK,
 			responder: httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/transaction_update_metadata_200.json")),
 		},
-		"HTTP PATCH /api/v1/transactions/1024 response: 400": {
+		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s response: 400", ID): {
 			expectedErr: models.SPVError{
 				Message:    http.StatusText(http.StatusBadRequest),
 				StatusCode: http.StatusBadRequest,
@@ -66,13 +68,13 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 			statusCode: http.StatusOK,
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, testfixtures.NewBadRequestSPVError()),
 		},
-		"HTTP PATCH /api/v1/transactions/1024 str response: 500": {
+		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s str response: 500", ID): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
 			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
-	ID := "1024"
+
 	URL := testfixtures.TestAPIAddr + "/api/v1/transactions/" + ID
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -83,7 +85,7 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 			// then:
 			got, err := wallet.UpdateTransactionMetadata(context.Background(), client.UpdateTransactionMetadataArgs{
 				ID: ID,
-				Metadata: queryutil.Metadata{
+				Metadata: querybuilders.Metadata{
 					"example_key1": "example_key10_val",
 					"example_key2": "example_key20_val",
 				},
@@ -326,13 +328,14 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 }
 
 func TestTransactionsAPI_Transaction(t *testing.T) {
+	ID := "1024"
 	tests := map[string]struct {
 		responder        httpmock.Responder
 		statusCode       int
 		expectedResponse *response.Transaction
 		expectedErr      error
 	}{
-		"HTTP PATCH /api/v1/transactions/1024  response: 200": {
+		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s  response: 200", ID): {
 			statusCode: http.StatusOK,
 			expectedResponse: &response.Transaction{
 				Model: response.Model{
@@ -366,7 +369,7 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 			},
 			responder: httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/transaction_200.json")),
 		},
-		"HTTP PATCH /api/v1/transactions/1024 response: 400": {
+		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s response: 400", ID): {
 			expectedErr: models.SPVError{
 				Message:    http.StatusText(http.StatusBadRequest),
 				StatusCode: http.StatusBadRequest,
@@ -375,14 +378,13 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 			statusCode: http.StatusOK,
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, testfixtures.NewBadRequestSPVError()),
 		},
-		"HTTP PATCH /api/v1/transactions/1024 str response: 500": {
+		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s str response: 500", ID): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
 			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	ID := "1024"
 	URL := testfixtures.TestAPIAddr + "/api/v1/transactions/" + ID
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {

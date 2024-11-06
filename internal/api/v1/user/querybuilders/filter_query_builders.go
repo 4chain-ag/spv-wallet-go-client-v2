@@ -1,4 +1,4 @@
-package queryutil
+package querybuilders
 
 import (
 	"errors"
@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
@@ -29,18 +28,16 @@ func (m *MetadataFilterQueryBuilder) Build() (url.Values, error) {
 		if err := m.dfs(0, &path, v, &sb, pref); err != nil {
 			return nil, err
 		}
-
-		path.Reset()
 	}
 
 	params := make(url.Values)
-	ss := strings.Split(TrimLastAmpersand(sb.String()), "&")
-	for _, s := range ss {
-		if len(s) == 0 {
+	paramsChain := strings.Split(TrimLastAmpersand(sb.String()), "&")
+	for _, pair := range paramsChain {
+		if len(pair) == 0 {
 			continue
 		}
 
-		p := strings.Split(s, "=")
+		p := strings.Split(pair, "=")
 		params.Add(p[0], p[1])
 	}
 	return params, nil
@@ -163,77 +160,4 @@ func (t *TransactionFilterQueryBuilder) Build() (url.Values, error) {
 	params.AddPair("totalValue", t.TransactionFilter.TotalValue)
 	params.AddPair("status", t.TransactionFilter.Status)
 	return params.Values, nil
-}
-
-type ExtendedURLValues struct {
-	url.Values
-}
-
-func (e *ExtendedURLValues) AddPair(key string, val any) {
-	if val == nil || len(key) == 0 {
-		return
-	}
-
-	write := func(v any) { e.Add(key, fmt.Sprintf("%v", v)) }
-	writeRange := func(v filter.TimeRange) {
-		if v.From != nil && !v.From.IsZero() {
-			e.Add(fmt.Sprintf("%s[from]", key), v.From.Format(time.RFC3339))
-		}
-
-		if v.To != nil && !v.To.IsZero() {
-			e.Add(fmt.Sprintf("%s[to]", key), v.To.Format(time.RFC3339))
-		}
-	}
-
-	switch v := val.(type) {
-	case int:
-		if v > 0 {
-			write(v)
-		}
-
-	case string:
-		if len(v) > 0 {
-			write(v)
-		}
-
-	case *string:
-		if v != nil && len(*v) > 0 {
-			write(*v)
-		}
-
-	case *uint64:
-		if v != nil && *v > 0 {
-			write(*v)
-		}
-
-	case *uint32:
-		if v != nil && *v > 0 {
-			write(*v)
-		}
-
-	case *bool:
-		if v != nil {
-			write(*v)
-		}
-
-	case *filter.TimeRange:
-		if v != nil {
-			writeRange(*v)
-		}
-	}
-}
-
-func (e *ExtendedURLValues) Append(vv ...url.Values) {
-	for _, v := range vv {
-		for k, iv := range v {
-			e.Values[k] = append(e.Values[k], iv...)
-		}
-	}
-}
-
-func NewExtendedURLValues() *ExtendedURLValues {
-	e := ExtendedURLValues{
-		make(url.Values),
-	}
-	return &e
 }

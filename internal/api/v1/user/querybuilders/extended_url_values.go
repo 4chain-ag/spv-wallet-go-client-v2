@@ -75,8 +75,7 @@ func (e *ExtendedURLValues) Append(vv ...url.Values) {
 }
 
 func NewExtendedURLValues() *ExtendedURLValues {
-	e := ExtendedURLValues{
+	return &ExtendedURLValues{
 		make(url.Values),
 	}
-	return &e
 }

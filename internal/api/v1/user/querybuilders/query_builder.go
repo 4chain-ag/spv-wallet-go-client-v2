@@ -13,7 +13,7 @@ func WithQueryParamsFilter(q filter.QueryParams) QueryBuilderOption {
 	var zero filter.QueryParams
 	return func(qb *QueryBuilder) {
 		if q != zero {
-			qb.builders = append(qb.builders, &QueryParamsFilterQueryBuilder{q})
+			qb.builders = append(qb.builders, &QueryParamsFilterBuilder{q})
 		}
 	}
 }
@@ -21,7 +21,7 @@ func WithQueryParamsFilter(q filter.QueryParams) QueryBuilderOption {
 func WithMetadataFilter(m Metadata) QueryBuilderOption {
 	return func(qb *QueryBuilder) {
 		if m != nil {
-			qb.builders = append(qb.builders, &MetadataFilterQueryBuilder{MaxDepth: DefaultMaxDepth, Metadata: m})
+			qb.builders = append(qb.builders, &MetadataFilterBuilder{MaxDepth: DefaultMaxDepth, Metadata: m})
 		}
 	}
 }
@@ -30,9 +30,9 @@ func WithTransactionFilter(tf filter.TransactionFilter) QueryBuilderOption {
 	var zero filter.TransactionFilter
 	return func(qb *QueryBuilder) {
 		if tf != zero {
-			qb.builders = append(qb.builders, &TransactionFilterQueryBuilder{
-				TransactionFilter:       tf,
-				ModelFilterQueryBuilder: ModelFilterQueryBuilder{ModelFilter: tf.ModelFilter},
+			qb.builders = append(qb.builders, &TransactionFilterBuilder{
+				TransactionFilter:  tf,
+				ModelFilterBuilder: ModelFilterBuilder{ModelFilter: tf.ModelFilter},
 			})
 		}
 	}

@@ -15,5 +15,6 @@ func (m *ModelFilterBuilder) Build() (url.Values, error) {
 	params.AddPair("includeDeleted", m.ModelFilter.IncludeDeleted)
 	params.AddPair("createdRange", m.ModelFilter.CreatedRange)
 	params.AddPair("updatedRange", m.ModelFilter.UpdatedRange)
+
 	return params.Values, nil
 }

@@ -165,11 +165,14 @@ func TestMetadataFilterBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mp := querybuilders.MetadataFilterBuilder{
+			// when:
+			builder := querybuilders.MetadataFilterBuilder{
 				MaxDepth: tc.depth,
 				Metadata: tc.metadata,
 			}
-			got, err := mp.Build()
+
+			// then:
+			got, err := builder.Build()
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.Equal(t, tc.expectedParams, got)
 		})

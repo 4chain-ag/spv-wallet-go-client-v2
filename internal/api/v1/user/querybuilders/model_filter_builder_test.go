@@ -112,8 +112,11 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := querybuilders.ModelFilterBuilder{ModelFilter: tc.filter}
-			got, err := m.Build()
+			// when:
+			builder := querybuilders.ModelFilterBuilder{ModelFilter: tc.filter}
+
+			// then:
+			got, err := builder.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
 		})

@@ -26,14 +26,11 @@ func WithMetadataFilter(m Metadata) QueryBuilderOption {
 	}
 }
 
-func WithTransactionFilter(tf filter.TransactionFilter) QueryBuilderOption {
-	var zero filter.TransactionFilter
+func WithModelFilter(m filter.ModelFilter) QueryBuilderOption {
+	var zero filter.ModelFilter
 	return func(qb *QueryBuilder) {
-		if tf != zero {
-			qb.builders = append(qb.builders, &TransactionFilterBuilder{
-				TransactionFilter:  tf,
-				ModelFilterBuilder: ModelFilterBuilder{ModelFilter: tf.ModelFilter},
-			})
+		if m != zero {
+			qb.builders = append(qb.builders, &ModelFilterBuilder{ModelFilter: m})
 		}
 	}
 }
@@ -54,19 +51,20 @@ type QueryBuilder struct {
 	builders []FilterQueryBuilder
 }
 
-func (q *QueryBuilder) Build() (url.Values, error) {
+func (q *QueryBuilder) Build() (*ExtendedURLValues, error) {
 	params := NewExtendedURLValues()
-	for _, b := range q.builders {
-		bparams, err := b.Build()
+	for _, builder := range q.builders {
+		values, err := builder.Build()
 		if err != nil {
 			return nil, errors.Join(err, ErrFilterQueryBuilder)
 		}
 
-		if len(bparams) > 0 {
-			params.Append(bparams)
+		if len(values) > 0 {
+			params.Append(values)
 		}
 	}
-	return params.Values, nil
+
+	return params, nil
 }
 
 func NewQueryBuilder(opts ...QueryBuilderOption) *QueryBuilder {
@@ -74,15 +72,8 @@ func NewQueryBuilder(opts ...QueryBuilderOption) *QueryBuilder {
 	for _, o := range opts {
 		o(&qb)
 	}
+
 	return &qb
 }
 
 var ErrFilterQueryBuilder = errors.New("filter query builder - build operation failure")
-
-func ParseToMap(values url.Values) map[string]string {
-	m := make(map[string]string)
-	for k, v := range values {
-		m[k] = v[0]
-	}
-	return m
-}

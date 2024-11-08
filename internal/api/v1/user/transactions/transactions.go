@@ -104,9 +104,13 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...query.Transc
 	builderOpts := []querybuilders.QueryBuilderOption{
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithQueryParamsFilter(query.QueryParams),
-		querybuilders.WithTransactionFilter(query.Filter),
+		querybuilders.WithFilterQueryBuilder(&TransactionFilterBuilder{
+			TransactionFilter:  query.Filter,
+			ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.Filter.ModelFilter},
+		}),
 	}
-	params, err := querybuilders.NewQueryBuilder(builderOpts...).Build()
+	builder := querybuilders.NewQueryBuilder(builderOpts...)
+	params, err := builder.Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create transactions query params: %w", err)
 	}
@@ -116,7 +120,7 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...query.Transc
 		R().
 		SetContext(ctx).
 		SetResult(&result).
-		SetQueryParams(querybuilders.ParseToMap(params)).
+		SetQueryParams(params.ParseToMap()).
 		Get(a.addr)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)

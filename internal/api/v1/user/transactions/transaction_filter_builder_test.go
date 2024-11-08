@@ -1,4 +1,4 @@
-package querybuilders_test
+package transactions_test
 
 import (
 	"net/url"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
@@ -29,10 +30,6 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 				DraftID:         testfixtures.Ptr(""),
 				TotalValue:      testfixtures.Ptr(uint64(0)),
 				Status:          testfixtures.Ptr(""),
-				ModelFilter: filter.ModelFilter{
-					CreatedRange: &filter.TimeRange{},
-					UpdatedRange: &filter.TimeRange{},
-				},
 			},
 			expectedParams: make(url.Values),
 		},
@@ -184,11 +181,11 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			tfp := querybuilders.TransactionFilterBuilder{
-				ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
+			tfb := transactions.TransactionFilterBuilder{
 				TransactionFilter:  tc.filter,
+				ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
 			}
-			got, err := tfp.Build()
+			got, err := tfb.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
 		})

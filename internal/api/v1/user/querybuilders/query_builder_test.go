@@ -14,9 +14,9 @@ import (
 
 func TestQueryBuilder_Build(t *testing.T) {
 	type filters struct {
-		TransactionFilter filter.TransactionFilter
 		QueryParamsFilter filter.QueryParams
 		MetadataFilter    querybuilders.Metadata
+		ModelFilter       filter.ModelFilter
 	}
 	tests := map[string]struct {
 		filters        filters
@@ -44,30 +44,6 @@ func TestQueryBuilder_Build(t *testing.T) {
 				"sort":   []string{"asc"},
 			},
 		},
-		"query builder: URL values with transaction filter-only": {
-			filters: filters{
-				TransactionFilter: filter.TransactionFilter{
-					ModelFilter: filter.ModelFilter{
-						IncludeDeleted: testfixtures.Ptr(true),
-						CreatedRange: &filter.TimeRange{
-							From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
-						},
-						UpdatedRange: &filter.TimeRange{
-							From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
-						},
-					},
-				},
-			},
-			expectedParams: url.Values{
-				"includeDeleted":     []string{"true"},
-				"createdRange[from]": []string{"2021-01-01T00:00:00Z"},
-				"createdRange[to]":   []string{"2021-01-02T00:00:00Z"},
-				"updatedRange[from]": []string{"2021-02-01T00:00:00Z"},
-				"updatedRange[to]":   []string{"2021-02-02T00:00:00Z"},
-			},
-		},
 		"query builder: URL values with metadata filter-only": {
 			expectedParams: url.Values{
 				"metadata[key1]": []string{"value1"},
@@ -88,17 +64,15 @@ func TestQueryBuilder_Build(t *testing.T) {
 					OrderByField:  "id",
 					SortDirection: "asc",
 				},
-				TransactionFilter: filter.TransactionFilter{
-					ModelFilter: filter.ModelFilter{
-						IncludeDeleted: testfixtures.Ptr(true),
-						CreatedRange: &filter.TimeRange{
-							From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
-						},
-						UpdatedRange: &filter.TimeRange{
-							From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
-						},
+				ModelFilter: filter.ModelFilter{
+					IncludeDeleted: testfixtures.Ptr(true),
+					CreatedRange: &filter.TimeRange{
+						From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+						To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+					},
+					UpdatedRange: &filter.TimeRange{
+						From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+						To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 					},
 				},
 				MetadataFilter: querybuilders.Metadata{
@@ -120,7 +94,7 @@ func TestQueryBuilder_Build(t *testing.T) {
 				"metadata[key2]":     []string{"1024"},
 			},
 		},
-		"query builder: filter query builder failure": {
+		"query builder: injected dependency filter query builder failure": {
 			filters: filters{
 				QueryParamsFilter: filter.QueryParams{
 					Page:          10,
@@ -140,15 +114,18 @@ func TestQueryBuilder_Build(t *testing.T) {
 			opts := []querybuilders.QueryBuilderOption{
 				querybuilders.WithMetadataFilter(tc.filters.MetadataFilter),
 				querybuilders.WithQueryParamsFilter(tc.filters.QueryParamsFilter),
-				querybuilders.WithTransactionFilter(tc.filters.TransactionFilter),
+				querybuilders.WithModelFilter(tc.filters.ModelFilter),
 				querybuilders.WithFilterQueryBuilder(tc.builder),
 			}
-			qb := querybuilders.NewQueryBuilder(opts...)
+			builder := querybuilders.NewQueryBuilder(opts...)
 
 			// then:
-			got, err := qb.Build()
+			got, err := builder.Build()
 			require.ErrorIs(t, err, tc.expectedErr)
-			require.Equal(t, tc.expectedParams, got)
+
+			if got != nil {
+				require.Equal(t, tc.expectedParams, got.Values)
+			}
 		})
 	}
 }

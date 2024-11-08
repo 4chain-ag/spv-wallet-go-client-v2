@@ -1,25 +1,26 @@
-package querybuilders
+package transactions
 
 import (
 	"net/url"
 
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
 
 type TransactionFilterBuilder struct {
 	TransactionFilter  filter.TransactionFilter
-	ModelFilterBuilder ModelFilterBuilder
+	ModelFilterBuilder querybuilders.ModelFilterBuilder
 }
 
 func (t *TransactionFilterBuilder) Build() (url.Values, error) {
-	mfv, err := t.ModelFilterBuilder.Build()
+	modelFilterBuilder, err := t.ModelFilterBuilder.Build()
 	if err != nil {
 		return nil, err
 	}
 
-	params := NewExtendedURLValues()
-	if len(mfv) > 0 {
-		params.Append(mfv)
+	params := querybuilders.NewExtendedURLValues()
+	if len(modelFilterBuilder) > 0 {
+		params.Append(modelFilterBuilder)
 	}
 
 	params.AddPair("id", t.TransactionFilter.Id)

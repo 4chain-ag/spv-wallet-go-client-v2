@@ -66,6 +66,15 @@ func (e *ExtendedURLValues) AddPair(key string, val any) {
 	}
 }
 
+func (e *ExtendedURLValues) ParseToMap() map[string]string {
+	m := make(map[string]string)
+	for k, v := range e.Values {
+		m[k] = v[0]
+	}
+
+	return m
+}
+
 func (e *ExtendedURLValues) Append(vv ...url.Values) {
 	for _, v := range vv {
 		for k, iv := range v {

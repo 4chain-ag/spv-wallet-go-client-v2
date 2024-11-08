@@ -33,15 +33,16 @@ func (m *MetadataFilterBuilder) Build() (url.Values, error) {
 		return params, nil
 	}
 
-	paramsChain := strings.Split(TrimLastAmpersand(sb.String()), "&")
-	for _, pair := range paramsChain {
+	pairs := strings.Split(TrimLastAmpersand(sb.String()), "&")
+	for _, pair := range pairs {
 		if len(pair) == 0 {
 			continue
 		}
 
-		p := strings.Split(pair, "=")
-		params.Add(p[0], p[1])
+		split := strings.Split(pair, "=")
+		params.Add(split[0], split[1])
 	}
+
 	return params, nil
 }
 
@@ -76,13 +77,13 @@ func (m *MetadataFilterBuilder) processMapQueryParams(depth int, val any, path *
 		if err := m.generateQueryParams(depth+1, path, mpv.Interface(), ans, pref); err != nil {
 			return err
 		}
-
 		// Reset path after processing each map entry (backtracking).
 		str := path.String()
 		trim := str[:strings.LastIndex(str, "[")]
 		path.Reset()
 		path.WriteString(trim)
 	}
+
 	return nil
 }
 
@@ -94,13 +95,13 @@ func (m *MetadataFilterBuilder) processSlicQueryParams(depth int, val any, path 
 		if err := m.generateQueryParams(depth+1, path, slv.Interface(), ans, pref); err != nil {
 			return err
 		}
-
 		// Reset path after processing each slice element (backtracking).
 		str := path.String()
 		trim := str[:strings.LastIndex(str, "[]")]
 		path.Reset()
 		path.WriteString(trim)
 	}
+
 	return nil
 }
 

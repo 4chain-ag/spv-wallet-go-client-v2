@@ -65,10 +65,13 @@ func TestQueryParamsFilterQueryBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			qp := querybuilders.QueryParamsFilterBuilder{
+			// when:
+			queryBuilder := querybuilders.QueryParamsFilterBuilder{
 				QueryParamsFilter: tc.filter,
 			}
-			got, err := qp.Build()
+
+			// then:
+			got, err := queryBuilder.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
 		})

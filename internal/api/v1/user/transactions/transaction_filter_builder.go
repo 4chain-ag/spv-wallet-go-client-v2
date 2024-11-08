@@ -1,6 +1,7 @@
 package transactions
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
@@ -15,7 +16,7 @@ type TransactionFilterBuilder struct {
 func (t *TransactionFilterBuilder) Build() (url.Values, error) {
 	modelFilterBuilder, err := t.ModelFilterBuilder.Build()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to build model filter query params: %w", err)
 	}
 
 	params := querybuilders.NewExtendedURLValues()

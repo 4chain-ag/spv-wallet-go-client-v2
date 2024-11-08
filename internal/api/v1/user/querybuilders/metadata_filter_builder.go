@@ -23,12 +23,16 @@ func (m *MetadataFilterBuilder) Build() (url.Values, error) {
 		var path strings.Builder
 		pref := fmt.Sprintf("metadata[%s]", k)
 		path.WriteString(pref)
-		if err := m.dfs(0, &path, v, &sb, pref); err != nil {
+		if err := m.generateQueryParams(0, &path, v, &sb, pref); err != nil {
 			return nil, err
 		}
 	}
 
 	params := make(url.Values)
+	if sb.Len() == 0 {
+		return params, nil
+	}
+
 	paramsChain := strings.Split(TrimLastAmpersand(sb.String()), "&")
 	for _, pair := range paramsChain {
 		if len(pair) == 0 {
@@ -41,18 +45,22 @@ func (m *MetadataFilterBuilder) Build() (url.Values, error) {
 	return params, nil
 }
 
-func (m *MetadataFilterBuilder) dfs(depth int, path *strings.Builder, val any, ans *strings.Builder, pref string) error {
+func (m *MetadataFilterBuilder) generateQueryParams(depth int, path *strings.Builder, val any, ans *strings.Builder, pref string) error {
 	if depth > m.MaxDepth {
 		return fmt.Errorf("%w - max depth: %d", ErrMetadataFilterMaxDepthExceeded, m.MaxDepth)
 	}
 
+	if val == nil {
+		return nil
+	}
+
 	t := reflect.TypeOf(val)
 	if t.Kind() == reflect.Map {
-		return m.mapDfs(depth+1, val, path, ans, pref)
+		return m.processMapQueryParams(depth+1, val, path, ans, pref)
 	}
 
 	if t.Kind() == reflect.Slice {
-		return m.sliceDfs(depth+1, val, path, ans, pref)
+		return m.processSlicQueryParams(depth+1, val, path, ans, pref)
 	}
 
 	path.WriteString(fmt.Sprintf("=%v&", val))
@@ -60,12 +68,12 @@ func (m *MetadataFilterBuilder) dfs(depth int, path *strings.Builder, val any, a
 	return nil
 }
 
-func (m *MetadataFilterBuilder) mapDfs(depth int, val any, path *strings.Builder, ans *strings.Builder, pref string) error {
+func (m *MetadataFilterBuilder) processMapQueryParams(depth int, val any, path *strings.Builder, ans *strings.Builder, pref string) error {
 	rval := reflect.ValueOf(val)
 	for _, k := range rval.MapKeys() {
 		mpv := rval.MapIndex(k)
 		path.WriteString(fmt.Sprintf("[%v]", k.Interface()))
-		if err := m.dfs(depth+1, path, mpv.Interface(), ans, pref); err != nil {
+		if err := m.generateQueryParams(depth+1, path, mpv.Interface(), ans, pref); err != nil {
 			return err
 		}
 
@@ -78,12 +86,12 @@ func (m *MetadataFilterBuilder) mapDfs(depth int, val any, path *strings.Builder
 	return nil
 }
 
-func (m *MetadataFilterBuilder) sliceDfs(depth int, val any, path *strings.Builder, ans *strings.Builder, pref string) error {
+func (m *MetadataFilterBuilder) processSlicQueryParams(depth int, val any, path *strings.Builder, ans *strings.Builder, pref string) error {
 	slice := reflect.ValueOf(val)
 	for i := 0; i < slice.Len(); i++ {
 		path.WriteString("[]")
 		slv := slice.Index(i)
-		if err := m.dfs(depth+1, path, slv.Interface(), ans, pref); err != nil {
+		if err := m.generateQueryParams(depth+1, path, slv.Interface(), ans, pref); err != nil {
 			return err
 		}
 

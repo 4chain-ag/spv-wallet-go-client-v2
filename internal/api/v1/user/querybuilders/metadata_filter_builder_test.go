@@ -19,6 +19,23 @@ func TestMetadataFilterBuilder_Build(t *testing.T) {
 			depth:          querybuilders.DefaultMaxDepth,
 			expectedParams: make(url.Values),
 		},
+		"metadata: map entry [key]=nil": {
+			depth:          querybuilders.DefaultMaxDepth,
+			expectedParams: make(url.Values),
+			metadata: querybuilders.Metadata{
+				"key": nil,
+			},
+		},
+		"metadata: map entries [key1]=value1, [key2]=nil": {
+			depth: querybuilders.DefaultMaxDepth,
+			expectedParams: url.Values{
+				"metadata[key1][]": []string{"value1"},
+			},
+			metadata: querybuilders.Metadata{
+				"key1": []string{"value1"},
+				"key2": nil,
+			},
+		},
 		"metadata: map entry [key]=value1": {
 			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{

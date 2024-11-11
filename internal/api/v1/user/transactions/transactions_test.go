@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models"
@@ -27,8 +28,8 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s response: 200", ID): {
 			expectedResponse: &response.Transaction{
 				Model: response.Model{
-					CreatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
-					UpdatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
+					CreatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
+					UpdatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
 					Metadata: map[string]any{
 						"domain":          "john.doe.test.4chain.space",
 						"example_key1":    "example_key10_val",
@@ -83,7 +84,7 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 			transport.RegisterResponder(http.MethodPatch, URL, tc.responder)
 
 			// then:
-			got, err := wallet.UpdateTransactionMetadata(context.Background(), client.UpdateTransactionMetadataArgs{
+			got, err := wallet.UpdateTransactionMetadata(context.Background(), &commands.UpdateTransactionMetadata{
 				ID: ID,
 				Metadata: querybuilders.Metadata{
 					"example_key1": "example_key10_val",
@@ -107,8 +108,8 @@ func TestTransactionsAPI_RecordTransaction(t *testing.T) {
 			statusCode: http.StatusCreated,
 			expectedResponse: &response.Transaction{
 				Model: response.Model{
-					CreatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
-					UpdatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
+					CreatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
+					UpdatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
 					Metadata: map[string]interface{}{
 						"key":  "value",
 						"key2": "value2",
@@ -159,7 +160,7 @@ func TestTransactionsAPI_RecordTransaction(t *testing.T) {
 			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
 
 			// then:
-			got, err := wallet.RecordTransaction(context.Background(), client.RecordTransactionArgs{})
+			got, err := wallet.RecordTransaction(context.Background(), &commands.RecordTransaction{})
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.EqualValues(t, tc.expectedResponse, got)
 		})
@@ -177,8 +178,8 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 			statusCode: http.StatusOK,
 			expectedResponse: &response.DraftTransaction{
 				Model: response.Model{
-					CreatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
-					UpdatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
+					CreatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
+					UpdatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
 					Metadata: map[string]interface{}{
 						"receiver": "john.doe.test4@john.doe.test.4chain.space",
 						"sender":   "john.doe.test4@john.doe.test.4chain.space",
@@ -187,14 +188,14 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 				ID:        "36be741b-31c7-4aed-8840-5e5b2eafeb41",
 				Hex:       "c959fdb6-f438-4ef9-aef9-92a1852885ef",
 				XpubID:    "3f0a90d3-4f8b-45f6-81e4-9858fa47ecc0",
-				ExpiresAt: testfixtures.ParseTime("2024-11-05T07:30:27.372912Z"),
+				ExpiresAt: testfixtures.ParseTime(t, "2024-11-05T07:30:27.372912Z"),
 				Configuration: response.TransactionConfig{
 					ChangeSatoshis: 98,
 					ChangeDestinations: []*response.Destination{
 						{
 							Model: response.Model{
-								CreatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
-								UpdatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
+								CreatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
+								UpdatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
 							},
 							ID:            "c86dd8f4-316f-4d71-be00-7bd1a38079e4",
 							XpubID:        "d6884260-1624-415b-8625-652a59345ead",
@@ -214,8 +215,8 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 						{
 							Utxo: response.Utxo{
 								Model: response.Model{
-									CreatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
-									UpdatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
+									CreatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
+									UpdatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
 								},
 								UtxoPointer: response.UtxoPointer{
 									TransactionID: "3e0c5f6d-0dfc-462d-8a63-31b7a20d0c6b",
@@ -226,12 +227,12 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 								ScriptPubKey: "9d7eede4-00cd-47fd-ab3d-b0ae6d2ca6a6",
 								Type:         "pubkeyhash",
 								DraftID:      "f1ebe294-d921-4fb7-8b22-ed33e090e7ea",
-								ReservedAt:   testfixtures.ParseTime("2024-11-05T07:30:14.207287Z"),
+								ReservedAt:   testfixtures.ParseTime(t, "2024-11-05T07:30:14.207287Z"),
 							},
 							Destination: response.Destination{
 								Model: response.Model{
-									CreatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
-									UpdatedAt: testfixtures.ParseTime("2024-11-05T07:30:14.219077Z"),
+									CreatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
+									UpdatedAt: testfixtures.ParseTime(t, "2024-11-05T07:30:14.219077Z"),
 									Metadata: map[string]interface{}{
 										"domain":          "john.doe.test.4chain.space",
 										"ip_address":      "127.0.0.1",
@@ -317,7 +318,7 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
 
 			// then:
-			got, err := wallet.DraftTransaction(context.Background(), client.DraftTransactionArgs{
+			got, err := wallet.DraftTransaction(context.Background(), &commands.DraftTransaction{
 				Config:   response.TransactionConfig{},
 				Metadata: map[string]any{},
 			})
@@ -339,8 +340,8 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 			statusCode: http.StatusOK,
 			expectedResponse: &response.Transaction{
 				Model: response.Model{
-					CreatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
-					UpdatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
+					CreatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
+					UpdatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
 					Metadata: map[string]any{
 						"domain":          "john.doe.test.4chain.space",
 						"example_key1":    "example_key10_val",
@@ -412,8 +413,8 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 			expectedResponse: []*response.Transaction{
 				{
 					Model: response.Model{
-						CreatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
-						UpdatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
+						CreatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
+						UpdatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
 						Metadata: map[string]any{
 							"domain":          "john.doe.test.4chain.space",
 							"example_key1":    "example_key10_val",
@@ -442,8 +443,8 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 				},
 				{
 					Model: response.Model{
-						CreatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
-						UpdatedAt: testfixtures.ParseTime("2024-10-07T14:03:26.736816Z"),
+						CreatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
+						UpdatedAt: testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z"),
 						Metadata: map[string]any{
 							"domain":          "jane.doe.test.4chain.space",
 							"example_key101":  "example_key101_val",

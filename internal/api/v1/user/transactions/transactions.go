@@ -4,36 +4,21 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/query"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
 
 const route = "api/v1/transactions"
 
-type DraftTransactionRequest struct {
-	Config   response.TransactionConfig `json:"config"`
-	Metadata querybuilders.Metadata     `json:"metadata"`
-}
-
-type RecordTransactionRequest struct {
-	Metadata    querybuilders.Metadata `json:"metadata"`
-	Hex         string                 `json:"hex"`
-	ReferenceID string                 `json:"referenceId"`
-}
-
-type UpdateTransactionMetadataRequest struct {
-	ID       string                 `json:"-"`
-	Metadata querybuilders.Metadata `json:"metadata"`
-}
-
 type API struct {
 	addr string
 	cli  *resty.Client
 }
 
-func (a *API) DraftTransaction(ctx context.Context, r *DraftTransactionRequest) (*response.DraftTransaction, error) {
+func (a *API) DraftTransaction(ctx context.Context, r *commands.DraftTransaction) (*response.DraftTransaction, error) {
 	var result response.DraftTransaction
 
 	URL := a.addr + "/drafts"
@@ -49,7 +34,7 @@ func (a *API) DraftTransaction(ctx context.Context, r *DraftTransactionRequest) 
 	return &result, nil
 }
 
-func (a *API) RecordTransaction(ctx context.Context, r *RecordTransactionRequest) (*response.Transaction, error) {
+func (a *API) RecordTransaction(ctx context.Context, r *commands.RecordTransaction) (*response.Transaction, error) {
 	var result response.Transaction
 
 	_, err := a.cli.R().
@@ -64,7 +49,7 @@ func (a *API) RecordTransaction(ctx context.Context, r *RecordTransactionRequest
 	return &result, nil
 }
 
-func (a *API) UpdateTransactionMetadata(ctx context.Context, r *UpdateTransactionMetadataRequest) (*response.Transaction, error) {
+func (a *API) UpdateTransactionMetadata(ctx context.Context, r *commands.UpdateTransactionMetadata) (*response.Transaction, error) {
 	var result response.Transaction
 
 	URL := a.addr + "/" + r.ID
@@ -95,8 +80,8 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	return &result, nil
 }
 
-func (a *API) Transactions(ctx context.Context, transactionsOpts ...query.TransctionsQueryOption) ([]*response.Transaction, error) {
-	var query query.TransactionsQuery
+func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.TransctionsQueryOption) ([]*response.Transaction, error) {
+	var query queries.TransactionsQuery
 	for _, o := range transactionsOpts {
 		o(&query)
 	}

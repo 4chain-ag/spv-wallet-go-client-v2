@@ -9,10 +9,11 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
-	"github.com/bitcoin-sv/spv-wallet-go-client/query"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
@@ -115,8 +116,8 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 // This method sends an HTTP POST request to the "/draft" endpoint and expects
 // a response that can be unmarshaled into a response.DraftTransaction struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) DraftTransaction(ctx context.Context, args DraftTransactionArgs) (*response.DraftTransaction, error) {
-	res, err := c.transactionsAPI.DraftTransaction(ctx, args.ParseToDraftTransactionRequest())
+func (c *Client) DraftTransaction(ctx context.Context, cmd *commands.DraftTransaction) (*response.DraftTransaction, error) {
+	res, err := c.transactionsAPI.DraftTransaction(ctx, cmd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a draft transaction by calling the user transactions API: %w", err)
 	}
@@ -128,10 +129,10 @@ func (c *Client) DraftTransaction(ctx context.Context, args DraftTransactionArgs
 // This method sends an HTTP POST request to the "/transactions" endpoint, expecting
 // a response that can be unmarshaled into a response.Transaction struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) RecordTransaction(ctx context.Context, args RecordTransactionArgs) (*response.Transaction, error) {
-	res, err := c.transactionsAPI.RecordTransaction(ctx, args.ParseToRecordTransactionRequest())
+func (c *Client) RecordTransaction(ctx context.Context, cmd *commands.RecordTransaction) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.RecordTransaction(ctx, cmd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to record a transaction with reference ID: %s by calling the user transactions API: %w", args.ReferenceID, err)
+		return nil, fmt.Errorf("failed to record a transaction with reference ID: %s by calling the user transactions API: %w", cmd.ReferenceID, err)
 	}
 
 	return res, nil
@@ -141,8 +142,8 @@ func (c *Client) RecordTransaction(ctx context.Context, args RecordTransactionAr
 // This method sends an HTTP PATCH request with updated metadata and expects a response
 // that can be unmarshaled into a response.Transaction struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) UpdateTransactionMetadata(ctx context.Context, args UpdateTransactionMetadataArgs) (*response.Transaction, error) {
-	res, err := c.transactionsAPI.UpdateTransactionMetadata(ctx, args.ParseUpdateTransactionMetadataRequest())
+func (c *Client) UpdateTransactionMetadata(ctx context.Context, cmd *commands.UpdateTransactionMetadata) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.UpdateTransactionMetadata(ctx, cmd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update a transaction metadata by calling the user user transactions API: %w", err)
 	}
@@ -154,7 +155,7 @@ func (c *Client) UpdateTransactionMetadata(ctx context.Context, args UpdateTrans
 // This method applies optional query parameters and expects a response that can be
 // unmarshaled into a slice of response.Transaction pointers.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) Transactions(ctx context.Context, opts ...query.TransctionsQueryOption) ([]*response.Transaction, error) {
+func (c *Client) Transactions(ctx context.Context, opts ...queries.TransctionsQueryOption) ([]*response.Transaction, error) {
 	res, err := c.transactionsAPI.Transactions(ctx, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve transactions from the user transactions API: %w", err)

@@ -13,8 +13,8 @@ import (
 
 func TestExtendedURLValues_AddPair(t *testing.T) {
 	// given:
-	to := testfixtures.ParseTime("2024-10-07T14:03:26.736816Z")
-	from := testfixtures.ParseTime("2024-10-07T14:03:26.736816Z")
+	to := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
+	from := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
 	expectedValues := url.Values{
 		"key1":       []string{"str"},
 		"key2":       []string{"1"},
@@ -45,8 +45,8 @@ func TestExtendedURLValues_AddPair(t *testing.T) {
 
 func TestExtendedURLValues_ParseToMap(t *testing.T) {
 	// given:
-	to := testfixtures.ParseTime("2024-10-07T14:03:26.736816Z")
-	from := testfixtures.ParseTime("2024-10-07T14:03:26.736816Z")
+	to := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
+	from := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
 	expectedValues := map[string]string{
 		"key1":       "str",
 		"key2":       "1",

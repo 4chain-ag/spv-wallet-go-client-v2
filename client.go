@@ -9,6 +9,7 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/invitations"
@@ -99,6 +100,10 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 	return newClient(cfg, authenticator), nil
 }
 
+// Contacts retrieves the full list of user contacts. This method sends an HTTP GET request
+// to the "api/v1/contacts" endpoint. The server's response is expected to be unmarshaled into
+// a slice of *response.Contact structs. If the request fails or the response cannot be decoded,
+// an error is returned.
 func (c *Client) Contacts(ctx context.Context) ([]*response.Contact, error) {
 	res, err := c.contactsAPI.Contacts(ctx)
 	if err != nil {
@@ -108,6 +113,10 @@ func (c *Client) Contacts(ctx context.Context) ([]*response.Contact, error) {
 	return res, nil
 }
 
+// ContactWithPaymail retrieves a specific user contact by their paymail address.
+// This method sends an HTTP GET request to "api/v1/contacts/paymail_address", replacing paymail_address
+// with the provided paymail. The response is expected to be unmarshaled into a *response.Contact struct.
+// If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) ContactWithPaymail(ctx context.Context, paymail string) (*response.Contact, error) {
 	res, err := c.contactsAPI.ContactWithPaymail(ctx, paymail)
 	if err != nil {
@@ -117,8 +126,12 @@ func (c *Client) ContactWithPaymail(ctx context.Context, paymail string) (*respo
 	return res, nil
 }
 
-func (c *Client) UpsertContact(ctx context.Context, args UpsertContactArgs) (*response.Contact, error) {
-	res, err := c.contactsAPI.UpsertContact(ctx, args.parseUpsertContactRequest())
+// UpsertContact adds or updates a user contact using the user contacts API.
+// This method sends an HTTP PUT request to "api/v1/contacts/paymail_address", replacing paymail_address
+// with the user's paymail. The response is expected to be unmarshaled into a *response.Contact struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) UpsertContact(ctx context.Context, cmd commands.UpsertContact) (*response.Contact, error) {
+	res, err := c.contactsAPI.UpsertContact(ctx, cmd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upsert contact by calling the user contacts API: %w", err)
 	}
@@ -126,6 +139,9 @@ func (c *Client) UpsertContact(ctx context.Context, args UpsertContactArgs) (*re
 	return res, nil
 }
 
+// RemoveContact deletes a user contact using the user contacts API.
+// This method sends an HTTP DELETE request to "/api/v1/contacts/paymail_address", replacing paymail_address
+// with the user's paymail. If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) RemoveContact(ctx context.Context, paymail string) error {
 	err := c.contactsAPI.RemoveContact(ctx, paymail)
 	if err != nil {
@@ -135,6 +151,9 @@ func (c *Client) RemoveContact(ctx context.Context, paymail string) error {
 	return nil
 }
 
+// ConfirmContact confirms a user contact using the user contacts API.
+// This method sends an HTTP POST request to "/api/v1/contacts/paymail_address", replacing paymail_address
+// with the user's paymail. If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) ConfirmContact(ctx context.Context, paymail string) error {
 	err := c.contactsAPI.ConfirmContact(ctx, paymail)
 	if err != nil {
@@ -144,6 +163,9 @@ func (c *Client) ConfirmContact(ctx context.Context, paymail string) error {
 	return nil
 }
 
+// UnconfirmContact unconfirms a user contact using the user contacts API.
+// This method sends an HTTP DELETE request to "/api/v1/contacts/paymail_address", replacing paymail_address
+// with the user's paymail. If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) UnconfirmContact(ctx context.Context, paymail string) error {
 	err := c.contactsAPI.UnconfirmContact(ctx, paymail)
 	if err != nil {
@@ -153,6 +175,9 @@ func (c *Client) UnconfirmContact(ctx context.Context, paymail string) error {
 	return nil
 }
 
+// AcceptInvitation accepts an invitation to add a contact using the user invitations API.
+// This method sends an HTTP POST request to "/api/v1/invitations/paymail_address/contacts", replacing paymail_address
+// with the user's paymail. If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) AcceptInvitation(ctx context.Context, paymail string) error {
 	err := c.invitationsAPI.AcceptInvitation(ctx, paymail)
 	if err != nil {
@@ -162,6 +187,9 @@ func (c *Client) AcceptInvitation(ctx context.Context, paymail string) error {
 	return nil
 }
 
+// RejectInvitation rejects an invitation using the user invitations API.
+// This method sends an HTTP DELETE request to "/api/v1/invitations/paymail_address", replacing paymail_address
+// with the user's paymail. If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) RejectInvitation(ctx context.Context, paymail string) error {
 	err := c.invitationsAPI.RejectInvitation(ctx, paymail)
 	if err != nil {
@@ -172,9 +200,9 @@ func (c *Client) RejectInvitation(ctx context.Context, paymail string) error {
 }
 
 // SharedConfig retrieves the shared configuration from the user configurations API.
-// This method constructs an HTTP GET request to the "/shared" endpoint and expects
-// a response that can be unmarshaled into the response.SharedConfig struct.
-// If the request fails or the response cannot be decoded, an error will be returned.
+// This method constructs an HTTP GET request to the "api/v1/configs/shared" endpoint and expects
+// a response that can be unmarshaled into the response.SharedConfig struct. If the request fails
+// or the response cannot be decoded, an error will be returned.
 func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
 	res, err := c.configsAPI.SharedConfig(ctx)
 	if err != nil {

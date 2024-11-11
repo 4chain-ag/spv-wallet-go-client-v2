@@ -10,13 +10,13 @@ import (
 const route = "api/v1/invitations"
 
 type API struct {
-	addr string
-	cli  *resty.Client
+	addr       string
+	httpClient *resty.Client
 }
 
 func (a *API) AcceptInvitation(ctx context.Context, paymail string) error {
 	URL := a.addr + "/" + paymail + "/contacts"
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		Post(URL)
@@ -29,7 +29,7 @@ func (a *API) AcceptInvitation(ctx context.Context, paymail string) error {
 
 func (a *API) RejectInvitation(ctx context.Context, paymail string) error {
 	URL := a.addr + "/" + paymail
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		Delete(URL)
@@ -40,9 +40,9 @@ func (a *API) RejectInvitation(ctx context.Context, paymail string) error {
 	return nil
 }
 
-func NewAPI(addr string, cli *resty.Client) *API {
+func NewAPI(addr string, httpClient *resty.Client) *API {
 	return &API{
-		addr: addr + "/" + route,
-		cli:  cli,
+		addr:       addr + "/" + route,
+		httpClient: httpClient,
 	}
 }

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts/contactstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
@@ -23,32 +24,9 @@ func TestContactsAPI_Contacts(t *testing.T) {
 		expectedErr      error
 	}{
 		"HTTP GET /api/v1/contacts response: 200": {
-			statusCode: http.StatusOK,
-			expectedResponse: []*response.Contact{
-				{
-					Model: response.Model{
-						CreatedAt: ParseTime("2024-10-18T12:07:44.739839Z"),
-						UpdatedAt: ParseTime("2024-10-18T15:08:44.739918Z"),
-					},
-					ID:       "4f730efa-2a33-4275-bfdb-1f21fc110963",
-					FullName: "John Doe",
-					Paymail:  "john.doe.test5@john.doe.4chain.space",
-					PubKey:   "19751ea9-6c1f-4ba7-a7e2-551ef7930136",
-					Status:   "unconfirmed",
-				},
-				{
-					Model: response.Model{
-						CreatedAt: ParseTime("2024-10-18T12:07:44.739839Z"),
-						UpdatedAt: ParseTime("2024-10-18T15:08:44.739918Z"),
-					},
-					ID:       "e55a4d4e-4a4b-4720-8556-1c00dd6a5cf3",
-					FullName: "Jane Doe",
-					Paymail:  "jane.doe.test5@jane.doe.4chain.space",
-					PubKey:   "f8898969-3f96-48d3-b122-bbb3e738dbf5",
-					Status:   "unconfirmed",
-				},
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contacts_200.json")),
+			statusCode:       http.StatusOK,
+			expectedResponse: contactstest.ExpectedContacts(t),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contacts_200.json")),
 		},
 		"HTTP GET /api/v1/contacts response: 400": {
 			expectedErr: models.SPVError{
@@ -57,7 +35,7 @@ func TestContactsAPI_Contacts(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/contacts str response: 500": {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -90,19 +68,9 @@ func TestContactsAPI_ContactWithPaymail(t *testing.T) {
 		expectedErr      error
 	}{
 		fmt.Sprintf("HTTP GET /api/v1/contacts/%s response: 200", paymail): {
-			statusCode: http.StatusOK,
-			expectedResponse: &response.Contact{
-				Model: response.Model{
-					CreatedAt: ParseTime("2024-10-18T12:07:44.739839Z"),
-					UpdatedAt: ParseTime("2024-10-18T15:08:44.739918Z"),
-				},
-				ID:       "4f730efa-2a33-4275-bfdb-1f21fc110963",
-				FullName: "John Doe",
-				Paymail:  "john.doe.test5@john.doe.4chain.space",
-				PubKey:   "19751ea9-6c1f-4ba7-a7e2-551ef7930136",
-				Status:   "unconfirmed",
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contact_paymail_200.json")),
+			statusCode:       http.StatusOK,
+			expectedResponse: contactstest.ExpectedContactWithWithPaymail(t),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contact_paymail_200.json")),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/contacts/%s response: 400", paymail): {
 			expectedErr: models.SPVError{
@@ -111,7 +79,7 @@ func TestContactsAPI_ContactWithPaymail(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/contacts/%s str response: 500", paymail): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -144,22 +112,9 @@ func TestContactsAPI_UpsertContact(t *testing.T) {
 		expectedErr      error
 	}{
 		fmt.Sprintf("HTTP PUT /api/v1/contacts/%s response: 200", paymail): {
-			statusCode: http.StatusOK,
-			expectedResponse: &response.Contact{
-				Model: response.Model{
-					CreatedAt: ParseTime("2024-10-18T12:07:44.739839Z"),
-					UpdatedAt: ParseTime("2024-11-06T11:30:35.090124Z"),
-					Metadata: map[string]interface{}{
-						"example_key": "example_val",
-					},
-				},
-				ID:       "68acf78f-5ece-4917-821d-8028ecf06c9a",
-				FullName: "John Doe",
-				Paymail:  "john.doe.test@john.doe.test.4chain.space",
-				PubKey:   "0df36839-67bb-49e7-a9c7-e839aa564871",
-				Status:   "unconfirmed",
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contact_upsert_200.json")),
+			statusCode:       http.StatusOK,
+			expectedResponse: contactstest.ExpectedUpsertContact(t),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contact_upsert_200.json")),
 		},
 		fmt.Sprintf("HTTP PUT /api/v1/contacts/%s response: 400", paymail): {
 			expectedErr: models.SPVError{
@@ -168,7 +123,7 @@ func TestContactsAPI_UpsertContact(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP PUT /api/v1/contacts/%s str response: 500", paymail): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -185,7 +140,7 @@ func TestContactsAPI_UpsertContact(t *testing.T) {
 			transport.RegisterResponder(http.MethodPut, URL, tc.responder)
 
 			// then:
-			got, err := wallet.UpsertContact(context.Background(), client.UpsertContactArgs{
+			got, err := wallet.UpsertContact(context.Background(), commands.UpsertContact{
 				FullName: "John Doe",
 				Metadata: map[string]any{"example_key": "example_val"},
 				Paymail:  paymail,
@@ -214,7 +169,7 @@ func TestContactsAPI_RemoveContact(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/contacts/%s str response: 500", paymail): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -255,7 +210,7 @@ func TestContactsAPI_ConfirmContact(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP POST /api/v1/contacts/%s/confirmation str response: 500", paymail): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -297,7 +252,7 @@ func TestContactsAPI_UnconfirmContact(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/contacts/%s/confirmation str response: 500", paymail): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -317,21 +272,5 @@ func TestContactsAPI_UnconfirmContact(t *testing.T) {
 			err := wallet.UnconfirmContact(context.Background(), paymail)
 			require.ErrorIs(t, err, tc.expectedErr)
 		})
-	}
-}
-
-func ParseTime(s string) time.Time {
-	t, err := time.Parse(time.RFC3339Nano, s)
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
-func NewBadRequestSPVError() *models.SPVError {
-	return &models.SPVError{
-		Message:    http.StatusText(http.StatusBadRequest),
-		StatusCode: http.StatusBadRequest,
-		Code:       "invalid-data-format",
 	}
 }

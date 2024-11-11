@@ -4,29 +4,23 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
 
 // TODO: 1. Contacts should accept the optional query parameters similar to the transactions.
-// TODO: 2. Remove all helpers from the test file, all necessary funcs should be included in the testfixtures pkg.
 
 const route = "api/v1/contacts"
 
 type API struct {
-	addr string
-	cli  *resty.Client
-}
-
-type UpsertContactRequest struct {
-	FullName         string         `json:"fullName"`
-	Metadata         map[string]any `json:"metadata"`
-	RequesterPaymail string         `json:"requesterPaymail"`
+	addr       string
+	httpClient *resty.Client
 }
 
 func (a *API) Contacts(ctx context.Context) ([]*response.Contact, error) {
 	var result response.PageModel[response.Contact]
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		SetResult(&result).
@@ -42,7 +36,7 @@ func (a *API) ContactWithPaymail(ctx context.Context, paymail string) (*response
 	var result response.Contact
 
 	URL := a.addr + "/" + paymail
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		SetResult(&result).
@@ -54,11 +48,11 @@ func (a *API) ContactWithPaymail(ctx context.Context, paymail string) (*response
 	return &result, nil
 }
 
-func (a *API) UpsertContact(ctx context.Context, r UpsertContactRequest) (*response.Contact, error) {
+func (a *API) UpsertContact(ctx context.Context, r commands.UpsertContact) (*response.Contact, error) {
 	var result response.CreateContactResponse
 
-	URL := a.addr + "/" + r.RequesterPaymail
-	_, err := a.cli.
+	URL := a.addr + "/" + r.Paymail
+	_, err := a.httpClient.
 		R().
 		SetBody(r).
 		SetContext(ctx).
@@ -80,7 +74,7 @@ func (a *API) UpsertContact(ctx context.Context, r UpsertContactRequest) (*respo
 
 func (a *API) RemoveContact(ctx context.Context, paymail string) error {
 	URL := a.addr + "/" + paymail
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		Delete(URL)
@@ -93,7 +87,7 @@ func (a *API) RemoveContact(ctx context.Context, paymail string) error {
 
 func (a *API) ConfirmContact(ctx context.Context, paymail string) error {
 	URL := a.addr + "/" + paymail + "/confirmation"
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		Post(URL)
@@ -106,7 +100,7 @@ func (a *API) ConfirmContact(ctx context.Context, paymail string) error {
 
 func (a *API) UnconfirmContact(ctx context.Context, paymail string) error {
 	URL := a.addr + "/" + paymail + "/confirmation"
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		Delete(URL)
@@ -117,9 +111,9 @@ func (a *API) UnconfirmContact(ctx context.Context, paymail string) error {
 	return nil
 }
 
-func NewAPI(addr string, cli *resty.Client) *API {
+func NewAPI(addr string, httpClient *resty.Client) *API {
 	return &API{
-		addr: addr + "/" + route,
-		cli:  cli,
+		addr:       addr + "/" + route,
+		httpClient: httpClient,
 	}
 }

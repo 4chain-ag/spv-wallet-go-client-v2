@@ -9,7 +9,9 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/users"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
@@ -42,6 +44,7 @@ func NewDefaultConfig(addr string) Config {
 // of the HTTP requests and responses directly.
 type Client struct {
 	configsAPI *configs.API
+	usersAPI   *users.API
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -108,6 +111,32 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 	return res, nil
 }
 
+// UserInformation retrieves the complete information for the current user's xpub.
+// This method sends an HTTP GET request to the "api/v1/users/current" endpoint.
+// The server's response is expected to be unmarshaled into a *response.Xpub struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) UserInformation(ctx context.Context) (*response.Xpub, error) {
+	res, err := c.usersAPI.UserInformation(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve xpub user information from the users API: %w", err)
+	}
+
+	return res, nil
+}
+
+// UpdateUserInformationMetadata updates the metadata associated with the current user's xpub.
+// This method sends an HTTP PATCH request to the "api/v1/users/current" endpoint.
+// The server's response is expected to be unmarshaled into a *response.Xpub struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) UpdateUserInformationMetadata(ctx context.Context, cmd *commands.UpdateUserInformationMetadata) (*response.Xpub, error) {
+	res, err := c.usersAPI.UpdateUserInformationMetadata(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update xpub user information metadata using the users API: %w", err)
+	}
+
+	return res, nil
+}
+
 func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
 	pk, err1 := ec.PrivateKeyFromWif(s)
 	if err1 == nil {
@@ -130,6 +159,7 @@ func newClient(cfg Config, auth authenticator) *Client {
 	restyCli := newRestyClient(cfg, auth)
 	cli := Client{
 		configsAPI: configs.NewAPI(cfg.Addr, restyCli),
+		usersAPI:   users.NewAPI(cfg.Addr, restyCli),
 	}
 	return &cli
 }

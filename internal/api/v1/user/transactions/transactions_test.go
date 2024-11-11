@@ -10,7 +10,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions/transactionstest"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
@@ -38,7 +38,7 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, testfixtures.NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s str response: 500", ID): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -47,11 +47,11 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/transactions/" + ID
+	URL := clienttest.TestAPIAddr + "/api/v1/transactions/" + ID
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodPatch, URL, tc.responder)
 
 			// then:
@@ -87,7 +87,7 @@ func TestTransactionsAPI_RecordTransaction(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, testfixtures.NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/transactions str response: 500": {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -96,11 +96,11 @@ func TestTransactionsAPI_RecordTransaction(t *testing.T) {
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/transactions"
+	URL := clienttest.TestAPIAddr + "/api/v1/transactions"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
 
 			// then:
@@ -130,7 +130,7 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, testfixtures.NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		"HTTP POST /api/v1/transactions/drafts str response: 500": {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -139,11 +139,11 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/transactions/drafts"
+	URL := clienttest.TestAPIAddr + "/api/v1/transactions/drafts"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
 
 			// then:
@@ -177,7 +177,7 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, testfixtures.NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s str response: 500", ID): {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -186,11 +186,11 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/transactions/" + ID
+	URL := clienttest.TestAPIAddr + "/api/v1/transactions/" + ID
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
 
 			// then:
@@ -220,7 +220,7 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 				Code:       "invalid-data-format",
 			},
 			statusCode: http.StatusOK,
-			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, testfixtures.NewBadRequestSPVError()),
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/transactions str response: 500": {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
@@ -229,11 +229,11 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/transactions"
+	URL := clienttest.TestAPIAddr + "/api/v1/transactions"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
 
 			// then:

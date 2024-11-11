@@ -89,7 +89,7 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.Tran
 	builderOpts := []querybuilders.QueryBuilderOption{
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithQueryParamsFilter(query.QueryParams),
-		querybuilders.WithFilterQueryBuilder(&TransactionFilterBuilder{
+		querybuilders.WithFilterQueryBuilder(&transactionFilterBuilder{
 			TransactionFilter:  query.Filter,
 			ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.Filter.ModelFilter},
 		}),

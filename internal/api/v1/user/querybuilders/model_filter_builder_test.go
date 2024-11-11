@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders/querybuilderstest"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +22,7 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 				"includeDeleted": []string{"true"},
 			},
 			filter: filter.ModelFilter{
-				IncludeDeleted: testfixtures.Ptr(true),
+				IncludeDeleted: querybuilderstest.Ptr(true),
 			},
 		},
 		"model filter: filter with only created range 'from' field set": {
@@ -31,7 +31,7 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				CreatedRange: &filter.TimeRange{
-					From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+					From: querybuilderstest.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -41,7 +41,7 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				CreatedRange: &filter.TimeRange{
-					To: testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+					To: querybuilderstest.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -52,8 +52,8 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				CreatedRange: &filter.TimeRange{
-					From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-					To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+					From: querybuilderstest.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+					To:   querybuilderstest.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -63,7 +63,7 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				UpdatedRange: &filter.TimeRange{
-					From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+					From: querybuilderstest.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -73,7 +73,7 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				UpdatedRange: &filter.TimeRange{
-					To: testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+					To: querybuilderstest.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -84,8 +84,8 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 			},
 			filter: filter.ModelFilter{
 				UpdatedRange: &filter.TimeRange{
-					From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-					To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+					From: querybuilderstest.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+					To:   querybuilderstest.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -98,14 +98,14 @@ func TestModelFilterQueryBuilder_Build(t *testing.T) {
 				"updatedRange[to]":   []string{"2021-02-02T00:00:00Z"},
 			},
 			filter: filter.ModelFilter{
-				IncludeDeleted: testfixtures.Ptr(true),
+				IncludeDeleted: querybuilderstest.Ptr(true),
 				CreatedRange: &filter.TimeRange{
-					From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-					To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+					From: querybuilderstest.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+					To:   querybuilderstest.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
 				UpdatedRange: &filter.TimeRange{
-					From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-					To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+					From: querybuilderstest.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+					To:   querybuilderstest.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 		},

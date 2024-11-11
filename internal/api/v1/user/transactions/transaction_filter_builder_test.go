@@ -1,4 +1,4 @@
-package transactions_test
+package transactions
 
 import (
 	"net/url"
@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions/transactionstest"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
@@ -20,22 +19,22 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 	}{
 		"transaction filter: zero values": {
 			filter: filter.TransactionFilter{
-				Id:              testfixtures.Ptr(""),
-				Hex:             testfixtures.Ptr(""),
-				BlockHash:       testfixtures.Ptr(""),
-				BlockHeight:     testfixtures.Ptr(uint64(0)),
-				Fee:             testfixtures.Ptr(uint64(0)),
-				NumberOfInputs:  testfixtures.Ptr(uint32(0)),
-				NumberOfOutputs: testfixtures.Ptr(uint32(0)),
-				DraftID:         testfixtures.Ptr(""),
-				TotalValue:      testfixtures.Ptr(uint64(0)),
-				Status:          testfixtures.Ptr(""),
+				Id:              transactionstest.Ptr(""),
+				Hex:             transactionstest.Ptr(""),
+				BlockHash:       transactionstest.Ptr(""),
+				BlockHeight:     transactionstest.Ptr(uint64(0)),
+				Fee:             transactionstest.Ptr(uint64(0)),
+				NumberOfInputs:  transactionstest.Ptr(uint32(0)),
+				NumberOfOutputs: transactionstest.Ptr(uint32(0)),
+				DraftID:         transactionstest.Ptr(""),
+				TotalValue:      transactionstest.Ptr(uint64(0)),
+				Status:          transactionstest.Ptr(""),
 			},
 			expectedParams: make(url.Values),
 		},
 		"transaction filter: filter with only 'id' field set": {
 			filter: filter.TransactionFilter{
-				Id: testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				Id: transactionstest.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
 			},
 			expectedParams: url.Values{
 				"id": []string{"d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"},
@@ -43,7 +42,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'hex' field set": {
 			filter: filter.TransactionFilter{
-				Hex: testfixtures.Ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
+				Hex: transactionstest.Ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
 			},
 			expectedParams: url.Values{
 				"hex": []string{"001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"},
@@ -51,7 +50,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'block hash' field set": {
 			filter: filter.TransactionFilter{
-				BlockHash: testfixtures.Ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
+				BlockHash: transactionstest.Ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
 			},
 			expectedParams: url.Values{
 				"blockHash": []string{"0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"},
@@ -59,7 +58,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'block height' field set": {
 			filter: filter.TransactionFilter{
-				BlockHeight: testfixtures.Ptr(uint64(839376)),
+				BlockHeight: transactionstest.Ptr(uint64(839376)),
 			},
 			expectedParams: url.Values{
 				"blockHeight": []string{"839376"},
@@ -67,7 +66,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'fee' field set": {
 			filter: filter.TransactionFilter{
-				Fee: testfixtures.Ptr(uint64(1)),
+				Fee: transactionstest.Ptr(uint64(1)),
 			},
 			expectedParams: url.Values{
 				"fee": []string{"1"},
@@ -75,7 +74,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'number of inputs' field set": {
 			filter: filter.TransactionFilter{
-				NumberOfInputs: testfixtures.Ptr(uint32(10)),
+				NumberOfInputs: transactionstest.Ptr(uint32(10)),
 			},
 			expectedParams: url.Values{
 				"numberOfInputs": []string{"10"},
@@ -83,7 +82,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'number of outputs' field set": {
 			filter: filter.TransactionFilter{
-				NumberOfOutputs: testfixtures.Ptr(uint32(20)),
+				NumberOfOutputs: transactionstest.Ptr(uint32(20)),
 			},
 			expectedParams: url.Values{
 				"numberOfOutputs": []string{"20"},
@@ -91,7 +90,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'draft id' field set": {
 			filter: filter.TransactionFilter{
-				DraftID: testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				DraftID: transactionstest.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
 			},
 			expectedParams: url.Values{
 				"draftId": []string{"d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"},
@@ -99,7 +98,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'total value' field set": {
 			filter: filter.TransactionFilter{
-				TotalValue: testfixtures.Ptr(uint64(100000000)),
+				TotalValue: transactionstest.Ptr(uint64(100000000)),
 			},
 			expectedParams: url.Values{
 				"totalValue": []string{"100000000"},
@@ -107,7 +106,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: filter with only 'status' field set": {
 			filter: filter.TransactionFilter{
-				Status: testfixtures.Ptr("RECEIVED"),
+				Status: transactionstest.Ptr("RECEIVED"),
 			},
 			expectedParams: url.Values{
 				"status": []string{"RECEIVED"},
@@ -116,14 +115,14 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		"transaction filter: filter with only 'model filter' fields set": {
 			filter: filter.TransactionFilter{
 				ModelFilter: filter.ModelFilter{
-					IncludeDeleted: testfixtures.Ptr(true),
+					IncludeDeleted: transactionstest.Ptr(true),
 					CreatedRange: &filter.TimeRange{
-						From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-						To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+						From: transactionstest.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+						To:   transactionstest.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 					},
 					UpdatedRange: &filter.TimeRange{
-						From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-						To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+						From: transactionstest.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+						To:   transactionstest.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 					},
 				},
 			},
@@ -137,25 +136,25 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 		},
 		"transaction filter: all fields set": {
 			filter: filter.TransactionFilter{
-				Id:              testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
-				Hex:             testfixtures.Ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
-				BlockHash:       testfixtures.Ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
-				BlockHeight:     testfixtures.Ptr(uint64(839376)),
-				Fee:             testfixtures.Ptr(uint64(1)),
-				NumberOfInputs:  testfixtures.Ptr(uint32(10)),
-				NumberOfOutputs: testfixtures.Ptr(uint32(20)),
-				DraftID:         testfixtures.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
-				TotalValue:      testfixtures.Ptr(uint64(100000000)),
-				Status:          testfixtures.Ptr("RECEIVED"),
+				Id:              transactionstest.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				Hex:             transactionstest.Ptr("001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"),
+				BlockHash:       transactionstest.Ptr("0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"),
+				BlockHeight:     transactionstest.Ptr(uint64(839376)),
+				Fee:             transactionstest.Ptr(uint64(1)),
+				NumberOfInputs:  transactionstest.Ptr(uint32(10)),
+				NumberOfOutputs: transactionstest.Ptr(uint32(20)),
+				DraftID:         transactionstest.Ptr("d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"),
+				TotalValue:      transactionstest.Ptr(uint64(100000000)),
+				Status:          transactionstest.Ptr("RECEIVED"),
 				ModelFilter: filter.ModelFilter{
-					IncludeDeleted: testfixtures.Ptr(true),
+					IncludeDeleted: transactionstest.Ptr(true),
 					CreatedRange: &filter.TimeRange{
-						From: testfixtures.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-						To:   testfixtures.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+						From: transactionstest.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+						To:   transactionstest.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
 					},
 					UpdatedRange: &filter.TimeRange{
-						From: testfixtures.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-						To:   testfixtures.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+						From: transactionstest.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+						To:   transactionstest.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
 					},
 				},
 			},
@@ -181,7 +180,7 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			tfb := transactions.TransactionFilterBuilder{
+			tfb := transactionFilterBuilder{
 				TransactionFilter:  tc.filter,
 				ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
 			}

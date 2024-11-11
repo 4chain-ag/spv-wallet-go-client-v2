@@ -1,14 +1,12 @@
-package testfixtures
+package clienttest
 
 import (
-	"net/http"
 	"testing"
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/jarcoal/httpmock"
 )
 
@@ -55,24 +53,4 @@ func GivenSPVWalletClient(t *testing.T) (*client.Client, *httpmock.MockTransport
 	}
 
 	return spv, transport
-}
-
-func ParseTime(t *testing.T, s string) time.Time {
-	ts, err := time.Parse(time.RFC3339Nano, s)
-	if err != nil {
-		t.Fatalf("test helper - time parse: %s", err)
-	}
-	return ts
-}
-
-func Ptr[T any](value T) *T {
-	return &value
-}
-
-func NewBadRequestSPVError() *models.SPVError {
-	return &models.SPVError{
-		Message:    http.StatusText(http.StatusBadRequest),
-		StatusCode: http.StatusBadRequest,
-		Code:       "invalid-data-format",
-	}
 }

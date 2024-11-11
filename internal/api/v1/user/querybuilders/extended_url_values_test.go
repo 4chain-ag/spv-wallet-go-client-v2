@@ -6,15 +6,15 @@ import (
 	"time"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders/querybuilderstest"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
 
 func TestExtendedURLValues_AddPair(t *testing.T) {
 	// given:
-	to := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
-	from := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
+	to := querybuilderstest.ParseTime(t, "2024-10-07T14:03:26.736816Z")
+	from := querybuilderstest.ParseTime(t, "2024-10-07T14:03:26.736816Z")
 	expectedValues := url.Values{
 		"key1":       []string{"str"},
 		"key2":       []string{"1"},
@@ -30,10 +30,10 @@ func TestExtendedURLValues_AddPair(t *testing.T) {
 	params := querybuilders.NewExtendedURLValues()
 	params.AddPair("key1", "str")
 	params.AddPair("key2", 1)
-	params.AddPair("key3", testfixtures.Ptr("str_ptr"))
-	params.AddPair("key4", testfixtures.Ptr(uint64(64)))
-	params.AddPair("key5", testfixtures.Ptr(uint32(32)))
-	params.AddPair("key6", testfixtures.Ptr(bool(false)))
+	params.AddPair("key3", querybuilderstest.Ptr("str_ptr"))
+	params.AddPair("key4", querybuilderstest.Ptr(uint64(64)))
+	params.AddPair("key5", querybuilderstest.Ptr(uint32(32)))
+	params.AddPair("key6", querybuilderstest.Ptr(bool(false)))
 	params.AddPair("key7", &filter.TimeRange{
 		From: &from,
 		To:   &to,
@@ -45,8 +45,8 @@ func TestExtendedURLValues_AddPair(t *testing.T) {
 
 func TestExtendedURLValues_ParseToMap(t *testing.T) {
 	// given:
-	to := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
-	from := testfixtures.ParseTime(t, "2024-10-07T14:03:26.736816Z")
+	to := querybuilderstest.ParseTime(t, "2024-10-07T14:03:26.736816Z")
+	from := querybuilderstest.ParseTime(t, "2024-10-07T14:03:26.736816Z")
 	expectedValues := map[string]string{
 		"key1":       "str",
 		"key2":       "1",
@@ -61,10 +61,10 @@ func TestExtendedURLValues_ParseToMap(t *testing.T) {
 	params := querybuilders.NewExtendedURLValues()
 	params.AddPair("key1", "str")
 	params.AddPair("key2", 1)
-	params.AddPair("key3", testfixtures.Ptr("str_ptr"))
-	params.AddPair("key4", testfixtures.Ptr(uint64(64)))
-	params.AddPair("key5", testfixtures.Ptr(uint32(32)))
-	params.AddPair("key6", testfixtures.Ptr(bool(false)))
+	params.AddPair("key3", querybuilderstest.Ptr("str_ptr"))
+	params.AddPair("key4", querybuilderstest.Ptr(uint64(64)))
+	params.AddPair("key5", querybuilderstest.Ptr(uint32(32)))
+	params.AddPair("key6", querybuilderstest.Ptr(bool(false)))
 	params.AddPair("key7", &filter.TimeRange{
 		From: &from,
 		To:   &to,

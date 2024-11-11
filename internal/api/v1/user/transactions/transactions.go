@@ -14,15 +14,15 @@ import (
 const route = "api/v1/transactions"
 
 type API struct {
-	addr string
-	cli  *resty.Client
+	addr       string
+	httpClient *resty.Client
 }
 
 func (a *API) DraftTransaction(ctx context.Context, r *commands.DraftTransaction) (*response.DraftTransaction, error) {
 	var result response.DraftTransaction
 
 	URL := a.addr + "/drafts"
-	_, err := a.cli.R().
+	_, err := a.httpClient.R().
 		SetContext(ctx).
 		SetResult(&result).
 		SetBody(r).
@@ -37,7 +37,7 @@ func (a *API) DraftTransaction(ctx context.Context, r *commands.DraftTransaction
 func (a *API) RecordTransaction(ctx context.Context, r *commands.RecordTransaction) (*response.Transaction, error) {
 	var result response.Transaction
 
-	_, err := a.cli.R().
+	_, err := a.httpClient.R().
 		SetContext(ctx).
 		SetResult(&result).
 		SetBody(r).
@@ -53,7 +53,7 @@ func (a *API) UpdateTransactionMetadata(ctx context.Context, r *commands.UpdateT
 	var result response.Transaction
 
 	URL := a.addr + "/" + r.ID
-	_, err := a.cli.R().
+	_, err := a.httpClient.R().
 		SetContext(ctx).
 		SetResult(&result).
 		SetBody(r).
@@ -69,7 +69,7 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	var result response.Transaction
 
 	URL := a.addr + "/" + ID
-	_, err := a.cli.R().
+	_, err := a.httpClient.R().
 		SetContext(ctx).
 		SetResult(&result).
 		Get(URL)
@@ -101,7 +101,7 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.Tran
 	}
 
 	var result response.PageModel[response.Transaction]
-	_, err = a.cli.
+	_, err = a.httpClient.
 		R().
 		SetContext(ctx).
 		SetResult(&result).
@@ -116,7 +116,7 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.Tran
 
 func NewAPI(addr string, cli *resty.Client) *API {
 	return &API{
-		addr: addr + "/" + route,
-		cli:  cli,
+		addr:       addr + "/" + route,
+		httpClient: cli,
 	}
 }

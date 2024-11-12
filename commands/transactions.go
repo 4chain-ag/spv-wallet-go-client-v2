@@ -18,7 +18,9 @@ type DraftTransaction struct {
 	Metadata querybuilders.Metadata     `json:"metadata"` // Metadata related to the transaction.
 }
 
-// UpdateTransactionMetadata holds the arguments required to update a user transaction's metadata.
+// UpdateTransactionMetadata holds the arguments required to update the metadata of a user transaction.
+// The ID field is ignored in the request body sent to the SPV Wallet API; instead, it is used as part
+// of the transaction metadata update endpoint (e.g., /api/v1/transactions/{ID}).
 type UpdateTransactionMetadata struct {
 	ID       string                 `json:"-"`        // Unique identifier of the transaction to be updated.
 	Metadata querybuilders.Metadata `json:"metadata"` // New metadata to associate with the transaction.

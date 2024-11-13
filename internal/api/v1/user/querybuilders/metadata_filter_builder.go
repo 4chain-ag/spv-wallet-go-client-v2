@@ -101,6 +101,7 @@ func (m *MetadataFilterBuilder) processSliceQueryParams(val any, path Path, para
 	return nil
 }
 
-var ErrMetadataFilterMaxDepthExceeded = errors.New("maximum depth of nesting in metadata map exceeded")
-
-var ErrMetadataWrongTypeInArray = errors.New("wrong type in array")
+var (
+	ErrMetadataFilterMaxDepthExceeded = errors.New("maximum depth of nesting in metadata map exceeded")
+	ErrMetadataWrongTypeInArray       = errors.New("wrong type in array")
+)

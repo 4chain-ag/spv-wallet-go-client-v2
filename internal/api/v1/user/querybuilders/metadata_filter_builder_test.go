@@ -69,7 +69,7 @@ func TestMetadataFilterBuilder_Build(t *testing.T) {
 				},
 			},
 		},
-		"with special chars": {
+		"metadata: map entries [hey=123&522]=value1, [key2]=value=123": {
 			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[hey=123&522]": []string{"value1"},

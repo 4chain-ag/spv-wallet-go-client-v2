@@ -1,14 +1,14 @@
 {
     "createdAt": "2024-10-07T13:39:07.886862Z",
-    "updatedAt": "2024-11-11T15:46:10.050218Z",
+    "updatedAt": "2024-11-13T11:41:56.115402Z",
     "deletedAt": null,
     "metadata": {
      "metadata": {
-      "example_key": "example_value"
+      "key": "value"
      }
     },
-    "id": "98b5d2c8-c535-4cd1-9df1-7baa42474870",
-    "currentBalance": 215,
+    "id": "1356cc11-8164-4364-afa4-59f096a79eb5",
+    "currentBalance": 315,
     "nextInternalNum": 13,
     "nextExternalNum": 2
    }

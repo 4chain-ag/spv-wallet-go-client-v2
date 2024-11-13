@@ -111,12 +111,12 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 	return res, nil
 }
 
-// UserInformation retrieves the complete information for the current user's xpub.
+// XPub retrieves the complete information for the current user's xpub.
 // This method sends an HTTP GET request to the "api/v1/users/current" endpoint.
 // The server's response is expected to be unmarshaled into a *response.Xpub struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) UserInformation(ctx context.Context) (*response.Xpub, error) {
-	res, err := c.usersAPI.UserInformation(ctx)
+func (c *Client) XPub(ctx context.Context) (*response.Xpub, error) {
+	res, err := c.usersAPI.XPub(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve xpub user information from the users API: %w", err)
 	}
@@ -124,14 +124,53 @@ func (c *Client) UserInformation(ctx context.Context) (*response.Xpub, error) {
 	return res, nil
 }
 
-// UpdateUserInformationMetadata updates the metadata associated with the current user's xpub.
+// UpdateXPubMetadata updates the metadata associated with the current user's xpub.
 // This method sends an HTTP PATCH request to the "api/v1/users/current" endpoint.
 // The server's response is expected to be unmarshaled into a *response.Xpub struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) UpdateUserInformationMetadata(ctx context.Context, cmd *commands.UpdateUserInformationMetadata) (*response.Xpub, error) {
-	res, err := c.usersAPI.UpdateUserInformationMetadata(ctx, cmd)
+func (c *Client) UpdateXPubMetadata(ctx context.Context, cmd *commands.UpdateXPubMetadata) (*response.Xpub, error) {
+	res, err := c.usersAPI.UpdateXPubMetadata(ctx, cmd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update xpub user information metadata using the users API: %w", err)
+	}
+
+	return res, nil
+}
+
+// GenerateAccessKey creates the access key associated with the current user's xpub.
+// This method sends an HTTP POST request to the "api/v1/users/current/keys" endpoint.
+// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
+// If the request fails or the response cannot be decoded, an error is returned
+func (c *Client) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
+	res, err := c.usersAPI.GenerateAccessKey(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate user access key using the users API: %w", err)
+	}
+
+	return res, nil
+}
+
+// AccessKey retrieves the access key associated with the specified ID.
+// This method sends an HTTP GET request to the "api/v1/users/current/keys/{ID}" endpoint.
+// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
+// If the request fails or the response cannot be decoded, an error is returned
+func (c *Client) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
+	res, err := c.usersAPI.AccessKey(ctx, ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve user access key using the users API: %w", err)
+	}
+
+	return res, nil
+}
+
+// RevokeAccessKey revokes the access key associated with the specified ID.
+// This method sends an HTTP DELETE request to the "api/v1/users/current/keys/{ID}" endpoint.
+// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
+// If the request fails or the response cannot be decoded, an error is returned
+func (c *Client) RevokeAccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
+	res, err := c.usersAPI.RevokeAccessKey(ctx, ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to revoke user access key using the users API: %w", err)
 	}
 
 	return res, nil

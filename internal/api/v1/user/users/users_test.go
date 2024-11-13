@@ -2,6 +2,7 @@ package users_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -15,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUsersAPI_UpdateUserInformationMetadata(t *testing.T) {
+func TestUsersAPI_UpdateXPubMetadata(t *testing.T) {
 	tests := map[string]struct {
 		code             int
 		responder        httpmock.Responder
@@ -23,12 +24,12 @@ func TestUsersAPI_UpdateUserInformationMetadata(t *testing.T) {
 		expectedResponse *response.Xpub
 		expectedErr      error
 	}{
-		"HTTP GET /api/v1/users/current response: 200": {
-			expectedResponse: userstest.ExpectedUserInformationUpdateMetadata(t),
+		"HTTP PATCH /api/v1/users/current response: 200": {
+			expectedResponse: userstest.ExpectedUpdatedXPubMetadata(t),
 			code:             http.StatusOK,
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/user_information_metadata_update_200.json")),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/updated_xpub_metadata_200.json")),
 		},
-		"HTTP GET /api/v1/users/current response: 400": {
+		"HTTP PATCH /api/v1/users/current response: 400": {
 			expectedErr: models.SPVError{
 				Message:    http.StatusText(http.StatusBadRequest),
 				StatusCode: http.StatusBadRequest,
@@ -37,7 +38,7 @@ func TestUsersAPI_UpdateUserInformationMetadata(t *testing.T) {
 			statusCode: http.StatusOK,
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
 		},
-		"HTTP GET /api/v1/users/current str response: 500": {
+		"HTTP PATCH /api/v1/users/current str response: 500": {
 			expectedErr: client.ErrUnrecognizedAPIResponse,
 			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
@@ -52,7 +53,7 @@ func TestUsersAPI_UpdateUserInformationMetadata(t *testing.T) {
 			transport.RegisterResponder(http.MethodPatch, URL, tc.responder)
 
 			// then:
-			got, err := wallet.UpdateUserInformationMetadata(context.Background(), &commands.UpdateUserInformationMetadata{
+			got, err := wallet.UpdateXPubMetadata(context.Background(), &commands.UpdateXPubMetadata{
 				Metadata: map[string]any{
 					"example_key": "example_value",
 				},
@@ -63,7 +64,7 @@ func TestUsersAPI_UpdateUserInformationMetadata(t *testing.T) {
 	}
 }
 
-func TestUsersAPI_UserInformation(t *testing.T) {
+func TestUsersAPI_XPub(t *testing.T) {
 	tests := map[string]struct {
 		code             int
 		responder        httpmock.Responder
@@ -71,10 +72,10 @@ func TestUsersAPI_UserInformation(t *testing.T) {
 		expectedResponse *response.Xpub
 		expectedErr      error
 	}{
-		"HTTP GET /api/v1/users/current response: 200": {
-			expectedResponse: userstest.ExpectedUserInformation(t),
+		"HTTP GET /api/v1/users/current/ response: 200": {
+			expectedResponse: userstest.ExpectedUserXPub(t),
 			code:             http.StatusOK,
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/user_information_200.json")),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/retrieved_xpub_200.json")),
 		},
 		"HTTP GET /api/v1/users/current response: 400": {
 			expectedErr: models.SPVError{
@@ -100,7 +101,145 @@ func TestUsersAPI_UserInformation(t *testing.T) {
 			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
 
 			// then:
-			got, err := wallet.UserInformation(context.Background())
+			got, err := wallet.XPub(context.Background())
+			require.ErrorIs(t, err, tc.expectedErr)
+			require.EqualValues(t, tc.expectedResponse, got)
+		})
+	}
+}
+
+func TestUsersAPI_GenerateAccessKey(t *testing.T) {
+	tests := map[string]struct {
+		code             int
+		responder        httpmock.Responder
+		statusCode       int
+		expectedResponse *response.AccessKey
+		expectedErr      error
+	}{
+		"HTTP POST /api/v1/users/current/keys response: 200": {
+			expectedResponse: userstest.ExpectedCreatedAccessKey(t),
+			code:             http.StatusOK,
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/created_access_key_200.json")),
+		},
+		"HTTP POST /api/v1/users/current/keys response: 400": {
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusBadRequest),
+				StatusCode: http.StatusBadRequest,
+				Code:       "invalid-data-format",
+			},
+			statusCode: http.StatusOK,
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
+		},
+		"HTTP POST /api/v1/users/current/keys str response: 500": {
+			expectedErr: client.ErrUnrecognizedAPIResponse,
+			statusCode:  http.StatusInternalServerError,
+			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+		},
+	}
+
+	URL := testfixtures.TestAPIAddr + "/api/v1/users/current/keys"
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			// when:
+			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
+
+			// then:
+			got, err := wallet.GenerateAccessKey(context.Background(), &commands.GenerateAccessKey{
+				Metadata: map[string]any{
+					"example_key": "example_value",
+				},
+			})
+			require.ErrorIs(t, err, tc.expectedErr)
+			require.EqualValues(t, tc.expectedResponse, got)
+		})
+	}
+}
+
+func TestUsersAPI_AccessKey(t *testing.T) {
+	ID := "1fb70cc2-e9d9-41a3-842e-f71cc58d9787"
+	tests := map[string]struct {
+		code             int
+		responder        httpmock.Responder
+		statusCode       int
+		expectedResponse *response.AccessKey
+		expectedErr      error
+	}{
+		fmt.Sprintf("HTTP GET /api/v1/users/current/keys/%s response: 200", ID): {
+			expectedResponse: userstest.ExpectedRertrivedAccessKey(t),
+			code:             http.StatusOK,
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/retrieved_access_key_200.json")),
+		},
+		fmt.Sprintf("HTTP GET /api/v1/users/current/keys/%s response: 400", ID): {
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusBadRequest),
+				StatusCode: http.StatusBadRequest,
+				Code:       "invalid-data-format",
+			},
+			statusCode: http.StatusOK,
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
+		},
+		fmt.Sprintf("HTTP GET /api/v1/users/current/keys/%s str response: 500", ID): {
+			expectedErr: client.ErrUnrecognizedAPIResponse,
+			statusCode:  http.StatusInternalServerError,
+			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+		},
+	}
+
+	URL := testfixtures.TestAPIAddr + "/api/v1/users/current/keys/" + ID
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			// when:
+			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
+
+			// then:
+			got, err := wallet.AccessKey(context.Background(), ID)
+			require.ErrorIs(t, err, tc.expectedErr)
+			require.EqualValues(t, tc.expectedResponse, got)
+		})
+	}
+}
+
+func TestUsersAPI_RevokeAccessKey(t *testing.T) {
+	ID := "081743f7-040e-45a3-8c36-dde39001e20d"
+	tests := map[string]struct {
+		code             int
+		responder        httpmock.Responder
+		statusCode       int
+		expectedResponse *response.AccessKey
+		expectedErr      error
+	}{
+		fmt.Sprintf("HTTP DELETE /api/v1/users/current/keys/%s response: 200", ID): {
+			expectedResponse: userstest.ExpectedRevokedAccessKey(t),
+			code:             http.StatusOK,
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/revoked_access_key_200.json")),
+		},
+		fmt.Sprintf("HTTP DELETE /api/v1/users/current/keys/%s response: 400", ID): {
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusBadRequest),
+				StatusCode: http.StatusBadRequest,
+				Code:       "invalid-data-format",
+			},
+			statusCode: http.StatusOK,
+			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
+		},
+		fmt.Sprintf("HTTP DELETE /api/v1/users/current/keys/%s str response: 500", ID): {
+			expectedErr: client.ErrUnrecognizedAPIResponse,
+			statusCode:  http.StatusInternalServerError,
+			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+		},
+	}
+
+	URL := testfixtures.TestAPIAddr + "/api/v1/users/current/keys/" + ID
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			// when:
+			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			transport.RegisterResponder(http.MethodDelete, URL, tc.responder)
+
+			// then:
+			got, err := wallet.RevokeAccessKey(context.Background(), ID)
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.EqualValues(t, tc.expectedResponse, got)
 		})

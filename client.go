@@ -163,17 +163,17 @@ func (c *Client) AccessKey(ctx context.Context, ID string) (*response.AccessKey,
 	return res, nil
 }
 
-// RevokeAccessKey revokes the access key associated with the specified ID.
-// This method sends an HTTP DELETE request to the "api/v1/users/current/keys/{ID}" endpoint.
-// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
-// If the request fails or the response cannot be decoded, an error is returned
-func (c *Client) RevokeAccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
-	res, err := c.usersAPI.RevokeAccessKey(ctx, ID)
+// RevokeAccessKey revokes the access key associated with the given ID.
+// It sends an HTTP DELETE request to the "api/v1/users/current/keys/{ID}" endpoint.
+// A successful request returns an HTTP status code of 200.
+// If the request fails or the response cannot be processed, an error is returned.
+func (c *Client) RevokeAccessKey(ctx context.Context, ID string) error {
+	err := c.usersAPI.RevokeAccessKey(ctx, ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to revoke user access key using the users API: %w", err)
+		return fmt.Errorf("failed to revoke user access key using the users API: %w", err)
 	}
 
-	return res, nil
+	return nil
 }
 
 func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {

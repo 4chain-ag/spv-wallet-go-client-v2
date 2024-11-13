@@ -204,16 +204,14 @@ func TestUsersAPI_AccessKey(t *testing.T) {
 func TestUsersAPI_RevokeAccessKey(t *testing.T) {
 	ID := "081743f7-040e-45a3-8c36-dde39001e20d"
 	tests := map[string]struct {
-		code             int
-		responder        httpmock.Responder
-		statusCode       int
-		expectedResponse *response.AccessKey
-		expectedErr      error
+		code        int
+		responder   httpmock.Responder
+		statusCode  int
+		expectedErr error
 	}{
 		fmt.Sprintf("HTTP DELETE /api/v1/users/current/keys/%s response: 200", ID): {
-			expectedResponse: userstest.ExpectedRevokedAccessKey(t),
-			code:             http.StatusOK,
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/revoked_access_key_200.json")),
+			code:      http.StatusOK,
+			responder: httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/users/current/keys/%s response: 400", ID): {
 			expectedErr: models.SPVError{
@@ -239,9 +237,8 @@ func TestUsersAPI_RevokeAccessKey(t *testing.T) {
 			transport.RegisterResponder(http.MethodDelete, URL, tc.responder)
 
 			// then:
-			got, err := wallet.RevokeAccessKey(context.Background(), ID)
+			err := wallet.RevokeAccessKey(context.Background(), ID)
 			require.ErrorIs(t, err, tc.expectedErr)
-			require.EqualValues(t, tc.expectedResponse, got)
 		})
 	}
 }

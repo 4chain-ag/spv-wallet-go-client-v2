@@ -77,19 +77,16 @@ func (a *API) AccessKey(ctx context.Context, ID string) (*response.AccessKey, er
 	return &result, nil
 }
 
-func (a *API) RevokeAccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
-	var result response.AccessKey
-
+func (a *API) RevokeAccessKey(ctx context.Context, ID string) error {
 	URL := a.addr + "/keys/" + ID
 	_, err := a.httpClient.R().
 		SetContext(ctx).
-		SetResult(&result).
 		Delete(URL)
 	if err != nil {
-		return nil, fmt.Errorf("HTTP response failure: %w", err)
+		return fmt.Errorf("HTTP response failure: %w", err)
 	}
 
-	return &result, nil
+	return nil
 }
 
 func NewAPI(addr string, httpClient *resty.Client) *API {

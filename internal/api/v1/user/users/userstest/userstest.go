@@ -56,22 +56,6 @@ func ExpectedRertrivedAccessKey(t *testing.T) *response.AccessKey {
 	}
 }
 
-func ExpectedRevokedAccessKey(t *testing.T) *response.AccessKey {
-	ts := ParseTime(t, "2024-11-13T12:54:36.987563+01:00")
-	return &response.AccessKey{
-		Model: response.Model{
-			Metadata: map[string]interface{}{
-				"key": "value",
-			},
-			CreatedAt: ParseTime(t, "2024-11-13T11:44:04.95481Z"),
-			UpdatedAt: ParseTime(t, "2024-11-13T11:54:36.988715Z"),
-		},
-		ID:        "081743f7-040e-45a3-8c36-dde39001e20d",
-		XpubID:    "41d0a43c-1721-4777-ad4a-57cbb2b38160",
-		RevokedAt: &ts,
-	}
-}
-
 func ExpectedUserXPub(t *testing.T) *response.Xpub {
 	return &response.Xpub{
 		Model: response.Model{

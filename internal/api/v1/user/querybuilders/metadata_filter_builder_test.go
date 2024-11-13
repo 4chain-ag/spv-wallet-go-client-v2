@@ -56,6 +56,30 @@ func TestMetadataFilterBuilder_Build(t *testing.T) {
 				"key2": 1024,
 			},
 		},
+		"metadata: two keys nested in one": {
+			depth: querybuilders.DefaultMaxDepth,
+			expectedParams: url.Values{
+				"metadata[key1][key2]": []string{"value1"},
+				"metadata[key1][key3]": []string{"1024"},
+			},
+			metadata: querybuilders.Metadata{
+				"key1": querybuilders.Metadata{
+					"key2": "value1",
+					"key3": 1024,
+				},
+			},
+		},
+		"with special chars": {
+			depth: querybuilders.DefaultMaxDepth,
+			expectedParams: url.Values{
+				"metadata[hey=123&522]": []string{"value1"},
+				"metadata[key2]":        []string{"value=123"},
+			},
+			metadata: querybuilders.Metadata{
+				"hey=123&522": "value1",
+				"key2":        "value=123",
+			},
+		},
 		"metadata: map entries [key1]=value1, [key2]=[]{value2,value3,value4}": {
 			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
@@ -82,7 +106,7 @@ func TestMetadataFilterBuilder_Build(t *testing.T) {
 				"key4": []string{"value6", "value7", "value8"},
 			},
 		},
-		"metadata: map entries [key1]=value1, [key2]=[]{value1,value2,value3,value4}, [key3][key3_nested]=value5, [key4][key4_nested]=[]{6,7}": {
+		"metadata: map entries [key1]=value1, [key2]=[value1,value2,value3,value4], [key3][key3_nested]=value5, [key4][key4_nested]=[6, 7]": {
 			depth: querybuilders.DefaultMaxDepth,
 			expectedParams: url.Values{
 				"metadata[key1]":                []string{"value1"},
@@ -160,6 +184,19 @@ func TestMetadataFilterBuilder_Build(t *testing.T) {
 			},
 			depth:       3,
 			expectedErr: querybuilders.ErrMetadataFilterMaxDepthExceeded,
+		},
+		"metadata: unsupported map in array": {
+			metadata: querybuilders.Metadata{
+				"key1": querybuilders.Metadata{
+					"key2": []any{
+						querybuilders.Metadata{
+							"key3": "value1",
+						},
+					},
+				},
+			},
+			depth:       querybuilders.DefaultMaxDepth,
+			expectedErr: querybuilders.ErrMetadataWrongTypeInArray,
 		},
 	}
 

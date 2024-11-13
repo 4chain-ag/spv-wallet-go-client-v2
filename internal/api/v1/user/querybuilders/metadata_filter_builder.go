@@ -11,25 +11,25 @@ type Metadata map[string]any
 
 const DefaultMaxDepth = 100
 
-type path string
+type metadataPath string
 
-func (p path) NestPath(key any) path {
-	return path(fmt.Sprintf("%s[%v]", p, key))
+func (m metadataPath) NestPath(key any) metadataPath {
+	return metadataPath(fmt.Sprintf("%s[%v]", m, key))
 }
 
-func (p path) AddToURL(urlValues url.Values, value any) {
-	urlValues.Add(string(p), fmt.Sprintf("%v", value))
+func (m metadataPath) AddToURL(urlValues url.Values, value any) {
+	urlValues.Add(string(m), fmt.Sprintf("%v", value))
 }
 
-func (p path) AddArrayToURL(urlValues url.Values, values []any) {
-	key := string(p) + "[]"
+func (m metadataPath) AddArrayToURL(urlValues url.Values, values []any) {
+	key := string(m) + "[]"
 	for _, value := range values {
 		urlValues.Add(key, fmt.Sprintf("%v", value))
 	}
 }
 
-func newPath(key string) path {
-	return path(fmt.Sprintf("metadata[%s]", key))
+func newMetadataPath(key string) metadataPath {
+	return metadataPath(fmt.Sprintf("metadata[%s]", key))
 }
 
 type MetadataFilterBuilder struct {
@@ -40,7 +40,7 @@ type MetadataFilterBuilder struct {
 func (m *MetadataFilterBuilder) Build() (url.Values, error) {
 	params := make(url.Values)
 	for k, v := range m.Metadata {
-		path := newPath(k)
+		path := newMetadataPath(k)
 		if err := m.generateQueryParams(0, path, v, params); err != nil {
 			return nil, err
 		}
@@ -49,7 +49,7 @@ func (m *MetadataFilterBuilder) Build() (url.Values, error) {
 	return params, nil
 }
 
-func (m *MetadataFilterBuilder) generateQueryParams(depth int, path path, val any, params url.Values) error {
+func (m *MetadataFilterBuilder) generateQueryParams(depth int, path metadataPath, val any, params url.Values) error {
 	if depth > m.MaxDepth {
 		return fmt.Errorf("%w - max depth: %d", ErrMetadataFilterMaxDepthExceeded, m.MaxDepth)
 	}
@@ -69,7 +69,7 @@ func (m *MetadataFilterBuilder) generateQueryParams(depth int, path path, val an
 	}
 }
 
-func (m *MetadataFilterBuilder) processMapQueryParams(depth int, val any, param path, params url.Values) error {
+func (m *MetadataFilterBuilder) processMapQueryParams(depth int, val any, param metadataPath, params url.Values) error {
 	rval := reflect.ValueOf(val)
 	for _, k := range rval.MapKeys() {
 		nested := param.NestPath(k.Interface())
@@ -81,7 +81,7 @@ func (m *MetadataFilterBuilder) processMapQueryParams(depth int, val any, param 
 	return nil
 }
 
-func (m *MetadataFilterBuilder) processSliceQueryParams(val any, path path, params url.Values) error {
+func (m *MetadataFilterBuilder) processSliceQueryParams(val any, path metadataPath, params url.Values) error {
 	slice := reflect.ValueOf(val)
 	arr := make([]any, slice.Len())
 	for i := 0; i < slice.Len(); i++ {

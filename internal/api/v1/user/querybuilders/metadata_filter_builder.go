@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
-	"strings"
 )
 
 type Metadata map[string]any
@@ -17,36 +16,40 @@ type MetadataFilterBuilder struct {
 	Metadata Metadata
 }
 
+type Path string
+
+func (p Path) NestPath(key any) Path {
+	return Path(fmt.Sprintf("%s[%v]", p, key))
+}
+
+func (p Path) AddToURL(urlValues url.Values, value any) {
+	urlValues.Add(string(p), fmt.Sprintf("%v", value))
+}
+
+func (p Path) AddArrayToURL(urlValues url.Values, values []any) {
+	key := string(p) + "[]"
+	for _, value := range values {
+		urlValues.Add(key, fmt.Sprintf("%v", value))
+	}
+}
+
+func NewPath(key string) Path {
+	return Path(fmt.Sprintf("metadata[%s]", key))
+}
+
 func (m *MetadataFilterBuilder) Build() (url.Values, error) {
-	var sb strings.Builder
+	params := make(url.Values)
 	for k, v := range m.Metadata {
-		var path strings.Builder
-		pref := fmt.Sprintf("metadata[%s]", k)
-		path.WriteString(pref)
-		if err := m.generateQueryParams(0, &path, v, &sb, pref); err != nil {
+		path := NewPath(k)
+		if err := m.generateQueryParams(0, path, v, params); err != nil {
 			return nil, err
 		}
-	}
-
-	params := make(url.Values)
-	if sb.Len() == 0 {
-		return params, nil
-	}
-
-	pairs := strings.Split(TrimLastAmpersand(sb.String()), "&")
-	for _, pair := range pairs {
-		if len(pair) == 0 {
-			continue
-		}
-
-		split := strings.Split(pair, "=")
-		params.Add(split[0], split[1])
 	}
 
 	return params, nil
 }
 
-func (m *MetadataFilterBuilder) generateQueryParams(depth int, path *strings.Builder, val any, ans *strings.Builder, pref string) error {
+func (m *MetadataFilterBuilder) generateQueryParams(depth int, path Path, val any, params url.Values) error {
 	if depth > m.MaxDepth {
 		return fmt.Errorf("%w - max depth: %d", ErrMetadataFilterMaxDepthExceeded, m.MaxDepth)
 	}
@@ -55,62 +58,49 @@ func (m *MetadataFilterBuilder) generateQueryParams(depth int, path *strings.Bui
 		return nil
 	}
 
-	t := reflect.TypeOf(val)
-	if t.Kind() == reflect.Map {
-		return m.processMapQueryParams(depth+1, val, path, ans, pref)
+	switch reflect.TypeOf(val).Kind() {
+	case reflect.Map:
+		return m.processMapQueryParams(depth+1, val, path, params)
+	case reflect.Slice:
+		return m.processSliceQueryParams(val, path, params)
+	default:
+		path.AddToURL(params, val)
+		return nil
 	}
-
-	if t.Kind() == reflect.Slice {
-		return m.processSlicQueryParams(depth+1, val, path, ans, pref)
-	}
-
-	path.WriteString(fmt.Sprintf("=%v&", val))
-	ans.WriteString(path.String())
-	return nil
 }
 
-func (m *MetadataFilterBuilder) processMapQueryParams(depth int, val any, path *strings.Builder, ans *strings.Builder, pref string) error {
+func (m *MetadataFilterBuilder) processMapQueryParams(depth int, val any, param Path, params url.Values) error {
 	rval := reflect.ValueOf(val)
 	for _, k := range rval.MapKeys() {
-		mpv := rval.MapIndex(k)
-		path.WriteString(fmt.Sprintf("[%v]", k.Interface()))
-		if err := m.generateQueryParams(depth+1, path, mpv.Interface(), ans, pref); err != nil {
+		nested := param.NestPath(k.Interface())
+		if err := m.generateQueryParams(depth+1, nested, rval.MapIndex(k).Interface(), params); err != nil {
 			return err
 		}
-		// Reset path after processing each map entry (backtracking).
-		str := path.String()
-		trim := str[:strings.LastIndex(str, "[")]
-		path.Reset()
-		path.WriteString(trim)
 	}
 
 	return nil
 }
 
-func (m *MetadataFilterBuilder) processSlicQueryParams(depth int, val any, path *strings.Builder, ans *strings.Builder, pref string) error {
+func (m *MetadataFilterBuilder) processSliceQueryParams(val any, path Path, params url.Values) error {
 	slice := reflect.ValueOf(val)
+	arr := make([]any, slice.Len())
 	for i := 0; i < slice.Len(); i++ {
-		path.WriteString("[]")
-		slv := slice.Index(i)
-		if err := m.generateQueryParams(depth+1, path, slv.Interface(), ans, pref); err != nil {
-			return err
+		item := slice.Index(i)
+
+		// safe check - only primitive types are allowed in arrays
+		// note: kind := item.Kind() is not enough, because it returns interface instead of actual underlying type
+		kind := reflect.TypeOf(item.Interface()).Kind()
+		if kind == reflect.Map || kind == reflect.Slice {
+			return ErrMetadataWrongTypeInArray
 		}
-		// Reset path after processing each slice element (backtracking).
-		str := path.String()
-		trim := str[:strings.LastIndex(str, "[]")]
-		path.Reset()
-		path.WriteString(trim)
+
+		arr[i] = item.Interface()
 	}
+	path.AddArrayToURL(params, arr)
 
 	return nil
 }
 
 var ErrMetadataFilterMaxDepthExceeded = errors.New("maximum depth of nesting in metadata map exceeded")
 
-func TrimLastAmpersand(s string) string {
-	if len(s) > 0 && s[len(s)-1] == '&' {
-		return s[:len(s)-1]
-	}
-
-	return s
-}
+var ErrMetadataWrongTypeInArray = errors.New("wrong type in array")

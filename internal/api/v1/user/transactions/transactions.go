@@ -80,7 +80,7 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	return &result, nil
 }
 
-func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.TransactionsQueryOption) ([]*response.Transaction, error) {
+func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.TransactionsQueryOption) (*response.PageModel[response.Transaction], error) {
 	var query queries.TransactionsQuery
 	for _, o := range transactionsOpts {
 		o(&query)
@@ -111,7 +111,7 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.Tran
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
 
-	return result.Content, nil
+	return &result, nil
 }
 
 func NewAPI(addr string, cli *resty.Client) *API {

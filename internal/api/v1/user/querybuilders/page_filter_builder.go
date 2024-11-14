@@ -16,5 +16,6 @@ func (p *PageFilterBuilder) Build() (url.Values, error) {
 	params.AddPair("size", p.Page.Size)
 	params.AddPair("sort", p.Page.Sort)
 	params.AddPair("sortBy", p.Page.SortBy)
+
 	return params.Values, nil
 }

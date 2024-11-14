@@ -16,8 +16,8 @@
     "page": {
       "lastEvaluatedKey": "6bad63f5-8f2e-4756-aca9-cc9cb4a001c6",
       "orderByField": "blockHeight",
-      "size": 0,
+      "size": 20,
       "sortDirection": "asc",
-      "totalElements": 0
+      "totalElements": 10
     }
   }

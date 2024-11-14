@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots/merklerootstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
@@ -19,13 +18,13 @@ func TestMerkleRootsAPI_MerkleRoots(t *testing.T) {
 	tests := map[string]struct {
 		responder        httpmock.Responder
 		statusCode       int
-		expectedResponse []*models.MerkleRoot
+		expectedResponse *queries.MerkleRootPage
 		expectedErr      error
 	}{
 		"HTTP GET /api/v1/merkleroots response: 200": {
 			statusCode:       http.StatusOK,
-			expectedResponse: merklerootstest.ExpectedMerkleRoorts(),
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("merklerootstest/merkleroots_200.json")),
+			expectedResponse: merklerootstest.ExpectedMerkleRootsPage(),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("merklerootstest/get_merkleroots_200.json")),
 		},
 		"HTTP GET /api/v1/merkleroots response: 400": {
 			expectedErr: models.SPVError{
@@ -54,44 +53,6 @@ func TestMerkleRootsAPI_MerkleRoots(t *testing.T) {
 			got, err := wallet.MerkleRoots(context.Background())
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.EqualValues(t, tc.expectedResponse, got)
-		})
-	}
-}
-
-func Test_CreateQueryParams(t *testing.T) {
-	tests := map[string]struct {
-		opts           []queries.MerkleRootsQueryOption
-		expectedParams map[string]string
-	}{
-
-		"query params: map entry [batchSize]=10": {
-			opts: []queries.MerkleRootsQueryOption{queries.MerkleRootsQueryWithBatchSize(10)},
-			expectedParams: map[string]string{
-				"batchSize": "10",
-			},
-		},
-		"query params: map entry [lastEvaluatedKey]=key": {
-			opts: []queries.MerkleRootsQueryOption{queries.MerkleRootsQueryWithLastEvaluatedKey("key")},
-			expectedParams: map[string]string{
-				"lastEvaluatedKey": "key",
-			},
-		},
-		"query params: map entries [lastEvaluatedKey]=key, [batchSize]=10": {
-			opts: []queries.MerkleRootsQueryOption{
-				queries.MerkleRootsQueryWithLastEvaluatedKey("key"),
-				queries.MerkleRootsQueryWithBatchSize(10),
-			},
-			expectedParams: map[string]string{
-				"lastEvaluatedKey": "key",
-				"batchSize":        "10",
-			},
-		},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			got := merkleroots.CreateQueryParams(tc.opts...)
-			require.Equal(t, got, tc.expectedParams)
 		})
 	}
 }

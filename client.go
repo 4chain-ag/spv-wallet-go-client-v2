@@ -181,14 +181,20 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	return res, nil
 }
 
-// MerkleRoots retrieves the full list of user merkle roots. This method sends an HTTP GET request
-// to the "api/v1/merkleroots" endpoint. The server's response is expected to be unmarshaled into
-// a slice of *models.MerkleRoot structs. If the request fails or the response cannot be decoded,
-// an error is returned.
-func (c *Client) MerkleRoots(ctx context.Context, opts ...queries.MerkleRootsQueryOption) ([]*models.MerkleRoot, error) {
+// MerkleRoots retrieves a paginated list of Merkle roots from the user Merkle roots API.
+// The API response includes Merkle roots along with pagination details, such as the current
+// page number, sort order, and sorting field (sortBy).
+//
+// This method supports optional query parameters, which can be specified using the provided
+// query options. These options customize the behavior of the API request, such as setting
+// batch size or applying filters for pagination.
+//
+// The response is unmarshaled into a *queries.MerkleRootPage struct. If the API request fails
+// or the response cannot be successfully decoded, an error is returned.
+func (c *Client) MerkleRoots(ctx context.Context, opts ...queries.MerkleRootsQueryOption) (*queries.MerkleRootPage, error) {
 	res, err := c.merkleRootsAPI.MerkleRoots(ctx, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve shared configuration from user configs API: %w", err)
+		return nil, fmt.Errorf("failed to retrieve Merkle roots from the API: %w", err)
 	}
 
 	return res, nil

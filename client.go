@@ -155,7 +155,7 @@ func (c *Client) UpdateTransactionMetadata(ctx context.Context, cmd *commands.Up
 // This method applies optional query parameters and expects a response that can be
 // unmarshaled into a slice of response.Transaction pointers.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) Transactions(ctx context.Context, opts ...queries.TransctionsQueryOption) ([]*response.Transaction, error) {
+func (c *Client) Transactions(ctx context.Context, opts ...queries.TransactionsQueryOption) ([]*response.Transaction, error) {
 	res, err := c.transactionsAPI.Transactions(ctx, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve transactions from the user transactions API: %w", err)

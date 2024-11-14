@@ -65,9 +65,12 @@ func TestPageFilterBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			// when:
 			builder := querybuilders.PageFilterBuilder{
 				Page: tc.filter,
 			}
+
+			// then:
 			got, err := builder.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)

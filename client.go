@@ -181,68 +181,72 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	return res, nil
 }
 
-// XPub retrieves the complete information for the current user's xpub.
-// This method sends an HTTP GET request to the "api/v1/users/current" endpoint.
+// XPub retrieves the complete xpub information for the current user.
 // The server's response is expected to be unmarshaled into a *response.Xpub struct.
 // If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) XPub(ctx context.Context) (*response.Xpub, error) {
 	res, err := c.usersAPI.XPub(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve xpub user information from the users API: %w", err)
+		return nil, fmt.Errorf("failed to retrieve xpub information from the users API: %w", err)
 	}
-
 	return res, nil
 }
 
 // UpdateXPubMetadata updates the metadata associated with the current user's xpub.
-// This method sends an HTTP PATCH request to the "api/v1/users/current" endpoint.
 // The server's response is expected to be unmarshaled into a *response.Xpub struct.
 // If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) UpdateXPubMetadata(ctx context.Context, cmd *commands.UpdateXPubMetadata) (*response.Xpub, error) {
 	res, err := c.usersAPI.UpdateXPubMetadata(ctx, cmd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update xpub user information metadata using the users API: %w", err)
+		return nil, fmt.Errorf("failed to update xpub metadata using the users API: %w", err)
 	}
-
 	return res, nil
 }
 
-// GenerateAccessKey creates the access key associated with the current user's xpub.
-// This method sends an HTTP POST request to the "api/v1/users/current/keys" endpoint.
+// GenerateAccessKey creates a new access key associated with the current user's xpub.
 // The server's response is expected to be unmarshaled into a *response.AccessKey struct.
-// If the request fails or the response cannot be decoded, an error is returned
+// If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
 	res, err := c.usersAPI.GenerateAccessKey(ctx, cmd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate user access key using the users API: %w", err)
+		return nil, fmt.Errorf("failed to generate access key using the user access key API: %w", err)
 	}
+	return res, nil
+}
 
+// AccessKeys retrieves a paginated list of access keys from the user access keys API.
+// The response includes access keys and pagination details, such as the page number,
+// sort order, and sorting field (sortBy).
+//
+// This method allows optional query parameters to be applied via the provided query options.
+// The response is expected to unmarshal into a *queries.AccessKeyPage struct.
+// If the API request fails or the response cannot be decoded successfully, an error is returned.
+func (c *Client) AccessKeys(ctx context.Context, accessKeyOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
+	res, err := c.usersAPI.AccessKeys(ctx, accessKeyOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve access keys page from the user access key API: %w", err)
+	}
 	return res, nil
 }
 
 // AccessKey retrieves the access key associated with the specified ID.
-// This method sends an HTTP GET request to the "api/v1/users/current/keys/{ID}" endpoint.
 // The server's response is expected to be unmarshaled into a *response.AccessKey struct.
-// If the request fails or the response cannot be decoded, an error is returned
+// If the request fails or the response cannot be decoded, an error is returned.
 func (c *Client) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
 	res, err := c.usersAPI.AccessKey(ctx, ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve user access key using the users API: %w", err)
+		return nil, fmt.Errorf("failed to retrieve access key using the user access key API: %w", err)
 	}
-
 	return res, nil
 }
 
 // RevokeAccessKey revokes the access key associated with the given ID.
-// It sends an HTTP DELETE request to the "api/v1/users/current/keys/{ID}" endpoint.
-// A successful request returns an HTTP status code of 200.
 // If the request fails or the response cannot be processed, an error is returned.
 func (c *Client) RevokeAccessKey(ctx context.Context, ID string) error {
 	err := c.usersAPI.RevokeAccessKey(ctx, ID)
 	if err != nil {
-		return fmt.Errorf("failed to revoke user access key using the users API: %w", err)
+		return fmt.Errorf("failed to revoke access key using the users API: %w", err)
 	}
-
 	return nil
 }
 

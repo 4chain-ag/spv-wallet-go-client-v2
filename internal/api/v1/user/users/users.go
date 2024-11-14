@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
 
 const route = "api/v1/users/current"
-
-// TODO: 1. Implement search access key endpoint call.
 
 type API struct {
 	addr       string
@@ -69,6 +69,41 @@ func (a *API) AccessKey(ctx context.Context, ID string) (*response.AccessKey, er
 	_, err := a.httpClient.R().
 		SetContext(ctx).
 		SetResult(&result).
+		Get(URL)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP response failure: %w", err)
+	}
+
+	return &result, nil
+}
+
+func (a *API) AccessKeys(ctx context.Context, transactionsOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
+	var query queries.AccessKeyQuery
+	for _, o := range transactionsOpts {
+		o(&query)
+	}
+
+	builderOpts := []querybuilders.QueryBuilderOption{
+		querybuilders.WithMetadataFilter(query.Metadata),
+		querybuilders.WithPageFilterQueryBuilder(query.PageFilter),
+		querybuilders.WithFilterQueryBuilder(&accessKeyFilterBuilder{
+			accessKeyFilter:    query.AccessKeyFilter,
+			modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.AccessKeyFilter.ModelFilter},
+		}),
+	}
+	builder := querybuilders.NewQueryBuilder(builderOpts...)
+	params, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build access keys query params: %w", err)
+	}
+
+	var result response.PageModel[response.AccessKey]
+	URL := a.addr + "/keys"
+	_, err = a.httpClient.
+		R().
+		SetContext(ctx).
+		SetResult(&result).
+		SetQueryParams(params.ParseToMap()).
 		Get(URL)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)

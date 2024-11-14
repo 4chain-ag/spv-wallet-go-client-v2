@@ -158,7 +158,7 @@ func (c *Client) UpdateTransactionMetadata(ctx context.Context, cmd *commands.Up
 // This method allows optional query parameters to be applied via the provided query options.
 // The response is expected to unmarshal into a *response.PageModel[response.Transaction] struct.
 // If the API request fails or the response cannot be decoded successfully, an error is returned.
-func (c *Client) Transactions(ctx context.Context, opts ...queries.TransactionsQueryOption) (*response.PageModel[response.Transaction], error) {
+func (c *Client) Transactions(ctx context.Context, opts ...queries.TransactionsQueryOption) (*queries.TransactionPage, error) {
 	res, err := c.transactionsAPI.Transactions(ctx, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve transactions page from the user transactions API: %w", err)

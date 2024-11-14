@@ -2,7 +2,13 @@ package queries
 
 import (
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
+
+// TransactionPage is an alias for the transactions response page model
+// returned by the SPV Wallet API, which contains a paginated list of
+// transactions along with pagination metadata.
+type TransactionPage = response.PageModel[response.Transaction]
 
 // TransactionsQuery aggregates query parameters for constructing a transactions endpoint URL.
 // It holds filters for metadata, transaction-specific attributes, and pagination.

@@ -80,9 +80,7 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	return &result, nil
 }
 
-type TransactionPage = response.PageModel[response.Transaction]
-
-func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.TransactionsQueryOption) (*TransactionPage, error) {
+func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.TransactionsQueryOption) (*queries.TransactionPage, error) {
 	var query queries.TransactionsQuery
 	for _, o := range transactionsOpts {
 		o(&query)

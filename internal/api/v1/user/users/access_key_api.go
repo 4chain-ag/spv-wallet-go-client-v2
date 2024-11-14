@@ -11,42 +11,12 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const route = "api/v1/users/current"
-
-type API struct {
+type AccessKeyAPI struct {
 	addr       string
 	httpClient *resty.Client
 }
 
-func (a *API) XPub(ctx context.Context) (*response.Xpub, error) {
-	var result response.Xpub
-	_, err := a.httpClient.
-		R().
-		SetContext(ctx).
-		SetResult(&result).
-		Get(a.addr)
-	if err != nil {
-		return nil, fmt.Errorf("HTTP response failure: %w", err)
-	}
-
-	return &result, nil
-}
-
-func (a *API) UpdateXPubMetadata(ctx context.Context, cmd *commands.UpdateXPubMetadata) (*response.Xpub, error) {
-	var result response.Xpub
-	_, err := a.httpClient.R().
-		SetContext(ctx).
-		SetResult(&result).
-		SetBody(cmd).
-		Patch(a.addr)
-	if err != nil {
-		return nil, fmt.Errorf("HTTP response failure: %w", err)
-	}
-
-	return &result, nil
-}
-
-func (a *API) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
+func (a *AccessKeyAPI) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
 	var result response.AccessKey
 
 	URL := a.addr + "/keys"
@@ -62,7 +32,7 @@ func (a *API) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAcces
 	return &result, nil
 }
 
-func (a *API) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
+func (a *AccessKeyAPI) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
 	var result response.AccessKey
 
 	URL := a.addr + "/keys/" + ID
@@ -77,7 +47,7 @@ func (a *API) AccessKey(ctx context.Context, ID string) (*response.AccessKey, er
 	return &result, nil
 }
 
-func (a *API) AccessKeys(ctx context.Context, transactionsOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
+func (a *AccessKeyAPI) AccessKeys(ctx context.Context, transactionsOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
 	var query queries.AccessKeyQuery
 	for _, o := range transactionsOpts {
 		o(&query)
@@ -112,7 +82,7 @@ func (a *API) AccessKeys(ctx context.Context, transactionsOpts ...queries.Access
 	return &result, nil
 }
 
-func (a *API) RevokeAccessKey(ctx context.Context, ID string) error {
+func (a *AccessKeyAPI) RevokeAccessKey(ctx context.Context, ID string) error {
 	URL := a.addr + "/keys/" + ID
 	_, err := a.httpClient.R().
 		SetContext(ctx).
@@ -124,8 +94,8 @@ func (a *API) RevokeAccessKey(ctx context.Context, ID string) error {
 	return nil
 }
 
-func NewAPI(addr string, httpClient *resty.Client) *API {
-	return &API{
+func NewAccessKeyAPI(addr string, httpClient *resty.Client) *AccessKeyAPI {
+	return &AccessKeyAPI{
 		addr:       addr + "/" + route,
 		httpClient: httpClient,
 	}

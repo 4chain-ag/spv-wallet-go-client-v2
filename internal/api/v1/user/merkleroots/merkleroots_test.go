@@ -8,7 +8,7 @@ import (
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots/merklerootstest"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/jarcoal/httpmock"
@@ -43,11 +43,11 @@ func TestMerkleRootsAPI_MerkleRoots(t *testing.T) {
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/merkleroots"
+	URL := clienttest.TestAPIAddr + "/api/v1/merkleroots"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
 
 			// then:

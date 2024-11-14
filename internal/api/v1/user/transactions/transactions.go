@@ -114,9 +114,9 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.Tran
 	return result.Content, nil
 }
 
-func NewAPI(addr string, cli *resty.Client) *API {
+func NewAPI(addr string, httpClient *resty.Client) *API {
 	return &API{
 		addr:       addr + "/" + route,
-		httpClient: cli,
+		httpClient: httpClient,
 	}
 }

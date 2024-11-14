@@ -266,13 +266,12 @@ type authenticator interface {
 }
 
 func newClient(cfg Config, auth authenticator) *Client {
-	restyCli := newRestyClient(cfg, auth)
-	cli := Client{
-		configsAPI:      configs.NewAPI(cfg.Addr, restyCli),
-		usersAPI:        users.NewAPI(cfg.Addr, restyCli),
-		transactionsAPI: transactions.NewAPI(cfg.Addr, restyCli),
+	httpClient := newRestyClient(cfg, auth)
+	return &Client{
+		configsAPI:      configs.NewAPI(cfg.Addr, httpClient),
+		usersAPI:        users.NewAPI(cfg.Addr, httpClient),
+		transactionsAPI: transactions.NewAPI(cfg.Addr, httpClient),
 	}
-	return &cli
 }
 
 func newRestyClient(cfg Config, auth authenticator) *resty.Client {

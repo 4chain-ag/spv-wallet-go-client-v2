@@ -8,12 +8,12 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
 
-type accessKeyFilterBuilder struct {
+type accessKeyFilterQueryBuilder struct {
 	accessKeyFilter    filter.AccessKeyFilter
 	modelFilterBuilder querybuilders.ModelFilterBuilder
 }
 
-func (a *accessKeyFilterBuilder) Build() (url.Values, error) {
+func (a *accessKeyFilterQueryBuilder) Build() (url.Values, error) {
 	modelFilterBuilder, err := a.modelFilterBuilder.Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build model filter query params: %w", err)

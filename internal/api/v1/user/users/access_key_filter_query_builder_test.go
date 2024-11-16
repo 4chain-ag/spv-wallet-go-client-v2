@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAccessKeyFilterBuilder_Build(t *testing.T) {
+func TestAccessKeyFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
 		filter         filter.AccessKeyFilter
 		expectedParams url.Values
@@ -64,11 +64,14 @@ func TestAccessKeyFilterBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			akb := accessKeyFilterBuilder{
+			// when:
+			queryBuilder := accessKeyFilterQueryBuilder{
 				accessKeyFilter:    tc.filter,
 				modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
 			}
-			got, err := akb.Build()
+
+			// then:
+			got, err := queryBuilder.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
 		})

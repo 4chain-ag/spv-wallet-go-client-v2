@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	client "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testfixtures"
+	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -35,17 +35,17 @@ func TestInvitationsAPI_AcceptInvitation(t *testing.T) {
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP POST /api/v1/invitations/%s/contacts str response: 500", paymail): {
-			expectedErr: client.ErrUnrecognizedAPIResponse,
+			expectedErr: wallet.ErrUnrecognizedAPIResponse,
 			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/invitations/" + paymail + "/contacts"
+	URL := clienttest.TestAPIAddr + "/api/v1/invitations/" + paymail + "/contacts"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
 
 			// then:
@@ -76,17 +76,17 @@ func TestInvitationsAPI_RejectInvitation(t *testing.T) {
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP POST /api/v1/invitations/%s str response: 500", paymail): {
-			expectedErr: client.ErrUnrecognizedAPIResponse,
+			expectedErr: wallet.ErrUnrecognizedAPIResponse,
 			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	URL := testfixtures.TestAPIAddr + "/api/v1/invitations/" + paymail
+	URL := clienttest.TestAPIAddr + "/api/v1/invitations/" + paymail
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := testfixtures.GivenSPVWalletClient(t)
+			wallet, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodDelete, URL, tc.responder)
 
 			// then:

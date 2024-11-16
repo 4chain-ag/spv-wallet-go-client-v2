@@ -5,33 +5,42 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
-func ExpectedContacts(t *testing.T) []*response.Contact {
-	return []*response.Contact{
-		{
-			Model: response.Model{
-				CreatedAt: ParseTime(t, "2024-10-18T12:07:44.739839Z"),
-				UpdatedAt: ParseTime(t, "2024-10-18T15:08:44.739918Z"),
+func ExpectedUserContactsPage(t *testing.T) *queries.UserContactsPage {
+	return &queries.UserContactsPage{
+		Content: []*response.Contact{
+			{
+				Model: response.Model{
+					CreatedAt: ParseTime(t, "2024-10-18T12:07:44.739839Z"),
+					UpdatedAt: ParseTime(t, "2024-10-18T15:08:44.739918Z"),
+				},
+				ID:       "4f730efa-2a33-4275-bfdb-1f21fc110963",
+				FullName: "John Doe",
+				Paymail:  "john.doe.test5@john.doe.4chain.space",
+				PubKey:   "19751ea9-6c1f-4ba7-a7e2-551ef7930136",
+				Status:   "unconfirmed",
 			},
-			ID:       "4f730efa-2a33-4275-bfdb-1f21fc110963",
-			FullName: "John Doe",
-			Paymail:  "john.doe.test5@john.doe.4chain.space",
-			PubKey:   "19751ea9-6c1f-4ba7-a7e2-551ef7930136",
-			Status:   "unconfirmed",
+			{
+				Model: response.Model{
+					CreatedAt: ParseTime(t, "2024-10-18T12:07:44.739839Z"),
+					UpdatedAt: ParseTime(t, "2024-10-18T15:08:44.739918Z"),
+				},
+				ID:       "e55a4d4e-4a4b-4720-8556-1c00dd6a5cf3",
+				FullName: "Jane Doe",
+				Paymail:  "jane.doe.test5@jane.doe.4chain.space",
+				PubKey:   "f8898969-3f96-48d3-b122-bbb3e738dbf5",
+				Status:   "unconfirmed",
+			},
 		},
-		{
-			Model: response.Model{
-				CreatedAt: ParseTime(t, "2024-10-18T12:07:44.739839Z"),
-				UpdatedAt: ParseTime(t, "2024-10-18T15:08:44.739918Z"),
-			},
-			ID:       "e55a4d4e-4a4b-4720-8556-1c00dd6a5cf3",
-			FullName: "Jane Doe",
-			Paymail:  "jane.doe.test5@jane.doe.4chain.space",
-			PubKey:   "f8898969-3f96-48d3-b122-bbb3e738dbf5",
-			Status:   "unconfirmed",
+		Page: response.PageDescription{
+			Size:          2,
+			Number:        2,
+			TotalElements: 2,
+			TotalPages:    1,
 		},
 	}
 }

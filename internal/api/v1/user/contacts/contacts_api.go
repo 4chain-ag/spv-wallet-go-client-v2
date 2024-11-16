@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
-
-// TODO: 1. Contacts should accept the optional query parameters similar to the transactions.
 
 const route = "api/v1/contacts"
 
@@ -18,18 +18,40 @@ type API struct {
 	httpClient *resty.Client
 }
 
-func (a *API) Contacts(ctx context.Context) ([]*response.Contact, error) {
-	var result response.PageModel[response.Contact]
-	_, err := a.httpClient.
+func (a *API) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
+	var query queries.ContactQuery
+	for _, o := range contactOpts {
+		o(&query)
+	}
+
+	builderOpts := []querybuilders.QueryBuilderOption{
+		querybuilders.WithMetadataFilter(query.Metadata),
+		querybuilders.WithPageFilter(query.PageFilter),
+		querybuilders.WithFilterQueryBuilder(&contactFilterQueryBuilder{
+			contactFilter: query.ContactFilter,
+			modelFilterBuilder: querybuilders.ModelFilterBuilder{
+				ModelFilter: query.ContactFilter.ModelFilter,
+			},
+		}),
+	}
+	builder := querybuilders.NewQueryBuilder(builderOpts...)
+	params, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build user contacts query params: %w", err)
+	}
+
+	var result queries.UserContactsPage
+	_, err = a.httpClient.
 		R().
 		SetContext(ctx).
 		SetResult(&result).
+		SetQueryParams(params.ParseToMap()).
 		Get(a.addr)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
 
-	return result.Content, nil
+	return &result, nil
 }
 
 func (a *API) ContactWithPaymail(ctx context.Context, paymail string) (*response.Contact, error) {

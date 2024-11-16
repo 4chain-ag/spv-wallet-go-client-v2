@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts/contactstest"
@@ -27,7 +26,7 @@ func TestContactsAPI_Contacts(t *testing.T) {
 		"HTTP GET /api/v1/contacts response: 200": {
 			statusCode:       http.StatusOK,
 			expectedResponse: contactstest.ExpectedContacts(t),
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contacts_200.json")),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/get_contacts_200.json")),
 		},
 		"HTTP GET /api/v1/contacts response: 400": {
 			expectedErr: models.SPVError{
@@ -39,7 +38,7 @@ func TestContactsAPI_Contacts(t *testing.T) {
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/contacts str response: 500": {
-			expectedErr: client.ErrUnrecognizedAPIResponse,
+			expectedErr: wallet.ErrUnrecognizedAPIResponse,
 			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
@@ -71,7 +70,7 @@ func TestContactsAPI_ContactWithPaymail(t *testing.T) {
 		fmt.Sprintf("HTTP GET /api/v1/contacts/%s response: 200", paymail): {
 			statusCode:       http.StatusOK,
 			expectedResponse: contactstest.ExpectedContactWithWithPaymail(t),
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contact_paymail_200.json")),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/get_contact_paymail_200.json")),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/contacts/%s response: 400", paymail): {
 			expectedErr: models.SPVError{
@@ -115,7 +114,7 @@ func TestContactsAPI_UpsertContact(t *testing.T) {
 		fmt.Sprintf("HTTP PUT /api/v1/contacts/%s response: 200", paymail): {
 			statusCode:       http.StatusOK,
 			expectedResponse: contactstest.ExpectedUpsertContact(t),
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/contact_upsert_200.json")),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/put_contact_upsert_200.json")),
 		},
 		fmt.Sprintf("HTTP PUT /api/v1/contacts/%s response: 400", paymail): {
 			expectedErr: models.SPVError{

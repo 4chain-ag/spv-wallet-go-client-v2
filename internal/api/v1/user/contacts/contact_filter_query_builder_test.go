@@ -70,13 +70,13 @@ func TestContactFilterQueryBuilder_Build(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			cfb := contactFilterQueryBuilder{
+			queryBuilder := contactFilterQueryBuilder{
 				contactFilter:      tc.filter,
 				modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
 			}
 
 			// then:
-			got, err := cfb.Build()
+			got, err := queryBuilder.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
 		})

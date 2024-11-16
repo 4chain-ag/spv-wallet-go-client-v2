@@ -18,13 +18,13 @@ type API struct {
 	httpClient *resty.Client
 }
 
-func (a *API) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
+func (a *API) Contacts(ctx context.Context, opts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
 	var query queries.ContactQuery
-	for _, o := range contactOpts {
+	for _, o := range opts {
 		o(&query)
 	}
 
-	builderOpts := []querybuilders.QueryBuilderOption{
+	queryBuilder := querybuilders.NewQueryBuilder([]querybuilders.QueryBuilderOption{
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.PageFilter),
 		querybuilders.WithFilterQueryBuilder(&contactFilterQueryBuilder{
@@ -33,9 +33,8 @@ func (a *API) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryO
 				ModelFilter: query.ContactFilter.ModelFilter,
 			},
 		}),
-	}
-	builder := querybuilders.NewQueryBuilder(builderOpts...)
-	params, err := builder.Build()
+	}...)
+	params, err := queryBuilder.Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build user contacts query params: %w", err)
 	}

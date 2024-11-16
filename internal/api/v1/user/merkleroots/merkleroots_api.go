@@ -22,12 +22,8 @@ func (a *API) MerkleRoots(ctx context.Context, merkleRootOpts ...queries.MerkleR
 		o(&query)
 	}
 
-	builder := querybuilders.NewQueryBuilder(querybuilders.WithFilterQueryBuilder(
-		&merkleRootsFilterBuilder{
-			query: query,
-		},
-	))
-	params, err := builder.Build()
+	queryBuilder := querybuilders.NewQueryBuilder(querybuilders.WithFilterQueryBuilder(&merkleRootsFilterQueryBuilder{query: query}))
+	params, err := queryBuilder.Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build merkle roots query params: %w", err)
 	}

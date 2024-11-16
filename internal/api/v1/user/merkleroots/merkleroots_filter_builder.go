@@ -7,11 +7,11 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 )
 
-type merkleRootsFilterBuilder struct {
+type merkleRootsFilterQueryBuilder struct {
 	query queries.MerkleRootsQuery
 }
 
-func (m *merkleRootsFilterBuilder) Build() (url.Values, error) {
+func (m *merkleRootsFilterQueryBuilder) Build() (url.Values, error) {
 	params := querybuilders.NewExtendedURLValues()
 	params.AddPair("batchSize", m.query.BatchSize)
 	params.AddPair("lastEvaluatedKey", m.query.LastEvaluatedKey)

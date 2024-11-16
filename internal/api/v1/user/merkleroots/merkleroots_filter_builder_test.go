@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMerklerootsFilterBuilder_Build(t *testing.T) {
+func TestMerklerootsFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
 		query          queries.MerkleRootsQuery
 		expectedParams url.Values
@@ -48,12 +48,12 @@ func TestMerklerootsFilterBuilder_Build(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			mfb := merkleRootsFilterBuilder{
+			queryBuilder := merkleRootsFilterQueryBuilder{
 				query: tc.query,
 			}
 
 			// then:
-			got, err := mfb.Build()
+			got, err := queryBuilder.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, got, tc.expectedParams)
 		})

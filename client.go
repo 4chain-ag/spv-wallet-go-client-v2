@@ -12,6 +12,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
@@ -46,6 +47,7 @@ func NewDefaultConfig(addr string) Config {
 type Client struct {
 	configsAPI      *configs.API
 	transactionsAPI *transactions.API
+	utxosAPI        *utxos.API
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -179,6 +181,22 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	return res, nil
 }
 
+// Utxos fetches a paginated list of UTXOs from the user UTXOs API.
+// The response includes UTXOs along with pagination details, such as page number,
+// sort order, and sorting field.
+//
+// Optional query parameters can be applied using the provided query options.
+// The response is unmarshaled into a *queries.UtxosPage struct.
+// Returns an error if the API request fails or the response cannot be decoded.
+func (c *Client) UTXOs(ctx context.Context, opts ...queries.UtxoQueryOption) (*queries.UtxosPage, error) {
+	res, err := c.utxosAPI.UTXOs(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve UTXOs page from the user UTXOs API: %w", err)
+	}
+
+	return res, nil
+}
+
 // ErrUnrecognizedAPIResponse indicates that the response received from the SPV Wallet API
 // does not match the expected expected format or structure.
 var ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")
@@ -202,10 +220,11 @@ type authenticator interface {
 }
 
 func newClient(cfg Config, auth authenticator) *Client {
-	restyCli := newRestyClient(cfg, auth)
+	httpClient := newRestyClient(cfg, auth)
 	cli := Client{
-		configsAPI:      configs.NewAPI(cfg.Addr, restyCli),
-		transactionsAPI: transactions.NewAPI(cfg.Addr, restyCli),
+		configsAPI:      configs.NewAPI(cfg.Addr, httpClient),
+		utxosAPI:        utxos.NewAPI(cfg.Addr, httpClient),
+		transactionsAPI: transactions.NewAPI(cfg.Addr, httpClient),
 	}
 	return &cli
 }

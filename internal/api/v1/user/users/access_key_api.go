@@ -47,9 +47,9 @@ func (a *AccessKeyAPI) AccessKey(ctx context.Context, ID string) (*response.Acce
 	return &result, nil
 }
 
-func (a *AccessKeyAPI) AccessKeys(ctx context.Context, accessKeyOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
+func (a *AccessKeyAPI) AccessKeys(ctx context.Context, opts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
 	var query queries.AccessKeyQuery
-	for _, o := range accessKeyOpts {
+	for _, o := range opts {
 		o(&query)
 	}
 

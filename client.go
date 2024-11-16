@@ -181,7 +181,7 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	return res, nil
 }
 
-// Utxos fetches a paginated list of UTXOs from the user UTXOs API.
+// UTXOs fetches a paginated list of UTXOs from the user UTXOs API.
 // The response includes UTXOs along with pagination details, such as page number,
 // sort order, and sorting field.
 //

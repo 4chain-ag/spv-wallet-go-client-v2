@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
@@ -72,7 +73,7 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	return newClient(cfg, authenticator)
 }
 
 // NewWithXPriv creates a new client instance using an extended private key (xPriv).
@@ -89,7 +90,7 @@ func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	return newClient(cfg, authenticator)
 }
 
 // NewWithAccessKey creates a new client instance using an access key.
@@ -107,7 +108,7 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	return newClient(cfg, authenticator)
 }
 
 // Contacts retrieves a paginated list of user contacts from the user contacts API.
@@ -409,19 +410,23 @@ type authenticator interface {
 	Authenticate(r *resty.Request) error
 }
 
-func newClient(cfg Config, auth authenticator) *Client {
-	httpClient := newRestyClient(cfg, auth)
+func newClient(cfg Config, auth authenticator) (*Client, error) {
+	URL, err := url.Parse(cfg.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)
+	}
 
+	httpClient := newRestyClient(cfg, auth)
 	return &Client{
 		merkleRootsAPI:  merkleroots.NewAPI(cfg.Addr, httpClient),
 		configsAPI:      configs.NewAPI(cfg.Addr, httpClient),
-		transactionsAPI: transactions.NewAPI(cfg.Addr, httpClient),
+		transactionsAPI: transactions.NewAPI(URL, httpClient),
 		utxosAPI:        utxos.NewAPI(cfg.Addr, httpClient),
 		accessKeyAPI:    users.NewAccessKeyAPI(cfg.Addr, httpClient),
 		xpubAPI:         users.NewXPubAPI(cfg.Addr, httpClient),
 		contactsAPI:     contacts.NewAPI(cfg.Addr, httpClient),
 		invitationsAPI:  invitations.NewAPI(cfg.Addr, httpClient),
-	}
+	}, nil
 }
 
 func newRestyClient(cfg Config, auth authenticator) *resty.Client {

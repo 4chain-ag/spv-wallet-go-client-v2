@@ -46,11 +46,11 @@ func TestMerkleRootsAPI_MerkleRoots(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := clienttest.GivenSPVWalletClient(t)
+			spvWalletClient, transport := clienttest.GivenSPVWalletClient(t)
 			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
 
 			// then:
-			got, err := wallet.MerkleRoots(context.Background())
+			got, err := spvWalletClient.MerkleRoots(context.Background())
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.EqualValues(t, tc.expectedResponse, got)
 		})

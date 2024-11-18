@@ -24,7 +24,7 @@ func (a *API) Contacts(ctx context.Context, opts ...queries.ContactQueryOption) 
 		o(&query)
 	}
 
-	queryBuilder := querybuilders.NewQueryBuilder([]querybuilders.QueryBuilderOption{
+	queryBuilder := querybuilders.NewQueryBuilder(
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.PageFilter),
 		querybuilders.WithFilterQueryBuilder(&contactFilterQueryBuilder{
@@ -33,7 +33,7 @@ func (a *API) Contacts(ctx context.Context, opts ...queries.ContactQueryOption) 
 				ModelFilter: query.ContactFilter.ModelFilter,
 			},
 		}),
-	}...)
+	)
 	params, err := queryBuilder.Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build user contacts query params: %w", err)

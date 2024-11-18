@@ -53,14 +53,14 @@ func (a *AccessKeyAPI) AccessKeys(ctx context.Context, opts ...queries.AccessKey
 		o(&query)
 	}
 
-	queryBuilder := querybuilders.NewQueryBuilder([]querybuilders.QueryBuilderOption{
+	queryBuilder := querybuilders.NewQueryBuilder(
 		querybuilders.WithMetadataFilter(query.Metadata),
-		querybuilders.WithPageFilterQueryBuilder(query.PageFilter),
+		querybuilders.WithPageFilter(query.PageFilter),
 		querybuilders.WithFilterQueryBuilder(&accessKeyFilterQueryBuilder{
 			accessKeyFilter:    query.AccessKeyFilter,
 			modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.AccessKeyFilter.ModelFilter},
 		}),
-	}...)
+	)
 	params, err := queryBuilder.Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build access keys query params: %w", err)

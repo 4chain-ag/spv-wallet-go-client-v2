@@ -22,14 +22,14 @@ func (a *API) UTXOs(ctx context.Context, opts ...queries.UtxoQueryOption) (*quer
 		o(&query)
 	}
 
-	queryBuilder := querybuilders.NewQueryBuilder([]querybuilders.QueryBuilderOption{
+	queryBuilder := querybuilders.NewQueryBuilder(
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.PageFilter),
 		querybuilders.WithFilterQueryBuilder(&utxoFilterQueryBuilder{
 			utxoFilter:         query.UtxoFilter,
 			modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.UtxoFilter.ModelFilter},
 		}),
-	}...)
+	)
 	params, err := queryBuilder.Build()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build utxo query params: %w", err)

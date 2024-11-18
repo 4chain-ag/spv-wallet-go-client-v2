@@ -3,7 +3,6 @@ package merkleroots_test
 import (
 	"context"
 	"net/http"
-	"path"
 	"testing"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
@@ -43,7 +42,7 @@ func TestMerkleRootsAPI_MerkleRoots(t *testing.T) {
 		},
 	}
 
-	URL := path.Join(clienttest.TestAPIAddr, "/api/v1/merkleroots")
+	URL := clienttest.TestAPIAddr + "/api/v1/merkleroots"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:

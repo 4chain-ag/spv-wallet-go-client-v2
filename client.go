@@ -5,10 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
@@ -19,9 +24,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/go-resty/resty/v2"
 )
 
 // Config holds configuration settings for establishing a connection and handling
@@ -73,7 +75,10 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
 	}
-	client := newClient(cfg, authenticator)
+	client, err := newClient(cfg, authenticator)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new client: %w", err)
+	}
 	client.xPub = key
 	return client, nil
 }
@@ -92,7 +97,10 @@ func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
 	}
 
-	client := newClient(cfg, authenticator)
+	client, err := newClient(cfg, authenticator)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new client: %w", err)
+	}
 	client.xPriv = key
 	return client, nil
 }
@@ -112,7 +120,7 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	return newClient(cfg, authenticator)
 }
 
 // Contacts retrieves a paginated list of user contacts from the user contacts API.
@@ -127,6 +135,7 @@ func (c *Client) Contacts(ctx context.Context, contactOpts ...queries.ContactQue
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve contacts from the user contacts API: %w", err)
 	}
+
 	return res, nil
 }
 
@@ -138,6 +147,7 @@ func (c *Client) ContactWithPaymail(ctx context.Context, paymail string) (*respo
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve contact by paymail from the user contacts API: %w", err)
 	}
+
 	return res, nil
 }
 
@@ -149,6 +159,7 @@ func (c *Client) UpsertContact(ctx context.Context, cmd commands.UpsertContact) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to upsert contact using the user contacts API: %w", err)
 	}
+
 	return res, nil
 }
 
@@ -159,6 +170,7 @@ func (c *Client) RemoveContact(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to remove contact using the user contacts API: %w", err)
 	}
+
 	return nil
 }
 
@@ -169,6 +181,7 @@ func (c *Client) ConfirmContact(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to confirm contact using the user contacts API: %w", err)
 	}
+
 	return nil
 }
 
@@ -179,6 +192,7 @@ func (c *Client) UnconfirmContact(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to unconfirm contact using the user contacts API: %w", err)
 	}
+
 	return nil
 }
 
@@ -189,6 +203,7 @@ func (c *Client) AcceptInvitation(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to accept invitation using the user invitations API: %w", err)
 	}
+
 	return nil
 }
 
@@ -199,6 +214,7 @@ func (c *Client) RejectInvitation(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to reject invitation using the user invitations API: %w", err)
 	}
+
 	return nil
 }
 
@@ -414,19 +430,23 @@ type authenticator interface {
 	Authenticate(r *resty.Request) error
 }
 
-func newClient(cfg Config, auth authenticator) *Client {
-	httpClient := newRestyClient(cfg, auth)
-
-	return &Client{
-		merkleRootsAPI:  merkleroots.NewAPI(cfg.Addr, httpClient),
-		configsAPI:      configs.NewAPI(cfg.Addr, httpClient),
-		transactionsAPI: transactions.NewAPI(cfg.Addr, httpClient),
-		utxosAPI:        utxos.NewAPI(cfg.Addr, httpClient),
-		accessKeyAPI:    users.NewAccessKeyAPI(cfg.Addr, httpClient),
-		xpubAPI:         users.NewXPubAPI(cfg.Addr, httpClient),
-		contactsAPI:     contacts.NewAPI(cfg.Addr, httpClient),
-		invitationsAPI:  invitations.NewAPI(cfg.Addr, httpClient),
+func newClient(cfg Config, auth authenticator) (*Client, error) {
+	url, err := url.Parse(cfg.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)
 	}
+
+	httpClient := newRestyClient(cfg, auth)
+	return &Client{
+		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
+		configsAPI:      configs.NewAPI(url, httpClient),
+		transactionsAPI: transactions.NewAPI(url, httpClient),
+		utxosAPI:        utxos.NewAPI(url, httpClient),
+		accessKeyAPI:    users.NewAccessKeyAPI(url, httpClient),
+		xpubAPI:         users.NewXPubAPI(url, httpClient),
+		contactsAPI:     contacts.NewAPI(url, httpClient),
+		invitationsAPI:  invitations.NewAPI(url, httpClient),
+	}, nil
 }
 
 func newRestyClient(cfg Config, auth authenticator) *resty.Client {

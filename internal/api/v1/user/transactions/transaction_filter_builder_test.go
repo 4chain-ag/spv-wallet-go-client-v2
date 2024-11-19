@@ -5,11 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet/models/filter"
-	"github.com/stretchr/testify/require"
-
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions/transactionstest"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTransactionFilterBuilder_Build(t *testing.T) {

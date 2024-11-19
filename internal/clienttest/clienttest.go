@@ -6,9 +6,8 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/jarcoal/httpmock"
-
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/jarcoal/httpmock"
 )
 
 const TestAPIAddr = "http://localhost:3003"

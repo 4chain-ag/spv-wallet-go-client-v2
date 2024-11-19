@@ -123,6 +123,7 @@ func (c *Client) Contacts(ctx context.Context, contactOpts ...queries.ContactQue
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve contacts from the user contacts API: %w", err)
 	}
+
 	return res, nil
 }
 
@@ -134,6 +135,7 @@ func (c *Client) ContactWithPaymail(ctx context.Context, paymail string) (*respo
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve contact by paymail from the user contacts API: %w", err)
 	}
+
 	return res, nil
 }
 
@@ -145,6 +147,7 @@ func (c *Client) UpsertContact(ctx context.Context, cmd commands.UpsertContact) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to upsert contact using the user contacts API: %w", err)
 	}
+
 	return res, nil
 }
 
@@ -155,6 +158,7 @@ func (c *Client) RemoveContact(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to remove contact using the user contacts API: %w", err)
 	}
+
 	return nil
 }
 
@@ -165,6 +169,7 @@ func (c *Client) ConfirmContact(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to confirm contact using the user contacts API: %w", err)
 	}
+
 	return nil
 }
 
@@ -175,6 +180,7 @@ func (c *Client) UnconfirmContact(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to unconfirm contact using the user contacts API: %w", err)
 	}
+
 	return nil
 }
 
@@ -185,6 +191,7 @@ func (c *Client) AcceptInvitation(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to accept invitation using the user invitations API: %w", err)
 	}
+
 	return nil
 }
 
@@ -195,6 +202,7 @@ func (c *Client) RejectInvitation(ctx context.Context, paymail string) error {
 	if err != nil {
 		return fmt.Errorf("failed to reject invitation using the user invitations API: %w", err)
 	}
+
 	return nil
 }
 
@@ -411,21 +419,21 @@ type authenticator interface {
 }
 
 func newClient(cfg Config, auth authenticator) (*Client, error) {
-	URL, err := url.Parse(cfg.Addr)
+	url, err := url.Parse(cfg.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)
 	}
 
 	httpClient := newRestyClient(cfg, auth)
 	return &Client{
-		merkleRootsAPI:  merkleroots.NewAPI(cfg.Addr, httpClient),
-		configsAPI:      configs.NewAPI(cfg.Addr, httpClient),
-		transactionsAPI: transactions.NewAPI(URL, httpClient),
-		utxosAPI:        utxos.NewAPI(cfg.Addr, httpClient),
-		accessKeyAPI:    users.NewAccessKeyAPI(cfg.Addr, httpClient),
-		xpubAPI:         users.NewXPubAPI(cfg.Addr, httpClient),
-		contactsAPI:     contacts.NewAPI(cfg.Addr, httpClient),
-		invitationsAPI:  invitations.NewAPI(cfg.Addr, httpClient),
+		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
+		configsAPI:      configs.NewAPI(url, httpClient),
+		transactionsAPI: transactions.NewAPI(url, httpClient),
+		utxosAPI:        utxos.NewAPI(url, httpClient),
+		accessKeyAPI:    users.NewAccessKeyAPI(url, httpClient),
+		xpubAPI:         users.NewXPubAPI(url, httpClient),
+		contactsAPI:     contacts.NewAPI(url, httpClient),
+		invitationsAPI:  invitations.NewAPI(url, httpClient),
 	}, nil
 }
 

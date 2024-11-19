@@ -15,10 +15,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	res, err := spv.SharedConfig(context.Background())
+	page, err := spv.Transactions(context.Background())
 	if err != nil {
-		log.Fatal()
+		log.Fatal(err)
 	}
 
-	exampleutil.Print("[HTTP GET] Shared config - api/v1/configs/shared", res)
+	exampleutil.Print("[HTTP GET] Transaction Page - api/v1/transactions", page)
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
@@ -15,10 +16,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	res, err := spv.SharedConfig(context.Background())
+	accessKeyID := "35465782-e247-42dd-a2e7-a01ba5b56285"
+	got, err := spv.AccessKey(context.Background(), accessKeyID)
 	if err != nil {
-		log.Fatal()
+		log.Fatal(err)
 	}
 
-	exampleutil.Print("[HTTP GET] Shared config - api/v1/configs/shared", res)
+	exampleutil.Print(fmt.Sprintf("[HTTP GET] Access key - api/v1/users/current/keys/%s", accessKeyID), got)
 }

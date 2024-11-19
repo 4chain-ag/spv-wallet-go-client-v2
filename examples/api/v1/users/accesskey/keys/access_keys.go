@@ -15,10 +15,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	res, err := spv.SharedConfig(context.Background())
+	accessKeys, err := spv.AccessKeys(context.Background())
 	if err != nil {
-		log.Fatal()
+		log.Fatal(err)
 	}
 
-	exampleutil.Print("[HTTP GET] Shared config - api/v1/configs/shared", res)
+	exampleutil.Print("[HTTP GET] Access keys - api/v1/users/current/keys/", accessKeys)
 }

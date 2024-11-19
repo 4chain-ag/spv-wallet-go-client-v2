@@ -1,7 +1,8 @@
-package main
+package transaction
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
@@ -15,10 +16,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	res, err := spv.SharedConfig(context.Background())
+	transactionID := "aceaefc7-f10b-4586-8425-b27227fc856e"
+	transaction, err := spv.Transaction(context.Background(), transactionID)
 	if err != nil {
-		log.Fatal()
+		log.Fatal(err)
 	}
 
-	exampleutil.Print("[HTTP GET] Shared config - api/v1/configs/shared", res)
+	exampleutil.Print(fmt.Sprintf("[HTTP GET] Transaction - api/v1/transactions/%s", transactionID), transaction)
 }

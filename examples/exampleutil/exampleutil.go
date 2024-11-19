@@ -11,11 +11,6 @@ import (
 
 var ExampleConfig = wallet.NewDefaultConfig("http://localhost:3003")
 
-const (
-	ExampleXPriv string = ""
-	ExampleXPub  string = ""
-)
-
 func Print(s string, a any) {
 	fmt.Println(strings.Repeat("~", 100))
 	fmt.Println(s)

@@ -73,13 +73,13 @@ func Generate() (KeyWithMnemonic, error) {
 
 	hdKey, err := bip32.GenerateHDKeyFromMnemonic(mnemonic, "", &chaincfg.MainNet)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("key generation error when creating hd private key: %w", err)
 	}
 
 	hdXpriv := hdKey.String()
 	hdXpub, err := bip32.GetExtendedPublicKey(hdKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("key generation error when creating hd public key: %w", err)
 	}
 
 	keys := &Keys{

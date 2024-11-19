@@ -3,6 +3,7 @@ package configs
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
@@ -11,17 +12,17 @@ import (
 const route = "api/v1/configs"
 
 type API struct {
-	addr string
-	cli  *resty.Client
+	url        *url.URL
+	httpClient *resty.Client
 }
 
 func (a *API) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
 	var result response.SharedConfig
-	_, err := a.cli.
+	_, err := a.httpClient.
 		R().
 		SetContext(ctx).
 		SetResult(&result).
-		Get(a.addr + "/shared")
+		Get(a.url.JoinPath("shared").String())
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
@@ -29,9 +30,9 @@ func (a *API) SharedConfig(ctx context.Context) (*response.SharedConfig, error) 
 	return &result, nil
 }
 
-func NewAPI(addr string, cli *resty.Client) *API {
+func NewAPI(url *url.URL, httpClient *resty.Client) *API {
 	return &API{
-		addr: addr + "/" + route,
-		cli:  cli,
+		url:        url.JoinPath(route),
+		httpClient: httpClient,
 	}
 }

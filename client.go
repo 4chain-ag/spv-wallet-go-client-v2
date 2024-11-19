@@ -5,12 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/invitations"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/users"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
@@ -41,7 +50,14 @@ func NewDefaultConfig(addr string) Config {
 // interact with both user and admin APIs without needing to manage the details
 // of the HTTP requests and responses directly.
 type Client struct {
-	configsAPI *configs.API
+	xpubAPI         *users.XPubAPI
+	accessKeyAPI    *users.AccessKeyAPI
+	configsAPI      *configs.API
+	merkleRootsAPI  *merkleroots.API
+	contactsAPI     *contacts.API
+	invitationsAPI  *invitations.API
+	transactionsAPI *transactions.API
+	utxosAPI        *utxos.API
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -57,7 +73,7 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	return newClient(cfg, authenticator)
 }
 
 // NewWithXPriv creates a new client instance using an extended private key (xPriv).
@@ -74,7 +90,7 @@ func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	return newClient(cfg, authenticator)
 }
 
 // NewWithAccessKey creates a new client instance using an access key.
@@ -92,13 +108,108 @@ func NewWithAccessKey(cfg Config, accessKey string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	return newClient(cfg, authenticator)
+}
+
+// Contacts retrieves a paginated list of user contacts from the user contacts API.
+// The API response includes user contacts along with pagination details, such as
+// the current page number, sort order, and the field used for sorting (sortBy).
+//
+// Optional query parameters can be provided via query options. The response is
+// unmarshaled into a *queries.UserContactsPage struct. If the API request fails
+// or the response cannot be decoded, an error is returned.
+func (c *Client) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
+	res, err := c.contactsAPI.Contacts(ctx, contactOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve contacts from the user contacts API: %w", err)
+	}
+
+	return res, nil
+}
+
+// ContactWithPaymail retrieves a specific user contact by their paymail address.
+// The response is unmarshaled into a *response.Contact struct. If the API request
+// fails or the response cannot be decoded, an error is returned.
+func (c *Client) ContactWithPaymail(ctx context.Context, paymail string) (*response.Contact, error) {
+	res, err := c.contactsAPI.ContactWithPaymail(ctx, paymail)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve contact by paymail from the user contacts API: %w", err)
+	}
+
+	return res, nil
+}
+
+// UpsertContact adds or updates a user contact through the user contacts API.
+// The response is unmarshaled into a *response.Contact struct. If the API request
+// fails or the response cannot be decoded, an error is returned.
+func (c *Client) UpsertContact(ctx context.Context, cmd commands.UpsertContact) (*response.Contact, error) {
+	res, err := c.contactsAPI.UpsertContact(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upsert contact using the user contacts API: %w", err)
+	}
+
+	return res, nil
+}
+
+// RemoveContact deletes a user contact using the user contacts API.
+// If the API request fails, an error is returned.
+func (c *Client) RemoveContact(ctx context.Context, paymail string) error {
+	err := c.contactsAPI.RemoveContact(ctx, paymail)
+	if err != nil {
+		return fmt.Errorf("failed to remove contact using the user contacts API: %w", err)
+	}
+
+	return nil
+}
+
+// ConfirmContact confirms a user contact using the user contacts API.
+// If the API request fails, an error is returned.
+func (c *Client) ConfirmContact(ctx context.Context, paymail string) error {
+	err := c.contactsAPI.ConfirmContact(ctx, paymail)
+	if err != nil {
+		return fmt.Errorf("failed to confirm contact using the user contacts API: %w", err)
+	}
+
+	return nil
+}
+
+// UnconfirmContact unconfirms a user contact using the user contacts API.
+// If the API request fails, an error is returned.
+func (c *Client) UnconfirmContact(ctx context.Context, paymail string) error {
+	err := c.contactsAPI.UnconfirmContact(ctx, paymail)
+	if err != nil {
+		return fmt.Errorf("failed to unconfirm contact using the user contacts API: %w", err)
+	}
+
+	return nil
+}
+
+// AcceptInvitation accepts a contact invitation using the user invitations API.
+// If the API request fails, an error is returned.
+func (c *Client) AcceptInvitation(ctx context.Context, paymail string) error {
+	err := c.invitationsAPI.AcceptInvitation(ctx, paymail)
+	if err != nil {
+		return fmt.Errorf("failed to accept invitation using the user invitations API: %w", err)
+	}
+
+	return nil
+}
+
+// RejectInvitation rejects a contact invitation using the user invitations API.
+// If the API request fails, an error is returned.
+func (c *Client) RejectInvitation(ctx context.Context, paymail string) error {
+	err := c.invitationsAPI.RejectInvitation(ctx, paymail)
+	if err != nil {
+		return fmt.Errorf("failed to reject invitation using the user invitations API: %w", err)
+	}
+
+	return nil
 }
 
 // SharedConfig retrieves the shared configuration from the user configurations API.
-// This method constructs an HTTP GET request to the "/shared" endpoint and expects
-// a response that can be unmarshaled into the response.SharedConfig struct.
-// If the request fails or the response cannot be decoded, an error will be returned.
+// This method constructs an HTTP GET request to the "api/v1/configs/shared" endpoint and expects
+// a response that can be unmarshaled into the response.SharedConfig struct. If the request fails
+// or the response cannot be decoded, an error will be returned.
 func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
 	res, err := c.configsAPI.SharedConfig(ctx)
 	if err != nil {
@@ -107,6 +218,187 @@ func (c *Client) SharedConfig(ctx context.Context) (*response.SharedConfig, erro
 
 	return res, nil
 }
+
+// DraftTransaction creates a new draft transaction using the user transactions API.
+// This method sends an HTTP POST request to the "/draft" endpoint and expects
+// a response that can be unmarshaled into a response.DraftTransaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) DraftTransaction(ctx context.Context, cmd *commands.DraftTransaction) (*response.DraftTransaction, error) {
+	res, err := c.transactionsAPI.DraftTransaction(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a draft transaction by calling the user transactions API: %w", err)
+	}
+
+	return res, nil
+}
+
+// RecordTransaction submits a transaction for recording using the user transactions API.
+// This method sends an HTTP POST request to the "/transactions" endpoint, expecting
+// a response that can be unmarshaled into a response.Transaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) RecordTransaction(ctx context.Context, cmd *commands.RecordTransaction) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.RecordTransaction(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to record a transaction with reference ID: %s by calling the user transactions API: %w", cmd.ReferenceID, err)
+	}
+
+	return res, nil
+}
+
+// UpdateTransactionMetadata updates the metadata of a transaction using the user transactions API.
+// This method sends an HTTP PATCH request with updated metadata and expects a response
+// that can be unmarshaled into a response.Transaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) UpdateTransactionMetadata(ctx context.Context, cmd *commands.UpdateTransactionMetadata) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.UpdateTransactionMetadata(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update a transaction metadata by calling the user user transactions API: %w", err)
+	}
+
+	return res, nil
+}
+
+// Transactions retrieves a paginated list of transactions from the user transactions API.
+// The returned response includes transactions and pagination details, such as the page number,
+// sort order, and sorting field (sortBy).
+//
+// This method allows optional query parameters to be applied via the provided query options.
+// The response is expected to unmarshal into a *response.PageModel[response.Transaction] struct.
+// If the API request fails or the response cannot be decoded successfully, an error is returned.
+func (c *Client) Transactions(ctx context.Context, opts ...queries.TransactionsQueryOption) (*queries.TransactionPage, error) {
+	res, err := c.transactionsAPI.Transactions(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve transactions page from the user transactions API: %w", err)
+	}
+
+	return res, nil
+}
+
+// Transaction retrieves a specific transaction by its ID using the user transactions API.
+// This method expects a response that can be unmarshaled into a response.Transaction struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transaction, error) {
+	res, err := c.transactionsAPI.Transaction(ctx, ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve transaction with ID: %s from the user transactions API: %w", ID, err)
+	}
+
+	return res, nil
+}
+
+// XPub retrieves the complete xpub information for the current user.
+// The server's response is expected to be unmarshaled into a *response.Xpub struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) XPub(ctx context.Context) (*response.Xpub, error) {
+	res, err := c.xpubAPI.XPub(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve xpub information from the users API: %w", err)
+	}
+
+	return res, nil
+}
+
+// UpdateXPubMetadata updates the metadata associated with the current user's xpub.
+// The server's response is expected to be unmarshaled into a *response.Xpub struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) UpdateXPubMetadata(ctx context.Context, cmd *commands.UpdateXPubMetadata) (*response.Xpub, error) {
+	res, err := c.xpubAPI.UpdateXPubMetadata(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update xpub metadata using the users API: %w", err)
+	}
+
+	return res, nil
+}
+
+// GenerateAccessKey creates a new access key associated with the current user's xpub.
+// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
+	res, err := c.accessKeyAPI.GenerateAccessKey(ctx, cmd)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate access key using the user access key API: %w", err)
+	}
+
+	return res, nil
+}
+
+// AccessKeys retrieves a paginated list of access keys from the user access keys API.
+// The response includes access keys and pagination details, such as the page number,
+// sort order, and sorting field (sortBy).
+//
+// This method allows optional query parameters to be applied via the provided query options.
+// The response is expected to unmarshal into a *queries.AccessKeyPage struct.
+// If the API request fails or the response cannot be decoded successfully, an error is returned.
+func (c *Client) AccessKeys(ctx context.Context, accessKeyOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
+	res, err := c.accessKeyAPI.AccessKeys(ctx, accessKeyOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve access keys page from the user access key API: %w", err)
+	}
+
+	return res, nil
+}
+
+// AccessKey retrieves the access key associated with the specified ID.
+// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
+// If the request fails or the response cannot be decoded, an error is returned.
+func (c *Client) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
+	res, err := c.accessKeyAPI.AccessKey(ctx, ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve access key using the user access key API: %w", err)
+	}
+
+	return res, nil
+}
+
+// RevokeAccessKey revokes the access key associated with the given ID.
+// If the request fails or the response cannot be processed, an error is returned.
+func (c *Client) RevokeAccessKey(ctx context.Context, ID string) error {
+	err := c.accessKeyAPI.RevokeAccessKey(ctx, ID)
+	if err != nil {
+		return fmt.Errorf("failed to revoke access key using the users API: %w", err)
+	}
+
+	return nil
+}
+
+// UTXOs fetches a paginated list of UTXOs from the user UTXOs API.
+// The response includes UTXOs along with pagination details, such as page number,
+// sort order, and sorting field.
+//
+// Optional query parameters can be applied using the provided query options.
+// The response is unmarshaled into a *queries.UtxosPage struct.
+// Returns an error if the API request fails or the response cannot be decoded.
+func (c *Client) UTXOs(ctx context.Context, opts ...queries.UtxoQueryOption) (*queries.UtxosPage, error) {
+	res, err := c.utxosAPI.UTXOs(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve UTXOs page from the user UTXOs API: %w", err)
+	}
+
+	return res, nil
+}
+
+// MerkleRoots retrieves a paginated list of Merkle roots from the user Merkle roots API.
+// The API response includes Merkle roots along with pagination details, such as the current
+// page number, sort order, and sorting field (sortBy).
+//
+// This method supports optional query parameters, which can be specified using the provided
+// query options. These options customize the behavior of the API request, such as setting
+// batch size or applying filters for pagination.
+//
+// The response is unmarshaled into a *queries.MerkleRootPage struct. If the API request fails
+// or the response cannot be successfully decoded, an error is returned.
+func (c *Client) MerkleRoots(ctx context.Context, opts ...queries.MerkleRootsQueryOption) (*queries.MerkleRootPage, error) {
+	res, err := c.merkleRootsAPI.MerkleRoots(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve Merkle roots from the API: %w", err)
+	}
+
+	return res, nil
+}
+
+// ErrUnrecognizedAPIResponse indicates that the response received from the SPV Wallet API
+// does not match the expected expected format or structure.
+var ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")
 
 func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
 	pk, err1 := ec.PrivateKeyFromWif(s)
@@ -126,12 +418,23 @@ type authenticator interface {
 	Authenticate(r *resty.Request) error
 }
 
-func newClient(cfg Config, auth authenticator) *Client {
-	restyCli := newRestyClient(cfg, auth)
-	cli := Client{
-		configsAPI: configs.NewAPI(cfg.Addr, restyCli),
+func newClient(cfg Config, auth authenticator) (*Client, error) {
+	url, err := url.Parse(cfg.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)
 	}
-	return &cli
+
+	httpClient := newRestyClient(cfg, auth)
+	return &Client{
+		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
+		configsAPI:      configs.NewAPI(url, httpClient),
+		transactionsAPI: transactions.NewAPI(url, httpClient),
+		utxosAPI:        utxos.NewAPI(url, httpClient),
+		accessKeyAPI:    users.NewAccessKeyAPI(url, httpClient),
+		xpubAPI:         users.NewXPubAPI(url, httpClient),
+		contactsAPI:     contacts.NewAPI(url, httpClient),
+		invitationsAPI:  invitations.NewAPI(url, httpClient),
+	}, nil
 }
 
 func newRestyClient(cfg Config, auth authenticator) *resty.Client {
@@ -155,7 +458,3 @@ func newRestyClient(cfg Config, auth authenticator) *resty.Client {
 			return fmt.Errorf("%w: %s", ErrUnrecognizedAPIResponse, r.Body())
 		})
 }
-
-// ErrUnrecognizedAPIResponse indicates that the response received from the SPV Wallet API
-// does not match the expected expected format or structure.
-var ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")

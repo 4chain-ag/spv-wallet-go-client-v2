@@ -6,8 +6,9 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/jarcoal/httpmock"
+
+	client "github.com/bitcoin-sv/spv-wallet-go-client"
 )
 
 const TestAPIAddr = "http://localhost:3003"
@@ -17,6 +18,8 @@ const (
 	UserXPub          = "xpub661MyMwAqRbcG9uqtWJY8pcBhVdrJBYvz8FUHZffnR1pNVPyQpXnaKeM5w2FyH5Wwhf5Cf15mFDVRZnuK9sEHDqqd39qWz36UDoobrzLyFM"
 	UserPrivAccessKey = "03a446ede05f04fd92d2707599a80b67ad76f63b3958706819c76308bfc7c1143d"
 	UserPubAccessKey  = "0239a60e37d62b0217ac86881caba194ab943e18099c080de70c173daf75d917b2"
+	// PubKey ex. "034252e5359a1de3b8ec08e6c29b80594e88fb47e6ae9ce65ee5a94f0d371d2cde"
+	PubKey = "034252e5359a1de3b8ec08e6c29b80594e88fb47e6ae9ce65ee5a94f0d371d2cde"
 )
 
 func ExtendedKey(t *testing.T) *bip32.ExtendedKey {

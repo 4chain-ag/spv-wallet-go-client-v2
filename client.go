@@ -9,6 +9,10 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
@@ -19,9 +23,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/go-resty/resty/v2"
 )
 
 // Config holds configuration settings for establishing a connection and handling
@@ -49,6 +50,8 @@ func NewDefaultConfig(addr string) Config {
 // interact with both user and admin APIs without needing to manage the details
 // of the HTTP requests and responses directly.
 type Client struct {
+	xPriv           *bip32.ExtendedKey
+	xPub            *bip32.ExtendedKey
 	xpubAPI         *users.XPubAPI
 	accessKeyAPI    *users.AccessKeyAPI
 	configsAPI      *configs.API
@@ -71,8 +74,9 @@ func NewWithXPub(cfg Config, xPub string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
 	}
-
-	return newClient(cfg, authenticator), nil
+	client := newClient(cfg, authenticator)
+	client.xPub = key
+	return client, nil
 }
 
 // NewWithXPriv creates a new client instance using an extended private key (xPriv).
@@ -89,7 +93,9 @@ func NewWithXPriv(cfg Config, xPriv string) (*Client, error) {
 		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
 	}
 
-	return newClient(cfg, authenticator), nil
+	client := newClient(cfg, authenticator)
+	client.xPriv = key
+	return client, nil
 }
 
 // NewWithAccessKey creates a new client instance using an access key.
@@ -277,10 +283,10 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	return res, nil
 }
 
-// XPub retrieves the complete xpub information for the current user.
+// XPubAPI retrieves the complete xpub information for the current user.
 // The server's response is expected to be unmarshaled into a *response.Xpub struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) XPub(ctx context.Context) (*response.Xpub, error) {
+func (c *Client) XPubAPI(ctx context.Context) (*response.Xpub, error) {
 	res, err := c.xpubAPI.XPub(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve xpub information from the users API: %w", err)
@@ -444,4 +450,14 @@ func newRestyClient(cfg Config, auth authenticator) *resty.Client {
 
 			return fmt.Errorf("%w: %s", ErrUnrecognizedAPIResponse, r.Body())
 		})
+}
+
+// XPriv retrieves the xPriv (extended private key) associated with the client.
+func (c *Client) XPriv() *bip32.ExtendedKey {
+	return c.xPriv
+}
+
+// XPub retrieves the xPub (extended public key) associated with the client.
+func (c *Client) XPub() *bip32.ExtendedKey {
+	return c.xPriv
 }

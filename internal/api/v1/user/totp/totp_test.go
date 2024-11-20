@@ -8,15 +8,16 @@ import (
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/stretchr/testify/require"
+
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/xpriv"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateTotpForContact(t *testing.T) {
+func TestClient_GenerateTotpForContact(t *testing.T) {
 	cfg := client.Config{
 		Addr:    clienttest.TestAPIAddr,
 		Timeout: 5 * time.Second,
@@ -67,7 +68,7 @@ func TestGenerateTotpForContact(t *testing.T) {
 	})
 }
 
-func TestValidateTotpForContact(t *testing.T) {
+func TestClient_ValidateTotpForContact(t *testing.T) {
 	cfg := client.Config{
 		Addr:    clienttest.TestAPIAddr,
 		Timeout: 5 * time.Second,

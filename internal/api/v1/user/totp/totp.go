@@ -8,7 +8,7 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/pquerna/otp"
@@ -16,19 +16,19 @@ import (
 )
 
 const (
-	// TotpDefaultPeriod - Default number of seconds a TOTP is valid for.
-	TotpDefaultPeriod uint = 30
-	// TotpDefaultDigits - Default TOTP length
-	TotpDefaultDigits uint = 2
+	// DefaultPeriod - Default number of seconds a TOTP is valid for.
+	DefaultPeriod uint = 30
+	// DefaultDigits - Default TOTP length
+	DefaultDigits uint = 2
 )
 
 // walletClient handles TOTP operations for SPV Wallet.
 type walletClient struct {
-	client *client.Client
+	client *wallet.Client
 }
 
 // New creates a new TOTP WalletClient.
-func New(c *client.Client) *walletClient {
+func New(c *wallet.Client) *walletClient {
 	return &walletClient{client: c}
 }
 
@@ -62,7 +62,7 @@ func (b *walletClient) ValidateTotpForContact(contact *models.Contact, passcode,
 	return valid, nil
 }
 
-func makeSharedSecret(client *client.Client, contact *models.Contact) ([]byte, error) {
+func makeSharedSecret(client *wallet.Client, contact *models.Contact) ([]byte, error) {
 	privKey, pubKey, err := getSharedSecretFactors(client, contact)
 	if err != nil {
 		return nil, fmt.Errorf("makeSharedSecret: error when getting shared secret factors: %w", err)
@@ -72,7 +72,7 @@ func makeSharedSecret(client *client.Client, contact *models.Contact) ([]byte, e
 	return x.Bytes(), nil
 }
 
-func getSharedSecretFactors(client *client.Client, contact *models.Contact) (*ec.PrivateKey, *ec.PublicKey, error) {
+func getSharedSecretFactors(client *wallet.Client, contact *models.Contact) (*ec.PrivateKey, *ec.PublicKey, error) {
 	// Retrieve xPriv from client or configuration.
 	xPriv := client.XPriv()
 	if xPriv == nil {
@@ -126,11 +126,11 @@ func convertPubKey(pubKey string) (*ec.PublicKey, error) {
 
 func getTotpOpts(period, digits uint) *totp.ValidateOpts {
 	if period == 0 {
-		period = TotpDefaultPeriod
+		period = DefaultPeriod
 	}
 
 	if digits == 0 {
-		digits = TotpDefaultDigits
+		digits = DefaultDigits
 	}
 
 	return &totp.ValidateOpts{

@@ -100,7 +100,7 @@ func TestXPubAPI_XPub(t *testing.T) {
 			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
 
 			// then:
-			got, err := wallet.XPub(context.Background())
+			got, err := wallet.XPubAPI(context.Background())
 			require.ErrorIs(t, err, tc.expectedErr)
 			require.EqualValues(t, tc.expectedResponse, got)
 		})

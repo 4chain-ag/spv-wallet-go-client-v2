@@ -8,7 +8,6 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/pquerna/otp"
@@ -22,19 +21,19 @@ const (
 	DefaultDigits uint = 2
 )
 
-// client handles TOTP operations for SPV Wallet.
-type client struct {
-	walletClient *wallet.Client
+// Client handles TOTP generation and validation.
+type Client struct {
+	xPriv *bip32.ExtendedKey
 }
 
 // New creates a new TOTP WalletClient.
-func New(c *wallet.Client) *client {
-	return &client{walletClient: c}
+func New(xPriv *bip32.ExtendedKey) *Client {
+	return &Client{xPriv: xPriv}
 }
 
 // GenerateTotpForContact generates a time-based one-time password (TOTP) for a contact.
-func (b *client) GenerateTotpForContact(contact *models.Contact, period, digits uint) (string, error) {
-	sharedSecret, err := makeSharedSecret(b.walletClient, contact)
+func (b *Client) GenerateTotpForContact(contact *models.Contact, period, digits uint) (string, error) {
+	sharedSecret, err := b.makeSharedSecret(contact)
 	if err != nil {
 		return "", fmt.Errorf("generateTotpForContact: error when making shared: %w", err)
 	}
@@ -48,22 +47,25 @@ func (b *client) GenerateTotpForContact(contact *models.Contact, period, digits 
 }
 
 // ValidateTotpForContact validates a TOTP for a contact.
-func (b *client) ValidateTotpForContact(contact *models.Contact, passcode, requesterPaymail string, period, digits uint) (bool, error) {
-	sharedSecret, err := makeSharedSecret(b.walletClient, contact)
+func (b *Client) ValidateTotpForContact(contact *models.Contact, passcode, requesterPaymail string, period, digits uint) error {
+	sharedSecret, err := b.makeSharedSecret(contact)
 	if err != nil {
-		return false, fmt.Errorf("validateTotpForContact: error when making shared secret: %w", err)
+		return fmt.Errorf("ValidateTotpForContact: error when making shared secret: %w", err)
 	}
 
 	opts := getTotpOpts(period, digits)
 	valid, err := totp.ValidateCustom(passcode, directedSecret(sharedSecret, requesterPaymail), time.Now(), *opts)
 	if err != nil {
-		return false, fmt.Errorf("validateTotpForContact: error when validating TOTP: %w", err)
+		return fmt.Errorf("ValidateTotpForContact: error when validating TOTP: %w", err)
 	}
-	return valid, nil
+	if !valid {
+		return fmt.Errorf("ValidateTotpForContact: TOTP is invalid")
+	}
+	return nil
 }
 
-func makeSharedSecret(client *wallet.Client, contact *models.Contact) ([]byte, error) {
-	privKey, pubKey, err := getSharedSecretFactors(client, contact)
+func (b *Client) makeSharedSecret(contact *models.Contact) ([]byte, error) {
+	privKey, pubKey, err := b.getSharedSecretFactors(contact)
 	if err != nil {
 		return nil, fmt.Errorf("makeSharedSecret: error when getting shared secret factors: %w", err)
 	}
@@ -72,15 +74,13 @@ func makeSharedSecret(client *wallet.Client, contact *models.Contact) ([]byte, e
 	return x.Bytes(), nil
 }
 
-func getSharedSecretFactors(client *wallet.Client, contact *models.Contact) (*ec.PrivateKey, *ec.PublicKey, error) {
-	// Retrieve xPriv from client or configuration.
-	xPriv := client.ClientXPriv()
-	if xPriv == nil {
+func (b *Client) getSharedSecretFactors(contact *models.Contact) (*ec.PrivateKey, *ec.PublicKey, error) {
+	if b.xPriv == nil {
 		return nil, nil, ErrMissingXpriv
 	}
 
 	// Derive private key from xPriv for PKI operations.
-	xpriv, err := deriveXprivForPki(xPriv)
+	xpriv, err := deriveXprivForPki(b.xPriv)
 	if err != nil {
 		return nil, nil, fmt.Errorf("getSharedSecretFactors: error when deriving xpriv for PKI: %w", err)
 	}

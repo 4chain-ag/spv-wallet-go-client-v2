@@ -16,7 +16,7 @@ the wallet client package during interaction wit the SPV Wallet API.
 -   SPV Wallet go client instance is properly created and configured.
 
 > [!TIP]
-> To verify Taskfile installation run: task, command in the terminal.
+> To verify Taskfile installation run: `task`, command in the terminal.
 
 ```
 task: [default] task --list

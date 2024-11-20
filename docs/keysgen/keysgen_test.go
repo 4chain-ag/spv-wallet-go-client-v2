@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/docs/examples/keysgen"
+	"github.com/bitcoin-sv/spv-wallet-go-client/docs/keysgen"
 )
 
 func ExampleGenerateKeys() {

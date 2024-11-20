@@ -1,6 +1,7 @@
 package examples
 
 const (
-	XPriv string = ""
-	XPub  string = ""
+	XPriv     string = ""
+	XPub      string = ""
+	AccessKey string = ""
 )

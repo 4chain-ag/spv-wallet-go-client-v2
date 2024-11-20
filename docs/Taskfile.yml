@@ -1,20 +1,121 @@
 version: '3'
 
+
 tasks:
-  generate_keys:
+  default:
+    cmds:
+      - task --list
+    desc: Display all available tasks.
+
+  generate-keys:
     desc: Generate keys for SPV Wallet API access.
     silent: true
     cmds:
       - echo "Generating keys - start"
       - echo "=================================================================="
-      - go run ./keysgen/keysgen.go
+      - go run ./keysgen/cmd/main.go
       - echo "=================================================================="
       - echo "Generating keys - end"
-
-  user_shared_config:
-    desc: Fetch shared config from SPV Wallet API.
+      
+  fetch-user-shared-config:
+    desc: Fetch user shared config.
     silent: true
     cmds:
-      - echo "Fetching shared config - start"
-      - go run ./api/v1/users/configs/shared_config.go
-      - echo "Fetching shared config - end"
+      - go run ./examples/api/v1/users/configs/shared_config.go
+
+  fetch-user-merkleroots:
+    desc: Fetch user Merkle roots page.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/merkleroots/fetch_merkleroots.go
+
+  fetch-user-contacts:    
+    desc: Fetch user contacts page.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/contacts/fetch_contacts/fetch_contacts.go
+
+  fetch-user-contact:    
+    desc: Fetch user contact with given paymail.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/contacts/fetch_contact/fetch_contact.go
+ 
+  user-contact-confirmation:    
+    desc: Confirm user contact with given paymail address.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/contacts/contact_confirmation/contact_confirmation.go
+  
+  user-contact-unconfirm:    
+    desc: Unconfirm user contact with given paymail address.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/contacts/unconfirm_contact/unconfirm_contact.go
+  
+  user-contact-remove:    
+    desc: Remove user contact with given paymail address.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/contacts/contact_remove/contact_remove.go
+
+  user-contact-upsert:    
+    desc: Upsert user contact with given paymail address.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/contacts/contact_upsert/contact_upsert.go
+
+  user-invitation-accept:    
+    desc: Accept user contact invitation with given paymail address.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/invitations/accept_invitation/accept_invitation.go
+
+  user-invitation-reject:    
+    desc: Reject user contact invitation with given paymail address.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/invitations/reject_invitation/reject_invitation.go
+
+  fetch-user-transactions:    
+    desc: Fetch user transactions page.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/transactions/fetch_transactions/fetch_transactions.go
+  
+  fetch-user-transaction:    
+    desc: Fetch user transaction with given ID.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/transactions/fetch_transaction/fetch_transaction.go
+
+  user-draft-transaction:    
+    desc: Create user draft transaction.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/transactions/draft_transaction/draft_transaction.go
+
+  user-transaction-metadata:    
+    desc: Update user transaction metadata with given ID.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/transactions/update_transaction_metadata/update_transaction_metadata.go
+
+  fetch-user-utxos:    
+    desc: Fetch user UTXOs page.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/utxos/fetch_utxos.go
+  
+  fetch-user-xpub:    
+    desc: Fetch current authroized user xpub info.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/xpub/fetch_xpub/fetch_xpub.go
+
+  user-xpub-metdata:    
+    desc: Update current authorized user xpub metadata.
+    silent: true
+    cmds:
+      - go run ./examples/api/v1/users/xpub/update_xpub_metadata/update_xpub_metadata.go
+    

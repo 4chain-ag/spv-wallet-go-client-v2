@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	transactionID := "aceaefc7-f10b-4586-8425-b27227fc856e"
+	transactionID := "2a4fa5b8caa54e0e46e8147b389e8efa09eb453ad8bb2577c56d67032a985e74"
 	transaction, err := spv.Transaction(context.Background(), transactionID)
 	if err != nil {
 		log.Fatal(err)

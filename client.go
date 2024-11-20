@@ -297,10 +297,10 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	return res, nil
 }
 
-// XPubAPI retrieves the complete xpub information for the current user.
+// XPub retrieves the complete xpub information for the current user.
 // The server's response is expected to be unmarshaled into a *response.Xpub struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) XPubAPI(ctx context.Context) (*response.Xpub, error) {
+func (c *Client) XPub(ctx context.Context) (*response.Xpub, error) {
 	res, err := c.xpubAPI.XPub(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve xpub information from the users API: %w", err)
@@ -470,12 +470,12 @@ func newRestyClient(cfg Config, auth authenticator) *resty.Client {
 		})
 }
 
-// XPriv retrieves the xPriv (extended private key) associated with the client.
-func (c *Client) XPriv() *bip32.ExtendedKey {
+// GetXPriv retrieves the xPriv (extended private key) associated with the client.
+func (c *Client) GetXPriv() *bip32.ExtendedKey {
 	return c.xPriv
 }
 
-// XPub retrieves the xPub (extended public key) associated with the client.
-func (c *Client) XPub() *bip32.ExtendedKey {
-	return c.xPriv
+// GetXPub retrieves the xPub (extended public key) associated with the client.
+func (c *Client) GetXPub() *bip32.ExtendedKey {
+	return c.xPub
 }

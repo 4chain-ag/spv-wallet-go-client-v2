@@ -25,7 +25,7 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 		// given
 		sut, err := client.NewWithXPriv(cfg, clienttest.UserXPriv)
 		require.NoError(t, err)
-		require.NotNil(t, sut.XPriv)
+		require.NotNil(t, sut.GetXPriv)
 
 		contact := models.Contact{PubKey: clienttest.PubKey}
 		wc := totp.New(sut)
@@ -41,7 +41,7 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 		// given
 		sut, err := client.NewWithXPub(cfg, clienttest.UserXPub)
 		require.NoError(t, err)
-		require.NotNil(t, sut.XPubAPI)
+		require.NotNil(t, sut.XPub)
 		wc := totp.New(sut)
 		// when
 		_, err = wc.GenerateTotpForContact(nil, 30, 2)
@@ -54,7 +54,7 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 		// given
 		sut, err := client.NewWithXPriv(cfg, clienttest.UserXPriv)
 		require.NoError(t, err)
-		require.NotNil(t, sut.XPriv)
+		require.NotNil(t, sut.GetXPriv)
 
 		contact := models.Contact{PubKey: "invalid-pk-format"}
 		wc := totp.New(sut)
@@ -87,10 +87,10 @@ func TestClient_ValidateTotpForContact(t *testing.T) {
 		// Set up the WalletClient for Alice and Bob
 		clientAlice, err := client.NewWithXPriv(cfg, aliceKeys.XPriv())
 		require.NoError(t, err)
-		require.NotNil(t, clientAlice.XPriv)
+		require.NotNil(t, clientAlice.GetXPriv)
 		clientBob, err := client.NewWithXPriv(cfg, bobKeys.XPriv())
 		require.NoError(t, err)
-		require.NotNil(t, clientBob.XPriv)
+		require.NotNil(t, clientBob.GetXPriv)
 
 		aliceContact := &models.Contact{
 			PubKey:  makeMockPKI(aliceKeys.XPub().String()),

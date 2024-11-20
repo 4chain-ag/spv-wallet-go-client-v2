@@ -22,19 +22,19 @@ const (
 	DefaultDigits uint = 2
 )
 
-// walletClient handles TOTP operations for SPV Wallet.
-type walletClient struct {
-	client *wallet.Client
+// client handles TOTP operations for SPV Wallet.
+type client struct {
+	walletClient *wallet.Client
 }
 
 // New creates a new TOTP WalletClient.
-func New(c *wallet.Client) *walletClient {
-	return &walletClient{client: c}
+func New(c *wallet.Client) *client {
+	return &client{walletClient: c}
 }
 
 // GenerateTotpForContact generates a time-based one-time password (TOTP) for a contact.
-func (b *walletClient) GenerateTotpForContact(contact *models.Contact, period, digits uint) (string, error) {
-	sharedSecret, err := makeSharedSecret(b.client, contact)
+func (b *client) GenerateTotpForContact(contact *models.Contact, period, digits uint) (string, error) {
+	sharedSecret, err := makeSharedSecret(b.walletClient, contact)
 	if err != nil {
 		return "", fmt.Errorf("generateTotpForContact: error when making shared: %w", err)
 	}
@@ -48,8 +48,8 @@ func (b *walletClient) GenerateTotpForContact(contact *models.Contact, period, d
 }
 
 // ValidateTotpForContact validates a TOTP for a contact.
-func (b *walletClient) ValidateTotpForContact(contact *models.Contact, passcode, requesterPaymail string, period, digits uint) (bool, error) {
-	sharedSecret, err := makeSharedSecret(b.client, contact)
+func (b *client) ValidateTotpForContact(contact *models.Contact, passcode, requesterPaymail string, period, digits uint) (bool, error) {
+	sharedSecret, err := makeSharedSecret(b.walletClient, contact)
 	if err != nil {
 		return false, fmt.Errorf("validateTotpForContact: error when making shared secret: %w", err)
 	}
@@ -74,7 +74,7 @@ func makeSharedSecret(client *wallet.Client, contact *models.Contact) ([]byte, e
 
 func getSharedSecretFactors(client *wallet.Client, contact *models.Contact) (*ec.PrivateKey, *ec.PublicKey, error) {
 	// Retrieve xPriv from client or configuration.
-	xPriv := client.XPriv()
+	xPriv := client.GetXPriv()
 	if xPriv == nil {
 		return nil, nil, ErrMissingXpriv
 	}

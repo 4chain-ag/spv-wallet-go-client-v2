@@ -10,6 +10,10 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
@@ -20,9 +24,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/go-resty/resty/v2"
 )
 
 // Config holds configuration settings for establishing a connection and handling
@@ -470,12 +471,12 @@ func newRestyClient(cfg Config, auth authenticator) *resty.Client {
 		})
 }
 
-// GetXPriv retrieves the xPriv (extended private key) associated with the client.
-func (c *Client) GetXPriv() *bip32.ExtendedKey {
+// ClientXPriv retrieves the xPriv (extended private key) associated with the client.
+func (c *Client) ClientXPriv() *bip32.ExtendedKey {
 	return c.xPriv
 }
 
-// GetXPub retrieves the xPub (extended public key) associated with the client.
-func (c *Client) GetXPub() *bip32.ExtendedKey {
+// ClientXPub retrieves the xPub (extended public key) associated with the client.
+func (c *Client) ClientXPub() *bip32.ExtendedKey {
 	return c.xPub
 }

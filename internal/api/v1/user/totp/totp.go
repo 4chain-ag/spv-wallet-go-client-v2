@@ -74,7 +74,7 @@ func makeSharedSecret(client *wallet.Client, contact *models.Contact) ([]byte, e
 
 func getSharedSecretFactors(client *wallet.Client, contact *models.Contact) (*ec.PrivateKey, *ec.PublicKey, error) {
 	// Retrieve xPriv from client or configuration.
-	xPriv := client.GetXPriv()
+	xPriv := client.ClientXPriv()
 	if xPriv == nil {
 		return nil, nil, ErrMissingXpriv
 	}

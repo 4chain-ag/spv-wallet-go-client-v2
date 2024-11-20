@@ -8,17 +8,18 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+
+	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 )
 
 const (
-	// TotpDefaultPeriod - Default number of seconds a TOTP is valid for.
-	TotpDefaultPeriod uint = 30
-	// TotpDefaultDigits - Default TOTP length
-	TotpDefaultDigits uint = 2
+	// DefaultPeriod - Default number of seconds a TOTP is valid for.
+	DefaultPeriod uint = 30
+	// DefaultDigits - Default TOTP length
+	DefaultDigits uint = 2
 )
 
 // Client handles TOTP generation and validation.
@@ -126,11 +127,11 @@ func convertPubKey(pubKey string) (*ec.PublicKey, error) {
 
 func getTotpOpts(period, digits uint) *totp.ValidateOpts {
 	if period == 0 {
-		period = TotpDefaultPeriod
+		period = DefaultPeriod
 	}
 
 	if digits == 0 {
-		digits = TotpDefaultDigits
+		digits = DefaultDigits
 	}
 
 	return &totp.ValidateOpts{

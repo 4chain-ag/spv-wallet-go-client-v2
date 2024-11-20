@@ -4,14 +4,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/stretchr/testify/require"
+
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateTotpForContact(t *testing.T) {
+func TestClient_GenerateTotpForContact(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// given
 		contact := models.Contact{PubKey: clienttest.PubKey}
@@ -38,7 +39,7 @@ func TestGenerateTotpForContact(t *testing.T) {
 	})
 }
 
-func TestValidateTotpForContact(t *testing.T) {
+func TestClient_ValidateTotpForContact(t *testing.T) {
 	cfg := client.Config{
 		Addr:    clienttest.TestAPIAddr,
 		Timeout: 5 * time.Second,

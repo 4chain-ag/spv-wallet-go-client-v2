@@ -3,6 +3,9 @@ package contacts_test
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"testing"
+
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts/contactstest"
@@ -12,8 +15,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"testing"
 )
 
 func TestContactsAPI_Contacts(t *testing.T) {

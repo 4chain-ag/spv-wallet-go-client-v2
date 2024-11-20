@@ -8,11 +8,10 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-
-	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 )
 
 const (

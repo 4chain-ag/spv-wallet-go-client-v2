@@ -4,12 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/stretchr/testify/require"
-
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/stretchr/testify/require"
 )
 
 func TestClient_GenerateTotpForContact(t *testing.T) {

@@ -10,11 +10,9 @@ tasks:
     desc: "Generate keys for SPV Wallet API access."
     silent: true
     cmds:
-      - echo "Generating keys - start"
       - echo "=================================================================="
       - go run ./keysgen/cmd/main.go
       - echo "=================================================================="
-      - echo "Generating keys - end"
 
   fetch-user-shared-config:
     desc: "Fetch user shared configuration."

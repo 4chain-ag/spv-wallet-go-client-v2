@@ -4,9 +4,8 @@ import (
 	"errors"
 	"net/url"
 
-	"github.com/bitcoin-sv/spv-wallet/models/filter"
-
 	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
 
 type QueryBuilderOption func(*QueryBuilder)

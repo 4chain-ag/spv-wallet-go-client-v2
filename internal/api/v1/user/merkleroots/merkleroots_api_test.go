@@ -42,12 +42,12 @@ func TestMerkleRootsAPI_MerkleRoots(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/merkleroots"
+	url := clienttest.TestAPIAddr + "/api/v1/merkleroots"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			spvWalletClient, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
+			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
 			got, err := spvWalletClient.MerkleRoots(context.Background())

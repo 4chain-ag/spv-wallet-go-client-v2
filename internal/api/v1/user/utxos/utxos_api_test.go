@@ -43,12 +43,12 @@ func TestUTXOAPI_UTXOs(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/utxos"
+	url := clienttest.TestAPIAddr + "/api/v1/utxos"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
+			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
 			got, err := wallet.UTXOs(context.Background())

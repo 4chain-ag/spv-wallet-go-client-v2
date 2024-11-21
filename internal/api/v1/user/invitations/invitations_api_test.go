@@ -41,12 +41,12 @@ func TestInvitationsAPI_AcceptInvitation(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/invitations/" + paymail + "/contacts"
+	url := clienttest.TestAPIAddr + "/api/v1/invitations/" + paymail + "/contacts"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
+			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// then:
 			err := wallet.AcceptInvitation(context.Background(), paymail)
@@ -82,12 +82,12 @@ func TestInvitationsAPI_RejectInvitation(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/invitations/" + paymail
+	url := clienttest.TestAPIAddr + "/api/v1/invitations/" + paymail
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodDelete, URL, tc.responder)
+			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:
 			err := wallet.RejectInvitation(context.Background(), paymail)

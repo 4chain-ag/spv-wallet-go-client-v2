@@ -45,12 +45,12 @@ func TestContactsAPI_Contacts(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/contacts"
+	url := clienttest.TestAPIAddr + "/api/v1/contacts"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
+			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
 			got, err := wallet.Contacts(context.Background())
@@ -89,12 +89,12 @@ func TestContactsAPI_ContactWithPaymail(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/contacts/" + paymail
+	url := clienttest.TestAPIAddr + "/api/v1/contacts/" + paymail
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
+			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
 			got, err := wallet.ContactWithPaymail(context.Background(), paymail)
@@ -133,12 +133,12 @@ func TestContactsAPI_UpsertContact(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/contacts/" + paymail
+	url := clienttest.TestAPIAddr + "/api/v1/contacts/" + paymail
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodPut, URL, tc.responder)
+			transport.RegisterResponder(http.MethodPut, url, tc.responder)
 
 			// then:
 			got, err := wallet.UpsertContact(context.Background(), commands.UpsertContact{
@@ -179,12 +179,12 @@ func TestContactsAPI_RemoveContact(t *testing.T) {
 		},
 	}
 
-	URL := clienttest.TestAPIAddr + "/api/v1/contacts/" + paymail
+	url := clienttest.TestAPIAddr + "/api/v1/contacts/" + paymail
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := clienttest.GivenSPVWalletClient(t)
-			transport.RegisterResponder(http.MethodDelete, URL, tc.responder)
+			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:
 			err := wallet.RemoveContact(context.Background(), paymail)

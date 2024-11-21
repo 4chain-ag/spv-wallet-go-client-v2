@@ -11,7 +11,6 @@ import (
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
-	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/invitations"
@@ -303,10 +302,10 @@ func (c *Client) Transaction(ctx context.Context, ID string) (*response.Transact
 	return res, nil
 }
 
-// XPubAPI retrieves the complete xpub information for the current user.
+// XPub retrieves the complete xpub information for the current user.
 // The server's response is expected to be unmarshaled into a *response.Xpub struct.
 // If the request fails or the response cannot be decoded, an error is returned.
-func (c *Client) XPubAPI(ctx context.Context) (*response.Xpub, error) {
+func (c *Client) XPub(ctx context.Context) (*response.Xpub, error) {
 	res, err := c.xpubAPI.XPub(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve xpub information from the users API: %w", err)

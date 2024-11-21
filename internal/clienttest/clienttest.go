@@ -2,6 +2,7 @@ package clienttest
 
 import (
 	"encoding/hex"
+	"net/http"
 	"testing"
 	"time"
 
@@ -61,6 +62,33 @@ func GivenSPVWalletClient(t *testing.T) (*client.Client, *httpmock.MockTransport
 	}
 
 	return spv, transport
+}
+
+func GivenSPVWalletClientWithTransport(t *testing.T, transport http.RoundTripper) (*client.Client, *httpmock.MockTransport) {
+	t.Helper()
+
+	// Extract the wrapped MockTransport if it's a TransportWrapper
+	var mockTransport *httpmock.MockTransport
+	if wrapper, ok := transport.(*TransportWrapper); ok {
+		mockTransport = wrapper.MockTransport
+	} else if mt, ok := transport.(*httpmock.MockTransport); ok {
+		mockTransport = mt
+	} else {
+		t.Fatalf("expected transport to be of type *httpmock.MockTransport or *httpmockwrapper.TransportWrapper, got %T", transport)
+	}
+
+	cfg := client.Config{
+		Addr:      TestAPIAddr,
+		Timeout:   5 * time.Second,
+		Transport: transport,
+	}
+
+	spv, err := client.NewWithXPriv(cfg, UserXPriv)
+	if err != nil {
+		t.Fatalf("test helper - spv wallet client with xpriv: %s", err)
+	}
+
+	return spv, mockTransport
 }
 
 func MockPKI(t *testing.T, xpub string) string {

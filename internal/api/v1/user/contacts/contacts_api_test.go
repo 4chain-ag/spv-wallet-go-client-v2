@@ -214,7 +214,7 @@ func TestContactsAPI_ConfirmContact(t *testing.T) {
 				StatusCode: http.StatusBadRequest,
 				Code:       "invalid-data-format",
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusBadRequest,
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP POST /api/v1/contacts/%s/confirmation str response: 500", contact.Paymail): {
@@ -229,8 +229,9 @@ func TestContactsAPI_ConfirmContact(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			aliceClient, aliceTransport := clienttest.GivenSPVWalletClient(t)
-			aliceTransport.RegisterResponder(http.MethodPost, url, tc.responder)
+			wrappedTransport := clienttest.NewTransportWrapper()
+			aliceClient, _ := clienttest.GivenSPVWalletClientWithTransport(t, wrappedTransport)
+			wrappedTransport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			passcode, err := aliceClient.GenerateTotpForContact(contact, 3600, 6)
 			require.NoError(t, err)
@@ -238,6 +239,13 @@ func TestContactsAPI_ConfirmContact(t *testing.T) {
 			// then:
 			err = aliceClient.ConfirmContact(context.Background(), contact, passcode, contact.Paymail, 3600, 6)
 			require.ErrorIs(t, err, tc.expectedErr)
+
+			// Assert status code:
+			resp, respErr := wrappedTransport.GetResponse()
+			require.NoError(t, respErr)
+			require.NotNil(t, resp, "response should not be nil")
+			require.Equal(t, tc.statusCode, resp.StatusCode, "unexpected HTTP status code")
+
 		})
 	}
 }

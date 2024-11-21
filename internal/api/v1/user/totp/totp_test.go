@@ -4,11 +4,13 @@ import (
 	"testing"
 	"time"
 
-	client "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/stretchr/testify/require"
+
+	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 )
 
 func TestClient_GenerateTotpForContact(t *testing.T) {
@@ -34,7 +36,7 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 		_, err := wc.GenerateTotpForContact(&contact, 30, 2)
 
 		// then
-		require.ErrorIs(t, err, totp.ErrContactPubKeyInvalid)
+		require.ErrorIs(t, err, errors.ErrContactPubKeyInvalid)
 	})
 }
 

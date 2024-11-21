@@ -10,7 +10,12 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/invitations"
@@ -21,9 +26,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/go-resty/resty/v2"
 )
 
 // Config holds configuration settings for establishing a connection and handling
@@ -175,8 +177,7 @@ func (c *Client) RemoveContact(ctx context.Context, paymail string) error {
 	return nil
 }
 
-// ConfirmContact check the TOTP code and if it's ok, confirms user's contact using the user contacts API.
-// If the API request fails, an error is returned.
+// ConfirmContact checks the TOTP code and if it's ok, confirms user's contact using the user contacts API.
 func (c *Client) ConfirmContact(ctx context.Context, contact *models.Contact, passcode, requesterPaymail string, period, digits uint) error {
 	if err := c.ValidateTotpForContact(contact, passcode, requesterPaymail, period, digits); err != nil {
 		return fmt.Errorf("failed to validate TOTP for contact: %w", err)
@@ -426,12 +427,11 @@ func (c *Client) ValidateTotpForContact(contact *models.Contact, passcode, reque
 	if c.totp == nil {
 		return errors.New("totp client not initialized - xPriv authentication required")
 	}
-	return c.totp.ValidateTotpForContact(contact, passcode, requesterPaymail, period, digits)
+	if err := c.totp.ValidateTotpForContact(contact, passcode, requesterPaymail, period, digits); err != nil {
+		return fmt.Errorf("failed to validate TOTP for contact: %w", err)
+	}
+	return nil
 }
-
-// ErrUnrecognizedAPIResponse indicates that the response received from the SPV Wallet API
-// does not match the expected format or structure.
-var ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")
 
 func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
 	pk, err1 := ec.PrivateKeyFromWif(s)
@@ -488,6 +488,6 @@ func newRestyClient(cfg Config, auth authenticator) *resty.Client {
 				return spvError
 			}
 
-			return fmt.Errorf("%w: %s", ErrUnrecognizedAPIResponse, r.Body())
+			return fmt.Errorf("%w: %s", goclienterr.ErrUnrecognizedAPIResponse, r.Body())
 		})
 }

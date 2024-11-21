@@ -8,10 +8,12 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 )
 
 const (
@@ -76,7 +78,7 @@ func (b *Client) makeSharedSecret(contact *models.Contact) ([]byte, error) {
 
 func (b *Client) getSharedSecretFactors(contact *models.Contact) (*ec.PrivateKey, *ec.PublicKey, error) {
 	if b.xPriv == nil {
-		return nil, nil, ErrMissingXpriv
+		return nil, nil, errors.ErrMissingXpriv
 	}
 
 	// Derive private key from xPriv for PKI operations.
@@ -93,7 +95,7 @@ func (b *Client) getSharedSecretFactors(contact *models.Contact) (*ec.PrivateKey
 	// Convert contact's public key.
 	pubKey, err := convertPubKey(contact.PubKey)
 	if err != nil {
-		return nil, nil, ErrContactPubKeyInvalid
+		return nil, nil, errors.ErrContactPubKeyInvalid
 	}
 
 	return privKey, pubKey, nil

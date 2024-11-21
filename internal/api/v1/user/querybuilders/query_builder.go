@@ -5,6 +5,8 @@ import (
 	"net/url"
 
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
+
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 )
 
 type QueryBuilderOption func(*QueryBuilder)
@@ -56,7 +58,7 @@ func (q *QueryBuilder) Build() (*ExtendedURLValues, error) {
 	for _, builder := range q.builders {
 		values, err := builder.Build()
 		if err != nil {
-			return nil, errors.Join(err, ErrFilterQueryBuilder)
+			return nil, errors.Join(err, goclienterr.ErrFilterQueryBuilder)
 		}
 
 		if len(values) > 0 {
@@ -75,5 +77,3 @@ func NewQueryBuilder(opts ...QueryBuilderOption) *QueryBuilder {
 
 	return &qb
 }
-
-var ErrFilterQueryBuilder = errors.New("filter query builder - build operation failure")

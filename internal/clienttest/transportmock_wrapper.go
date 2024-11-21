@@ -35,7 +35,10 @@ func (tw *TransportWrapper) RoundTrip(req *http.Request) (*http.Response, error)
 	tw.lastResponse = resp
 	tw.lastError = err
 
-	return resp, fmt.Errorf("Round trip error - %w", err)
+	if err != nil {
+		return resp, fmt.Errorf("Round trip error - %w", err)
+	}
+	return resp, nil
 }
 
 // GetResponse retrieves the last response and error.

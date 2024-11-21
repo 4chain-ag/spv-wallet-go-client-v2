@@ -1,6 +1,7 @@
 package clienttest
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -34,7 +35,7 @@ func (tw *TransportWrapper) RoundTrip(req *http.Request) (*http.Response, error)
 	tw.lastResponse = resp
 	tw.lastError = err
 
-	return resp, err
+	return resp, fmt.Errorf("Round trip error - %w", err)
 }
 
 // GetResponse retrieves the last response and error.

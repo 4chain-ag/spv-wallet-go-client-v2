@@ -54,3 +54,20 @@ func GivenSPVWalletClient(t *testing.T) (*client.Client, *httpmock.MockTransport
 
 	return spv, transport
 }
+
+func GivenSPVAdminAPI(t *testing.T) (*client.AdminAPI, *httpmock.MockTransport) {
+	t.Helper()
+	transport := httpmock.NewMockTransport()
+	cfg := client.Config{
+		Addr:      TestAPIAddr,
+		Timeout:   5 * time.Second,
+		Transport: transport,
+	}
+
+	spv, err := client.NewAdminAPI(cfg, UserXPub)
+	if err != nil {
+		t.Fatalf("test helper - spv wallet client with xpriv: %s", err)
+	}
+
+	return spv, transport
+}

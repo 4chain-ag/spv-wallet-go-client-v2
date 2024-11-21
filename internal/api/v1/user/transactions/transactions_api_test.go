@@ -8,7 +8,7 @@ import (
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions/transactionstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 	"github.com/bitcoin-sv/spv-wallet/models"

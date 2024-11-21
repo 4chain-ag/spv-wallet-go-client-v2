@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/go-resty/resty/v2"
 )

@@ -46,11 +46,10 @@ func NewDefaultConfig(addr string) Config {
 	}
 }
 
-// Client provides methods for user-related and admin-related APIs.
+// Client provides methods for user-related APIs.
 // This struct is designed to abstract and simplify the process of making HTTP calls
 // to the relevant endpoints. By utilizing this Client struct, developers can easily
-// interact with both user and admin APIs without needing to manage the details
-// of the HTTP requests and responses directly.
+// interact with user APIs without needing to manage the details of the HTTP requests and responses directly.
 type Client struct {
 	xpubAPI         *users.XPubAPI
 	accessKeyAPI    *users.AccessKeyAPI

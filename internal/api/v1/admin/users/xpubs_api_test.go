@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/users/userstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: 1. Update test case to verify status code and response.
+// TODO: 2. Add missing test for XPub method.
 func TestXPubsAPI_XPubs(t *testing.T) {
 	tests := map[string]struct {
 		code             int
@@ -32,7 +34,7 @@ func TestXPubsAPI_XPubs(t *testing.T) {
 			responder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/admin/users str response: 500": {
-			expectedErr: client.ErrUnrecognizedAPIResponse,
+			expectedErr: errors.ErrUnrecognizedAPIResponse,
 			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},

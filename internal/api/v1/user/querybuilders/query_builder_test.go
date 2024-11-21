@@ -6,12 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet/models/filter"
-	"github.com/stretchr/testify/require"
-
 	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders/querybuilderstest"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
+	"github.com/stretchr/testify/require"
 )
 
 func TestQueryBuilder_Build(t *testing.T) {

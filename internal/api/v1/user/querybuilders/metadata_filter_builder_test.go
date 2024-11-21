@@ -4,10 +4,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMetadataFilterBuilder_Build(t *testing.T) {

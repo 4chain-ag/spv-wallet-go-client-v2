@@ -32,6 +32,7 @@ func (a *AdminAPI) CreateXPub(ctx context.Context, cmd *commands.CreateUserXpub)
 	if err != nil {
 		return nil, xpubs.HTTPErrorFormatter("failed to create XPub", err).FormatPostErr()
 	}
+
 	return res, nil
 }
 

@@ -50,7 +50,7 @@ func (a *API) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (*quer
 	)
 	params, err := queryBuilder.Build()
 	if err != nil {
-		return nil, fmt.Errorf("failed to build access keys query params: %w", err)
+		return nil, fmt.Errorf("failed to build user xpubs query params: %w", err)
 	}
 
 	var result queries.XPubPage

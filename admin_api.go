@@ -1,4 +1,4 @@
-package client
+package spvwallet
 
 import (
 	"context"
@@ -7,8 +7,10 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	xpubs "github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/users"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
@@ -28,7 +30,7 @@ type AdminAPI struct {
 func (a *AdminAPI) CreateXPub(ctx context.Context, cmd *commands.CreateUserXpub) (*response.Xpub, error) {
 	res, err := a.xpubsAPI.CreateXPub(ctx, cmd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create XPub record via Admin XPubs API: %w", err)
+		return nil, xpubs.HTTPErrorFormatter("failed to create XPub", err).FormatPostErr()
 	}
 	return res, nil
 }
@@ -45,7 +47,7 @@ func (a *AdminAPI) CreateXPub(ctx context.Context, cmd *commands.CreateUserXpub)
 func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (*queries.XPubPage, error) {
 	res, err := a.xpubsAPI.XPubs(ctx, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve XPubs via Admin XPubs API: %w", err)
+		return nil, xpubs.HTTPErrorFormatter("failed to retrieve XPubs page", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -54,7 +56,7 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 // NewAdminAPI initializes a new instance of AdminAPI.
 // It configures the API client using the provided configuration and xPub key for authentication.
 // If any step fails, an appropriate error is returned.
-func NewAdminAPI(cfg Config, xPub string) (*AdminAPI, error) {
+func NewAdminAPI(cfg config.Config, xPub string) (*AdminAPI, error) {
 	url, err := url.Parse(cfg.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse address as url.URL: %w", err)
@@ -70,6 +72,6 @@ func NewAdminAPI(cfg Config, xPub string) (*AdminAPI, error) {
 		return nil, fmt.Errorf("failed to initialize xPub authenticator: %w", err)
 	}
 
-	httpClient := newRestyClient(cfg, authenticator)
+	httpClient := restyutil.NewHTTPClient(cfg, authenticator)
 	return &AdminAPI{xpubsAPI: xpubs.NewAPI(url, httpClient)}, nil
 }

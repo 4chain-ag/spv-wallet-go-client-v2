@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/errutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
@@ -94,5 +95,13 @@ func NewAccessKeyAPI(url *url.URL, httpClient *resty.Client) *AccessKeyAPI {
 	return &AccessKeyAPI{
 		url:        url.JoinPath(route),
 		httpClient: httpClient,
+	}
+}
+
+func AccessKeysHTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
+	return &errutil.HTTPErrorFormatter{
+		Action: action,
+		API:    "User Access Keys API",
+		Err:    err,
 	}
 }

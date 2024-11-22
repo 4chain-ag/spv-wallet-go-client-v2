@@ -1,6 +1,8 @@
 package errors
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	// ErrMissingXpriv is returned when the xpriv is missing.

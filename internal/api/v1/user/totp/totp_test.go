@@ -5,6 +5,7 @@ import (
 	"time"
 
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/clienttest"
@@ -40,16 +41,16 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 }
 
 func TestClient_ValidateTotpForContact(t *testing.T) {
-	cfg := client.Config{
+	cfg := config.Config{
 		Addr:    clienttest.TestAPIAddr,
 		Timeout: 5 * time.Second,
 	}
 	t.Run("success", func(t *testing.T) {
 		// given
-		clientAlice, err := client.NewWithXPriv(cfg, clienttest.AliceXPriv)
+		clientAlice, err := client.NewUserAPIWithXPriv(cfg, clienttest.AliceXPriv)
 		require.NoError(t, err)
 
-		clientBob, err := client.NewWithXPriv(cfg, clienttest.BobXPriv)
+		clientBob, err := client.NewUserAPIWithXPriv(cfg, clienttest.BobXPriv)
 		require.NoError(t, err)
 
 		// and
@@ -78,7 +79,7 @@ func TestClient_ValidateTotpForContact(t *testing.T) {
 
 	t.Run("contact has invalid PubKey - returns error", func(t *testing.T) {
 		// given
-		sut, err := client.NewWithXPriv(cfg, clienttest.UserXPriv)
+		sut, err := client.NewUserAPIWithXPriv(cfg, clienttest.UserXPriv)
 		require.NoError(t, err)
 
 		// and

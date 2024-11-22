@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestXPubFilterBuilder_Test(t *testing.T) {
+func TestXPubFilterBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
 		filter         filter.XpubFilter
 		expectedParams url.Values

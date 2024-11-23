@@ -11,7 +11,7 @@ tasks:
     silent: true
     cmds:
       - echo "=================================================================="
-      - go run ./keysgen/cmd/main.go
+      - go run ../walletkeys/cmd/main.go
       - echo "=================================================================="
 
   fetch-user-shared-config:

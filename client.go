@@ -27,6 +27,11 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+type MerkleRootsDB interface {
+	GetLastMerkleRoot() string
+	SaveMerkleRoots([]models.MerkleRoot) error
+}
+
 // Config holds configuration settings for establishing a connection and handling
 // request details in the application.
 type Config struct {
@@ -61,7 +66,6 @@ type Client struct {
 	transactionsAPI *transactions.API
 	utxosAPI        *utxos.API
 	totp            *totp.Client
-	merkleRoot      *merkleroots.Client
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -436,16 +440,16 @@ func (c *Client) ValidateTotpForContact(contact *models.Contact, passcode, reque
 	return nil
 }
 
-// SyncMerkleRoots synchronizes Merkle roots known to the SPV Wallet with the client database.
-// This method sends a series of HTTP GET requests to the "/merkleroots" endpoint, fetching
-// Merkle roots and storing them in the client database. The process continues until all
-func (c *Client) SyncMerkleRoots(ctx context.Context, repo merkleroots.MerkleRootsRepository) error {
-	if c.merkleRoot == nil {
-		return errors.New("merkle root client not initialized - xPriv authentication required")
-	}
-	if err := c.merkleRoot.SyncMerkleRoots(ctx, repo); err != nil {
+func (c *Client) SetMerkleRootsDB(db MerkleRootsDB) {
+	c.merkleRootsAPI.SetDB(db)
+}
+
+func (c *Client) SyncMerkleRoots(ctx context.Context) error {
+	err := c.merkleRootsAPI.SyncMerkleRoots(ctx)
+	if err != nil {
 		return fmt.Errorf("failed to sync Merkle roots: %w", err)
 	}
+
 	return nil
 }
 

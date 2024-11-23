@@ -1,6 +1,8 @@
 package errors
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	// ErrMissingXpriv is returned when the xpriv is missing.
@@ -18,6 +20,6 @@ var (
 	ErrUnrecognizedAPIResponse = errors.New("unrecognized response from API")
 	// ErrSyncMerkleRootsTimeout is returned when the SyncMerkleRoots operation times out.
 	ErrSyncMerkleRootsTimeout = errors.New("SyncMerkleRoots operation timed out")
-	// ErrStaleLastEvaluatedKey is returned when the last evaluated key has not changed between requests,
+	// ErrStaleLastEvaluatedKey is returned when the last evaluated key has not changed between requests.
 	ErrStaleLastEvaluatedKey = errors.New("the last evaluated key has not changed between requests, indicating a possible loop or synchronization issue.")
 )

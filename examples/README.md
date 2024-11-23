@@ -5,7 +5,7 @@ the wallet client package during interaction wit the SPV Wallet API.
 
 1. [Before you run](#before-you-run)
 1. [How to run example](#how-to-run-an-example)
-1. [Authorization](#authorization)
+1. [Authorization](#authroization)
 
 ## Before you run
 
@@ -16,7 +16,7 @@ the wallet client package during interaction wit the SPV Wallet API.
 -   SPV Wallet go client instance is properly created and configured.
 
 > [!TIP]
-> To verify Taskfile installation run: `task`, command in the terminal.
+> To verify Taskfile installation run: `task` command in the terminal.
 
 ```
 task: [default] task --list
@@ -148,4 +148,4 @@ task name_of_the_example
 ```
 
  > [!TIP]
-> To verify Taskfile installation run: `task`, command in the terminal.
+> To verify Taskfile installation run: `task` command in the terminal.

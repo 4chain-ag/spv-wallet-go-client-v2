@@ -148,4 +148,4 @@ task name_of_the_example
 ```
 
  > [!TIP]
-> To see all available commands run: task in the terminal.
+> To verify Taskfile installation run: `task`, command in the terminal.

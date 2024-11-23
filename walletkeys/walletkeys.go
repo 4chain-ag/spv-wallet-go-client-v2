@@ -8,7 +8,10 @@ import (
 	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 )
 
-const DefaultEntropy = 128 // The bit size must be a multiple of 32 and fall within the inclusive range of {128, 256}.
+// DefaultEntropy defines the default entropy (bit size) used for cryptographic purposes.
+// The value must be a multiple of 32 and within the inclusive range of {128, 256}.
+// It represents the default level of entropy for key generation or similar operations.
+const DefaultEntropy = 128
 
 // Keys represents a set of hierarchical deterministic (HD) keys,
 // including the extended private key (XPriv) and extended public key (XPub).

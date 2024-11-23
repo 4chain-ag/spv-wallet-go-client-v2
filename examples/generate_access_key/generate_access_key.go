@@ -6,8 +6,8 @@ import (
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
-	"github.com/bitcoin-sv/spv-wallet-go-client/docs/examples"
-	"github.com/bitcoin-sv/spv-wallet-go-client/docs/examples/exampleutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/examples"
+	"github.com/bitcoin-sv/spv-wallet-go-client/examples/exampleutil"
 )
 
 func main() {

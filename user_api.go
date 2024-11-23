@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
@@ -19,6 +18,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/users"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
@@ -26,10 +26,16 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// UserAPI provides methods for user-related APIs.
-// This struct is designed to abstract and simplify the process of making HTTP calls
-// to the relevant endpoints. By utilizing this UserAPI struct, developers can easily
-// interact with user APIs without needing to manage the details of the HTTP requests and responses directly.
+// UserAPI provides methods for interacting with user-related APIs.
+// It abstracts the details of HTTP request and response handling,
+// simplifying interaction with the endpoints.
+//
+// A zero-value UserAPI is not usable. Use one of the constructors
+// (e.g., NewUserAPIWithAccessKey, NewUserAPIWithXPriv, or NewUserAPIWithXPub)
+// to create a properly initialized instance.
+//
+// UserAPI methods may return wrapped errors, including models.SPVError or
+// ErrUnrecognizedAPIResponse, depending on the behavior of the SPV Wallet API.
 type UserAPI struct {
 	xpubAPI         *users.XPubAPI
 	accessKeyAPI    *users.AccessKeyAPI
@@ -43,12 +49,11 @@ type UserAPI struct {
 }
 
 // Contacts retrieves a paginated list of user contacts from the user contacts API.
-// The API response includes user contacts along with pagination details, such as
-// the current page number, sort order, and the field used for sorting (sortBy).
 //
-// Optional query parameters can be provided via query options. The response is
-// unmarshaled into a *queries.UserContactsPage struct. If the API request fails
-// or the response cannot be decoded, an error is returned.
+// The response includes contact data along with pagination details, such as the
+// current page, sort order, and sortBy field. Optional query parameters can be
+// provided using query options. The result is unmarshaled into a *queries.UserContactsPage.
+// Returns an error if the API request fails or the response cannot be decoded.
 func (u *UserAPI) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
 	res, err := u.contactsAPI.Contacts(ctx, contactOpts...)
 	if err != nil {
@@ -58,9 +63,9 @@ func (u *UserAPI) Contacts(ctx context.Context, contactOpts ...queries.ContactQu
 	return res, nil
 }
 
-// ContactWithPaymail retrieves a specific user contact by their paymail address.
-// The response is unmarshaled into a *response.Contact struct. If the API request
-// fails or the response cannot be decoded, an error is returned.
+// ContactWithPaymail retrieves a user contact by their paymail address.
+// The response is unmarshaled into a *response.Contact.
+// Returns an error if the API request fails or the response cannot be decoded.
 func (u *UserAPI) ContactWithPaymail(ctx context.Context, paymail string) (*response.Contact, error) {
 	res, err := u.contactsAPI.ContactWithPaymail(ctx, paymail)
 	if err != nil {
@@ -70,9 +75,9 @@ func (u *UserAPI) ContactWithPaymail(ctx context.Context, paymail string) (*resp
 	return res, nil
 }
 
-// UpsertContact adds or updates a user contact through the user contacts API.
-// The response is unmarshaled into a *response.Contact struct. If the API request
-// fails or the response cannot be decoded, an error is returned.
+// UpsertContact adds or updates a user contact via the user contacts API.
+// The response is unmarshaled into a *response.Contact.
+// Returns an error if the API request fails or the response cannot be decoded.
 func (u *UserAPI) UpsertContact(ctx context.Context, cmd commands.UpsertContact) (*response.Contact, error) {
 	res, err := u.contactsAPI.UpsertContact(ctx, cmd)
 	if err != nil {
@@ -82,8 +87,9 @@ func (u *UserAPI) UpsertContact(ctx context.Context, cmd commands.UpsertContact)
 	return res, nil
 }
 
-// RemoveContact deletes a user contact using the user contacts API.
-// If the API request fails, an error is returned.
+// RemoveContact deletes a user contact with the given paymail via the user contacts API.
+// Returns an error if the API request fails or the response cannot be decoded.
+// A nil error indicates the deleting contact was successful.
 func (u *UserAPI) RemoveContact(ctx context.Context, paymail string) error {
 	err := u.contactsAPI.RemoveContact(ctx, paymail)
 	if err != nil {
@@ -107,8 +113,8 @@ func (u *UserAPI) ConfirmContact(ctx context.Context, contact *models.Contact, p
 	return nil
 }
 
-// UnconfirmContact unconfirms a user contact using the user contacts API.
-// If the API request fails, an error is returned.
+// UnconfirmContact unconfirms a user contact with the given paymail via the user contacts API.
+// // Returns an error if the API request fails or the response cannot be decoded. A nil error indicates the deleting confirmation was successful.
 func (u *UserAPI) UnconfirmContact(ctx context.Context, paymail string) error {
 	err := u.contactsAPI.UnconfirmContact(ctx, paymail)
 	if err != nil {
@@ -118,8 +124,8 @@ func (u *UserAPI) UnconfirmContact(ctx context.Context, paymail string) error {
 	return nil
 }
 
-// AcceptInvitation accepts a contact invitation using the user invitations API.
-// If the API request fails, an error is returned.
+// AcceptInvitation accepts a user contact with the given paymail via the user contacts API.
+// // Returns an error if the API request fails or the response cannot be decoded. A nil error indicates the acceptation was successful.
 func (u *UserAPI) AcceptInvitation(ctx context.Context, paymail string) error {
 	err := u.invitationsAPI.AcceptInvitation(ctx, paymail)
 	if err != nil {
@@ -129,8 +135,9 @@ func (u *UserAPI) AcceptInvitation(ctx context.Context, paymail string) error {
 	return nil
 }
 
-// RejectInvitation rejects a contact invitation using the user invitations API.
-// If the API request fails, an error is returned.
+// RejectInvitation rejects a user contact with the given paymail via the user contacts API.
+// Returns an error if the API request fails or the response cannot be decoded.
+// A nil error indicates the rejection was successful.
 func (u *UserAPI) RejectInvitation(ctx context.Context, paymail string) error {
 	err := u.invitationsAPI.RejectInvitation(ctx, paymail)
 	if err != nil {
@@ -140,10 +147,9 @@ func (u *UserAPI) RejectInvitation(ctx context.Context, paymail string) error {
 	return nil
 }
 
-// SharedConfig retrieves the shared configuration from the user configurations API.
-// This method constructs an HTTP GET request to the "api/v1/configs/shared" endpoint and expects
-// a response that can be unmarshaled into the response.SharedConfig struct. If the request fails
-// or the response cannot be decoded, an error will be returned.
+// SharedConfig retrieves the shared configuration via the user configurations API.
+// The response is unmarshaled into a response.SharedConfig.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
 	res, err := u.configsAPI.SharedConfig(ctx)
 	if err != nil {
@@ -154,8 +160,7 @@ func (u *UserAPI) SharedConfig(ctx context.Context) (*response.SharedConfig, err
 }
 
 // DraftTransaction creates a new draft transaction using the user transactions API.
-// This method sends an HTTP POST request to the "/draft" endpoint and expects
-// a response that can be unmarshaled into a response.DraftTransaction struct.
+// The response is expected to be unmarshaled into a *response.DraftTransaction struct.
 // If the request fails or the response cannot be decoded, an error is returned.
 func (u *UserAPI) DraftTransaction(ctx context.Context, cmd *commands.DraftTransaction) (*response.DraftTransaction, error) {
 	res, err := u.transactionsAPI.DraftTransaction(ctx, cmd)
@@ -166,10 +171,9 @@ func (u *UserAPI) DraftTransaction(ctx context.Context, cmd *commands.DraftTrans
 	return res, nil
 }
 
-// RecordTransaction submits a transaction for recording using the user transactions API.
-// This method sends an HTTP POST request to the "/transactions" endpoint, expecting
-// a response that can be unmarshaled into a response.Transaction struct.
-// If the request fails or the response cannot be decoded, an error is returned.
+// RecordTransaction submits a transaction for recording via the user transactions API.
+// The response is unmarshaled into a *response.Transaction.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) RecordTransaction(ctx context.Context, cmd *commands.RecordTransaction) (*response.Transaction, error) {
 	res, err := u.transactionsAPI.RecordTransaction(ctx, cmd)
 	if err != nil {
@@ -180,10 +184,9 @@ func (u *UserAPI) RecordTransaction(ctx context.Context, cmd *commands.RecordTra
 	return res, nil
 }
 
-// UpdateTransactionMetadata updates the metadata of a transaction using the user transactions API.
-// This method sends an HTTP PATCH request with updated metadata and expects a response
-// that can be unmarshaled into a response.Transaction struct.
-// If the request fails or the response cannot be decoded, an error is returned.
+// UpdateTransactionMetadata updates the metadata of a transaction via the user transactions API.
+// The response is expected to be unmarshaled into a *response.Transaction struct.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) UpdateTransactionMetadata(ctx context.Context, cmd *commands.UpdateTransactionMetadata) (*response.Transaction, error) {
 	res, err := u.transactionsAPI.UpdateTransactionMetadata(ctx, cmd)
 	if err != nil {
@@ -194,13 +197,13 @@ func (u *UserAPI) UpdateTransactionMetadata(ctx context.Context, cmd *commands.U
 	return res, nil
 }
 
-// Transactions retrieves a paginated list of transactions from the user transactions API.
+// Transactions retrieves a paginated list of transactions via the user transactions API.
 // The returned response includes transactions and pagination details, such as the page number,
 // sort order, and sorting field (sortBy).
 //
 // This method allows optional query parameters to be applied via the provided query options.
-// The response is expected to unmarshal into a *response.PageModel[response.Transaction] struct.
-// If the API request fails or the response cannot be decoded successfully, an error is returned.
+// The response is expected to be to unmarshal into a *response.PageModel[response.Transaction] struct.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) Transactions(ctx context.Context, opts ...queries.TransactionsQueryOption) (*queries.TransactionPage, error) {
 	res, err := u.transactionsAPI.Transactions(ctx, opts...)
 	if err != nil {
@@ -210,9 +213,9 @@ func (u *UserAPI) Transactions(ctx context.Context, opts ...queries.Transactions
 	return res, nil
 }
 
-// Transaction retrieves a specific transaction by its ID using the user transactions API.
-// This method expects a response that can be unmarshaled into a response.Transaction struct.
-// If the request fails or the response cannot be decoded, an error is returned.
+// Transaction retrieves a specific transaction by its ID via the user transactions API.
+// The response is expected to be unmarshaled into a *response.Transaction struct.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) Transaction(ctx context.Context, ID string) (*response.Transaction, error) {
 	res, err := u.transactionsAPI.Transaction(ctx, ID)
 	if err != nil {
@@ -223,9 +226,9 @@ func (u *UserAPI) Transaction(ctx context.Context, ID string) (*response.Transac
 	return res, nil
 }
 
-// XPub retrieves the complete xpub information for the current user.
-// The server's response is expected to be unmarshaled into a *response.Xpub struct.
-// If the request fails or the response cannot be decoded, an error is returned.
+// XPub retrieves the full xpub information for the current user via the users API.
+// The response is unmarshaled into a *response.Xpub.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) XPub(ctx context.Context) (*response.Xpub, error) {
 	res, err := u.xpubAPI.XPub(ctx)
 	if err != nil {
@@ -235,9 +238,9 @@ func (u *UserAPI) XPub(ctx context.Context) (*response.Xpub, error) {
 	return res, nil
 }
 
-// UpdateXPubMetadata updates the metadata associated with the current user's xpub.
-// The server's response is expected to be unmarshaled into a *response.Xpub struct.
-// If the request fails or the response cannot be decoded, an error is returned.
+// UpdateXPubMetadata updates the metadata associated with the current user's xpub via the users API.
+// The response is unmarshaled into a *response.Xpub.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) UpdateXPubMetadata(ctx context.Context, cmd *commands.UpdateXPubMetadata) (*response.Xpub, error) {
 	res, err := u.xpubAPI.UpdateXPubMetadata(ctx, cmd)
 	if err != nil {
@@ -247,9 +250,9 @@ func (u *UserAPI) UpdateXPubMetadata(ctx context.Context, cmd *commands.UpdateXP
 	return res, nil
 }
 
-// GenerateAccessKey creates a new access key associated with the current user's xpub.
-// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
-// If the request fails or the response cannot be decoded, an error is returned.
+// GenerateAccessKey creates a new access key associated with the current user's xpub via the users access key API.
+// The response is unmarshaled into a *response.AccessKey.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
 	res, err := u.accessKeyAPI.GenerateAccessKey(ctx, cmd)
 	if err != nil {
@@ -259,13 +262,13 @@ func (u *UserAPI) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateA
 	return res, nil
 }
 
-// AccessKeys retrieves a paginated list of access keys from the user access keys API.
+// AccessKeys retrieves a paginated list of access keys via the user access keys API.
 // The response includes access keys and pagination details, such as the page number,
 // sort order, and sorting field (sortBy).
 //
 // This method allows optional query parameters to be applied via the provided query options.
 // The response is expected to unmarshal into a *queries.AccessKeyPage struct.
-// If the API request fails or the response cannot be decoded successfully, an error is returned.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) AccessKeys(ctx context.Context, accessKeyOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
 	res, err := u.accessKeyAPI.AccessKeys(ctx, accessKeyOpts...)
 	if err != nil {
@@ -275,9 +278,9 @@ func (u *UserAPI) AccessKeys(ctx context.Context, accessKeyOpts ...queries.Acces
 	return res, nil
 }
 
-// AccessKey retrieves the access key associated with the specified ID.
-// The server's response is expected to be unmarshaled into a *response.AccessKey struct.
-// If the request fails or the response cannot be decoded, an error is returned.
+// AccessKey retrieves the access key associated with the specified ID via the user access keys API.
+// The response is expected to be unmarshaled into a *response.AccessKey struct.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
 	res, err := u.accessKeyAPI.AccessKey(ctx, ID)
 	if err != nil {
@@ -288,8 +291,9 @@ func (u *UserAPI) AccessKey(ctx context.Context, ID string) (*response.AccessKey
 	return res, nil
 }
 
-// RevokeAccessKey revokes the access key associated with the given ID.
+// RevokeAccessKey revokes the access key associated with the given ID via the user access keys API.
 // If the request fails or the response cannot be processed, an error is returned.
+// A nil error indicates the revoking access key was successful.
 func (u *UserAPI) RevokeAccessKey(ctx context.Context, ID string) error {
 	err := u.accessKeyAPI.RevokeAccessKey(ctx, ID)
 	if err != nil {
@@ -300,13 +304,13 @@ func (u *UserAPI) RevokeAccessKey(ctx context.Context, ID string) error {
 	return nil
 }
 
-// UTXOs fetches a paginated list of UTXOs from the user UTXOs API.
+// UTXOs fetches a paginated list of UTXOs via the user UTXOs API.
 // The response includes UTXOs along with pagination details, such as page number,
 // sort order, and sorting field.
 //
 // Optional query parameters can be applied using the provided query options.
 // The response is unmarshaled into a *queries.UtxosPage struct.
-// Returns an error if the API request fails or the response cannot be decoded.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) UTXOs(ctx context.Context, opts ...queries.UtxoQueryOption) (*queries.UtxosPage, error) {
 	res, err := u.utxosAPI.UTXOs(ctx, opts...)
 	if err != nil {
@@ -316,7 +320,7 @@ func (u *UserAPI) UTXOs(ctx context.Context, opts ...queries.UtxoQueryOption) (*
 	return res, nil
 }
 
-// MerkleRoots retrieves a paginated list of Merkle roots from the user Merkle roots API.
+// MerkleRoots retrieves a paginated list of Merkle roots via the user Merkle roots API.
 // The API response includes Merkle roots along with pagination details, such as the current
 // page number, sort order, and sorting field (sortBy).
 //
@@ -324,8 +328,8 @@ func (u *UserAPI) UTXOs(ctx context.Context, opts ...queries.UtxoQueryOption) (*
 // query options. These options customize the behavior of the API request, such as setting
 // batch size or applying filters for pagination.
 //
-// The response is unmarshaled into a *queries.MerkleRootPage struct. If the API request fails
-// or the response cannot be successfully decoded, an error is returned.
+// The response is unmarshaled into a *queries.MerkleRootPage struct.
+// Returns an error if the request fails or the response cannot be decoded.
 func (u *UserAPI) MerkleRoots(ctx context.Context, opts ...queries.MerkleRootsQueryOption) (*queries.MerkleRootPage, error) {
 	res, err := u.merkleRootsAPI.MerkleRoots(ctx, opts...)
 	if err != nil {
@@ -340,10 +344,12 @@ func (u *UserAPI) GenerateTotpForContact(contact *models.Contact, period, digits
 	if u.totp == nil {
 		return "", errors.New("totp client not initialized - xPriv authentication required")
 	}
+
 	totp, err := u.totp.GenerateTotpForContact(contact, period, digits)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate TOTP for contact: %w", err)
 	}
+
 	return totp, nil
 }
 
@@ -352,9 +358,11 @@ func (u *UserAPI) ValidateTotpForContact(contact *models.Contact, passcode, requ
 	if u.totp == nil {
 		return errors.New("totp client not initialized - xPriv authentication required")
 	}
+
 	if err := u.totp.ValidateTotpForContact(contact, passcode, requesterPaymail, period, digits); err != nil {
 		return fmt.Errorf("failed to validate TOTP for contact: %w", err)
 	}
+
 	return nil
 }
 
@@ -371,7 +379,7 @@ func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
 	}
 
-	return newUserAPI(cfg, authenticator)
+	return initUserAPI(cfg, authenticator)
 }
 
 // NewUserAPIWithXPriv creates a new client instance using an extended private key (xPriv).
@@ -388,7 +396,7 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
 	}
 
-	userAPI, err := newUserAPI(cfg, authenticator)
+	userAPI, err := initUserAPI(cfg, authenticator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new client: %w", err)
 	}
@@ -402,7 +410,7 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 // to a PrivateKey. The resulting PrivateKey is used to sign requests made by the UserAPI instance
 // by setting the SignRequest flag to true.
 func NewUserAPIWithAccessKey(cfg config.Config, accessKey string) (*UserAPI, error) {
-	key, err := privateKeyFromHexOrWIF(accessKey)
+	key, err := cryptoutil.PrivateKeyFromHexOrWIF(accessKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to return private key from hex or WIF: %w", err)
 	}
@@ -412,28 +420,14 @@ func NewUserAPIWithAccessKey(cfg config.Config, accessKey string) (*UserAPI, err
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}
 
-	return newUserAPI(cfg, authenticator)
-}
-
-func privateKeyFromHexOrWIF(s string) (*ec.PrivateKey, error) {
-	pk, err1 := ec.PrivateKeyFromWif(s)
-	if err1 == nil {
-		return pk, nil
-	}
-
-	pk, err2 := ec.PrivateKeyFromHex(s)
-	if err2 != nil {
-		return nil, errors.Join(err1, err2)
-	}
-
-	return pk, nil
+	return initUserAPI(cfg, authenticator)
 }
 
 type authenticator interface {
 	Authenticate(r *resty.Request) error
 }
 
-func newUserAPI(cfg config.Config, auth authenticator) (*UserAPI, error) {
+func initUserAPI(cfg config.Config, auth authenticator) (*UserAPI, error) {
 	url, err := url.Parse(cfg.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)

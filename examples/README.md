@@ -21,25 +21,25 @@ the wallet client package during interaction wit the SPV Wallet API.
 ```
 task: [default] task --list
 task: Available tasks for this project:
-* default:                         Display all available tasks.
-* fetch-user-contact:              Fetch user contact with a given paymail.
-* fetch-user-contacts:             Fetch user contacts page.
-* fetch-user-merkleroots:          Fetch user Merkle roots page.
-* fetch-user-shared-config:        Fetch user shared configuration.
-* fetch-user-transaction:          Fetch user transaction with a given ID.
-* fetch-user-transactions:         Fetch user transactions page.
-* fetch-user-utxos:                Fetch user UTXOs page.
-* fetch-user-xpub:                 Fetch current authorized user's xpub info.
-* generate-keys:                   Generate keys for SPV Wallet API access.
-* user-contact-confirmation:       Confirm user contact with a given paymail address.
-* user-contact-remove:             Remove user contact with a given paymail address.
-* user-contact-unconfirm:          Unconfirm user contact with a given paymail address.
-* user-contact-upsert:             Upsert user contact with a given paymail address.
-* user-draft-transaction:          Create a user draft transaction.
-* user-invitation-accept:          Accept user contact invitation with a given paymail address.
-* user-invitation-reject:          Reject user contact invitation with a given paymail address.
-* user-transaction-metadata:       Update user transaction metadata with a given ID.
-* user-xpub-metadata:              Update current authorized user's xpub metadata.
+* default:                                Display all available tasks.
+* fetch-user-contact-by-paymail:          Fetch user contact by given paymail.
+* fetch-user-contacts:                    Fetch user contacts page.
+* fetch-user-merkleroots:                 Fetch user Merkle roots page.
+* fetch-user-shared-config:               Fetch user shared configuration.
+* fetch-user-transaction:                 Fetch user transaction with a given ID.
+* fetch-user-transactions:                Fetch user transactions page.
+* fetch-user-utxos:                       Fetch user UTXOs page.
+* fetch-user-xpub:                        Fetch current authorized user's xpub info.
+* generate-keys:                          Generate keys for SPV Wallet API access.
+* user-contact-confirmation:              Confirm user contact with a given paymail address.
+* user-contact-remove:                    Remove user contact with a given paymail address.
+* user-contact-unconfirm:                 Unconfirm user contact with a given paymail address.
+* user-contact-upsert:                    Upsert user contact with a given paymail address.
+* user-draft-transaction:                 Create a user draft transaction.
+* user-invitation-accept:                 Accept user contact invitation with a given paymail address.
+* user-invitation-reject:                 Reject user contact invitation with a given paymail address.
+* user-transaction-metadata-update:       Update user transaction metadata with a given ID.
+* user-xpub-metadata:                     Update current authorized user's xpub metadata.
 ```
 
 ## Authroization 

@@ -8,6 +8,7 @@ import (
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/docs/examples"
 	"github.com/bitcoin-sv/spv-wallet-go-client/docs/examples/exampleutil"
+	"github.com/bitcoin-sv/spv-wallet/models"
 )
 
 func main() {
@@ -17,7 +18,8 @@ func main() {
 	}
 
 	paymail := "john.doe@example.com"
-	err = spv.ConfirmContact(context.Background(), paymail)
+	code := "f22b4214-ab56-45c0-8399-60ed3a4ecf8e"
+	err = spv.ConfirmContact(context.Background(), &models.Contact{ID: "b2215c13-5690-469e-868f-e7bc240a0a23"}, code, paymail, 1, 8)
 	if err != nil {
 		log.Fatal(err)
 	}

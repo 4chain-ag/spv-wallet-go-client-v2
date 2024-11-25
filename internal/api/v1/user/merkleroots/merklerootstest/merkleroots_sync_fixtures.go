@@ -37,7 +37,7 @@ func CreateRepository(merkleRoots []models.MerkleRoot) *DB {
 }
 
 // sendJSONResponse sends a JSON response from the mock server.
-func sendJSONResponse(data interface{}, w *http.ResponseWriter) {
+func sendJSONResponse(data any, w *http.ResponseWriter) {
 	(*w).Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(*w).Encode(data); err != nil {
 		(*w).WriteHeader(http.StatusInternalServerError)

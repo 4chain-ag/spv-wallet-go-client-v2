@@ -70,7 +70,7 @@ func (wc *Client) SyncMerkleRoots(ctx context.Context, repo MerkleRootsRepositor
 			queryOpts := []queries.MerkleRootsQueryOption{
 				queries.MerkleRootsQueryWithLastEvaluatedKey(lastEvaluatedKey),
 			}
-			result, err := wc.merkleRootsAPI.MerkleRoots(ctx, queryOpts...)
+			result, err := wc.merkleRootsAPI.MerkleRoots(ctx, queries.MerkleRootsQueryWithLastEvaluatedKey(lastEvaluatedKey))
 			if err != nil {
 				if errors.Is(err, context.DeadlineExceeded) {
 					return goclienterr.ErrSyncMerkleRootsTimeout

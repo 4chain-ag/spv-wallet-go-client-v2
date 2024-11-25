@@ -85,7 +85,7 @@ func (wc *Client) SyncMerkleRoots(ctx context.Context, repo MerkleRootsRepositor
 
 			// Update the last evaluated key
 			lastEvaluatedKey = result.Page.LastEvaluatedKey
-			if previousLastEvaluatedKey == lastEvaluatedKey {
+			if lastEvaluatedKey != "" && previousLastEvaluatedKey == lastEvaluatedKey {
 				return goclienterr.ErrStaleLastEvaluatedKey
 			}
 

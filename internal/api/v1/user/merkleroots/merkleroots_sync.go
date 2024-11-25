@@ -7,10 +7,11 @@ import (
 	"net/url"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
-	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
-	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/go-resty/resty/v2"
+
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 )
 
 // MerkleRootsRepository is an interface responsible for storing synchronized MerkleRoots and retrieving the last evaluation key from the database.
@@ -67,9 +68,6 @@ func (wc *Client) SyncMerkleRoots(ctx context.Context, repo MerkleRootsRepositor
 			return goclienterr.ErrSyncMerkleRootsTimeout
 		default:
 			// Query the MerkleRoots API
-			queryOpts := []queries.MerkleRootsQueryOption{
-				queries.MerkleRootsQueryWithLastEvaluatedKey(lastEvaluatedKey),
-			}
 			result, err := wc.merkleRootsAPI.MerkleRoots(ctx, queries.MerkleRootsQueryWithLastEvaluatedKey(lastEvaluatedKey))
 			if err != nil {
 				if errors.Is(err, context.DeadlineExceeded) {

@@ -137,3 +137,25 @@ func TestMerkleRootsAPI_SyncMerkleRoots(t *testing.T) {
 		})
 	}
 }
+
+// TestMerkleRootsAPI_SyncMerkleRoots_PartialResponsesStoredSuccessfully tests the SyncMerkleRoots functionality
+func TestMerkleRootsAPI_SyncMerkleRoots_PartialResponsesStoredSuccessfully(t *testing.T) {
+	// given:
+	db := merklerootstest.CreateRepository([]models.MerkleRoot{})
+	url := clienttest.TestAPIAddr + "/api/v1/merkleroots"
+	spvWalletClient, transport := clienttest.GivenSPVWalletClient(t)
+
+	var expected []models.MerkleRoot
+	expected = append(expected, merklerootstest.FirstMerkleRootsPage().Content...)
+	expected = append(expected, merklerootstest.SecondMerkleRootsPage().Content...)
+	expected = append(expected, merklerootstest.ThirdMerkleRootsPage().Content...)
+
+	transport.RegisterResponder(http.MethodGet, url, merklerootstest.ResponderWithThreeMerkleRootPagesSuccess(t))
+
+	// when:
+	err := spvWalletClient.SyncMerkleRoots(context.Background(), db)
+
+	// then:
+	require.NoError(t, err)
+	require.Equal(t, expected, db.MerkleRoots)
+}

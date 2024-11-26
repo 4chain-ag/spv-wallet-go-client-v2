@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"slices"
+	"testing"
 	"time"
 
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/jarcoal/httpmock"
 )
 
 // DB simulates a storage of Merkle roots for testing.
@@ -241,5 +244,110 @@ func MockedMerkleRootsAPIResponseFn(lastMerkleRoot string) models.ExclusiveStart
 			TotalElements:    len(MockedSPVWalletData),
 			Size:             len(content),
 		},
+	}
+}
+
+func FirstMerkleRootsPage() *queries.MerkleRootPage {
+	return &queries.MerkleRootPage{
+		Content: []models.MerkleRoot{
+			{
+				BlockHeight: 0,
+				MerkleRoot:  "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+			},
+			{
+				BlockHeight: 1,
+				MerkleRoot:  "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098",
+			},
+			{
+				BlockHeight: 2,
+				MerkleRoot:  "9b0fc92260312ce44e74ef369f5c66bbb85848f2eddd5a7a1cde251e54ccfdd5",
+			},
+		},
+		Page: models.ExclusiveStartKeyPageInfo{
+			OrderByField:     Ptr("blockHeight"),
+			SortDirection:    Ptr("asc"),
+			TotalElements:    9,
+			Size:             3,
+			LastEvaluatedKey: "e4774f7a-eb99-4cac-956e-634d2aeccc93",
+		},
+	}
+}
+
+func SecondMerkleRootsPage() *queries.MerkleRootPage {
+	return &queries.MerkleRootPage{
+		Content: []models.MerkleRoot{
+			{
+				BlockHeight: 3,
+				MerkleRoot:  "999e1c837c76a1b7fbb7e57baf87b309960f5ffefbf2a9b95dd890602272f644",
+			},
+			{
+				BlockHeight: 4,
+				MerkleRoot:  "df2b060fa2e5e9c8ed5eaf6a45c13753ec8c63282b2688322eba40cd98ea067a",
+			},
+			{
+				BlockHeight: 5,
+				MerkleRoot:  "63522845d294ee9b0188ae5cac91bf389a0c3723f084ca1025e7d9cdfe481ce1",
+			},
+		},
+		Page: models.ExclusiveStartKeyPageInfo{
+			OrderByField:     Ptr("blockHeight"),
+			SortDirection:    Ptr("asc"),
+			TotalElements:    9,
+			Size:             3,
+			LastEvaluatedKey: "6bad63f5-8f2e-4756-aca9-cc9cb4a001c6",
+		},
+	}
+}
+
+func ThirdMerkleRootsPage() *queries.MerkleRootPage {
+	return &queries.MerkleRootPage{
+		Content: []models.MerkleRoot{
+			{
+				BlockHeight: 6,
+				MerkleRoot:  "20251a76e64e920e58291a30d4b212939aae976baca40e70818ceaa596fb9d37",
+			},
+			{
+				BlockHeight: 7,
+				MerkleRoot:  "8aa673bc752f2851fd645d6a0a92917e967083007d9c1684f9423b100540673f",
+			},
+			{
+				BlockHeight: 8,
+				MerkleRoot:  "a6f7f1c0dad0f2eb6b13c4f33de664b1b0e9f22efad5994a6d5b6086d85e85e3",
+			},
+		},
+		Page: models.ExclusiveStartKeyPageInfo{
+			OrderByField:     Ptr("blockHeight"),
+			SortDirection:    Ptr("asc"),
+			TotalElements:    9,
+			Size:             3,
+			LastEvaluatedKey: "09232c7e-ecf7-4e33-8feb-a32170c6e7b6",
+		},
+	}
+}
+
+func ResponderWithThreeMerkleRootPagesSuccess(t *testing.T) httpmock.Responder {
+	pages := map[int]*queries.MerkleRootPage{
+		0: FirstMerkleRootsPage(),
+		1: SecondMerkleRootsPage(),
+		2: ThirdMerkleRootsPage(),
+	}
+
+	var num int
+	return func(r *http.Request) (*http.Response, error) {
+		defer func() { num++ }()
+
+		if num < len(pages) {
+			res, err := httpmock.NewJsonResponse(http.StatusPartialContent, pages[num])
+			if err != nil {
+				t.Fatalf("test helper - failed to generate new json response: %s", err)
+			}
+			return res, nil
+		}
+
+		res, err := httpmock.NewJsonResponse(http.StatusOK, queries.MerkleRootPage{})
+		if err != nil {
+			t.Fatalf("test helper - failed to generate new json response: %s", err)
+		}
+		return res, nil
 	}
 }

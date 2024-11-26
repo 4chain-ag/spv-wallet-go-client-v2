@@ -17,7 +17,7 @@ func TestHTTPErrorFormatter_Format(t *testing.T) {
 		action = "retrieve users page"
 	)
 	wrappedErr := errors.New(http.StatusText(http.StatusInternalServerError))
-	expectedErr := fmt.Errorf(errutil.ErrMessageFormatSpecifier, http.MethodPost, action, API, wrappedErr)
+	expectedErr := fmt.Errorf("failed to send HTTP %s request to %s via %s: %w", http.MethodPost, action, API, wrappedErr)
 
 	formatter := errutil.HTTPErrorFormatter{
 		Action: action,

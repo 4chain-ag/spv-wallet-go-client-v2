@@ -5,8 +5,6 @@ import (
 	"net/http"
 )
 
-const ErrMessageFormatSpecifier = "failed to send HTTP %s request to %s via %s: %w"
-
 type HTTPErrorFormatter struct {
 	Action string
 	API    string
@@ -14,7 +12,7 @@ type HTTPErrorFormatter struct {
 }
 
 func (h HTTPErrorFormatter) Format(method string) error {
-	return fmt.Errorf(ErrMessageFormatSpecifier, method, h.Action, h.API, h.Err)
+	return fmt.Errorf("failed to send HTTP %s request to %s via %s: %w", method, h.Action, h.API, h.Err)
 }
 
 func (h HTTPErrorFormatter) FormatPutErr() error    { return h.Format(http.MethodPut) }

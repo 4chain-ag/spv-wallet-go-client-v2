@@ -20,4 +20,7 @@ var (
 	ErrSyncMerkleRootsTimeout = errors.New("SyncMerkleRoots operation timed out")
 	// ErrStaleLastEvaluatedKey is returned when the last evaluated key has not changed between requests,
 	ErrStaleLastEvaluatedKey = errors.New("the last evaluated key has not changed between requests, indicating a possible loop or synchronization issue.")
+
+	// ErrFailedToFetchMerkleRootsFromAPI is returned when the API fails to fetch merkle roots.
+	ErrFailedToFetchMerkleRootsFromAPI = errors.New("failed to fetch merkle roots from API")
 )

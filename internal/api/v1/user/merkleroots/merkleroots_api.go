@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/go-resty/resty/v2"
 )
 
 const route = "api/v1/merkleroots"

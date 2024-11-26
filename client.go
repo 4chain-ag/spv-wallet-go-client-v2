@@ -10,6 +10,10 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
@@ -22,9 +26,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/go-resty/resty/v2"
 )
 
 // Config holds configuration settings for establishing a connection and handling
@@ -61,7 +62,6 @@ type Client struct {
 	transactionsAPI *transactions.API
 	utxosAPI        *utxos.API
 	totp            *totp.Client
-	merkleRoot      *merkleroots.Client
 }
 
 // NewWithXPub creates a new client instance using an extended public key (xPub).
@@ -440,10 +440,7 @@ func (c *Client) ValidateTotpForContact(contact *models.Contact, passcode, reque
 // This method sends a series of HTTP GET requests to the "/merkleroots" endpoint, fetching
 // Merkle roots and storing them in the client database. The process continues until all
 func (c *Client) SyncMerkleRoots(ctx context.Context, repo merkleroots.MerkleRootsRepository) error {
-	if c.merkleRoot == nil {
-		return errors.New("merkle root client not initialized - xPriv authentication required")
-	}
-	if err := c.merkleRoot.SyncMerkleRoots(ctx, repo); err != nil {
+	if err := c.merkleRootsAPI.SyncMerkleRoots(ctx, repo); err != nil {
 		return fmt.Errorf("failed to sync Merkle roots: %w", err)
 	}
 	return nil

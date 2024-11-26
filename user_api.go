@@ -366,7 +366,7 @@ func (u *UserAPI) ValidateTotpForContact(contact *models.Contact, passcode, requ
 	return nil
 }
 
-// NewUserAPIWithXPub creates a new client instance using an extended public key (xPub).
+// NewUserAPIWithXPub creates a new UserAPI instance using an extended public key (xPub).
 // Requests made with this instance will not be signed, that's why we strongly recommend to use `NewUserAPIWithXPriv` or `NewUserAPIWithAccessKey` option instead.
 func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 	key, err := bip32.GetHDKeyFromExtendedPublicKey(xPub)
@@ -382,7 +382,7 @@ func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 	return initUserAPI(cfg, authenticator)
 }
 
-// NewUserAPIWithXPriv creates a new client instance using an extended private key (xPriv).
+// NewUserAPIWithXPriv creates a new UserAPI instance using an extended private key (xPriv).
 // Generates an HD key from the provided xPriv and sets up the UserAPI instance to sign requests
 // by setting the SignRequest flag to true. The generated HD key can be used for secure communications.
 func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
@@ -405,7 +405,7 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 	return userAPI, nil
 }
 
-// NewUserAPIWithAccessKey creates a new client instance using an access key.
+// NewUserAPIWithAccessKey creates a new UserAPI instance using an access key.
 // Function attempts to convert the provided access key from either hex or WIF format
 // to a PrivateKey. The resulting PrivateKey is used to sign requests made by the UserAPI instance
 // by setting the SignRequest flag to true.

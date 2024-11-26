@@ -8,7 +8,7 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	client "github.com/bitcoin-sv/spv-wallet-go-client"
+	spvwallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/jarcoal/httpmock"
 )
@@ -48,7 +48,7 @@ func PrivateKey(t *testing.T) *ec.PrivateKey {
 	return key
 }
 
-func GivenSPVWalletClient(t *testing.T) (*client.UserAPI, *httpmock.MockTransport) {
+func GivenSPVWalletClient(t *testing.T) (*spvwallet.UserAPI, *httpmock.MockTransport) {
 	t.Helper()
 	transport := httpmock.NewMockTransport()
 	cfg := config.Config{
@@ -57,7 +57,7 @@ func GivenSPVWalletClient(t *testing.T) (*client.UserAPI, *httpmock.MockTranspor
 		Transport: transport,
 	}
 
-	spv, err := client.NewUserAPIWithXPriv(cfg, UserXPriv)
+	spv, err := spvwallet.NewUserAPIWithXPriv(cfg, UserXPriv)
 	if err != nil {
 		t.Fatalf("test helper - spv wallet client with xpriv: %s", err)
 	}
@@ -65,7 +65,7 @@ func GivenSPVWalletClient(t *testing.T) (*client.UserAPI, *httpmock.MockTranspor
 	return spv, transport
 }
 
-func GivenSPVAdminAPI(t *testing.T) (*client.AdminAPI, *httpmock.MockTransport) {
+func GivenSPVAdminAPI(t *testing.T) (*spvwallet.AdminAPI, *httpmock.MockTransport) {
 	t.Helper()
 	transport := httpmock.NewMockTransport()
 	cfg := config.Config{
@@ -74,7 +74,7 @@ func GivenSPVAdminAPI(t *testing.T) (*client.AdminAPI, *httpmock.MockTransport) 
 		Transport: transport,
 	}
 
-	api, err := client.NewAdminAPI(cfg, UserXPub)
+	api, err := spvwallet.NewAdminAPIWithXPriv(cfg, UserXPriv)
 	if err != nil {
 		t.Fatalf("test helper - admin api with xPub: %s", err)
 	}
@@ -82,7 +82,7 @@ func GivenSPVAdminAPI(t *testing.T) (*client.AdminAPI, *httpmock.MockTransport) 
 	return api, transport
 }
 
-func GivenSPVWalletClientWithTransport(t *testing.T, transport http.RoundTripper) (*client.UserAPI, *httpmock.MockTransport) {
+func GivenSPVWalletClientWithTransport(t *testing.T, transport http.RoundTripper) (*spvwallet.UserAPI, *httpmock.MockTransport) {
 	t.Helper()
 
 	// Extract the wrapped MockTransport if it's a TransportWrapper
@@ -101,7 +101,7 @@ func GivenSPVWalletClientWithTransport(t *testing.T, transport http.RoundTripper
 		Transport: transport,
 	}
 
-	spv, err := client.NewUserAPIWithXPriv(cfg, UserXPriv)
+	spv, err := spvwallet.NewUserAPIWithXPriv(cfg, UserXPriv)
 	if err != nil {
 		t.Fatalf("test helper - spv wallet client with xpriv: %s", err)
 	}

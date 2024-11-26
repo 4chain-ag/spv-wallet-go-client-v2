@@ -60,15 +60,27 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 	return res, nil
 }
 
-// NewAdminAPI initializes a new instance of AdminAPI.
-// It configures the API client using the provided configuration and xPub key for authentication.
+// NewAdminAPIWithXPriv initializes a new instance of AdminAPI.
+// It configures the API client using the provided configuration and xPriv key for authentication.
 // If any step fails, an appropriate error is returned.
-func NewAdminAPI(cfg config.Config, xPub string) (*AdminAPI, error) {
-	url, err := url.Parse(cfg.Addr)
+func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
+	key, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse address as url.URL: %w", err)
+		return nil, fmt.Errorf("failed to generate HD key from xpriv: %w", err)
 	}
 
+	authenticator, err := auth.NewXprivAuthenticator(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize xPub authenticator: %w", err)
+	}
+
+	return initAdminAPI(cfg, authenticator)
+}
+
+// NewAdminWithXPub initializes a new instance of AdminAPI.
+// It configures the API client using the provided configuration and xPub key for authentication.
+// If any step fails, an appropriate error is returned.
+func NewAdminWithXPub(cfg config.Config, xPub string) (*AdminAPI, error) {
 	key, err := bip32.GetHDKeyFromExtendedPublicKey(xPub)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate HD key from xPub: %w", err)
@@ -79,6 +91,15 @@ func NewAdminAPI(cfg config.Config, xPub string) (*AdminAPI, error) {
 		return nil, fmt.Errorf("failed to initialize xPub authenticator: %w", err)
 	}
 
-	httpClient := restyutil.NewHTTPClient(cfg, authenticator)
+	return initAdminAPI(cfg, authenticator)
+}
+
+func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
+	url, err := url.Parse(cfg.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)
+	}
+
+	httpClient := restyutil.NewHTTPClient(cfg, auth)
 	return &AdminAPI{xpubsAPI: xpubs.NewAPI(url, httpClient)}, nil
 }

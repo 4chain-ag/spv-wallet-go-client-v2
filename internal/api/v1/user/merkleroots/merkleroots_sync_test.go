@@ -6,14 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/go-resty/resty/v2"
-	"github.com/stretchr/testify/require"
-
 	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots/merklerootstest"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/go-resty/resty/v2"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSyncMerkleRoots(t *testing.T) {

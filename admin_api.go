@@ -66,12 +66,12 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
 	key, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xpriv: %w", err)
+		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
 	}
 
 	authenticator, err := auth.NewXprivAuthenticator(key)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize xPub authenticator: %w", err)
+		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
 	}
 
 	return initAdminAPI(cfg, authenticator)

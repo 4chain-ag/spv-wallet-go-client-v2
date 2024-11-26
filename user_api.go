@@ -376,7 +376,7 @@ func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 
 	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
 	if err != nil {
-		return nil, fmt.Errorf("failed to intialized xpub authenticator: %w", err)
+		return nil, fmt.Errorf("failed to intialized xPub authenticator: %w", err)
 	}
 
 	return initUserAPI(cfg, authenticator)
@@ -388,12 +388,12 @@ func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 	key, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xpriv: %w", err)
+		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
 	}
 
 	authenticator, err := auth.NewXprivAuthenticator(key)
 	if err != nil {
-		return nil, fmt.Errorf("failed to intialized xpriv authenticator: %w", err)
+		return nil, fmt.Errorf("failed to intialized xPriv authenticator: %w", err)
 	}
 
 	userAPI, err := initUserAPI(cfg, authenticator)

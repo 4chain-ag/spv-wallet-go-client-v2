@@ -60,9 +60,11 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 	return res, nil
 }
 
-// NewAdminAPIWithXPriv initializes a new instance of AdminAPI.
-// It configures the API client using the provided configuration and xPriv key for authentication.
+// NewAdminAPIWithXPriv initializes a new AdminAPI instance using an extended private key (xPriv).
+// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
 // If any step fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will be securely signed.
 func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
 	key, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
@@ -77,9 +79,12 @@ func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
 	return initAdminAPI(cfg, authenticator)
 }
 
-// NewAdminWithXPub initializes a new instance of AdminAPI.
-// It configures the API client using the provided configuration and xPub key for authentication.
-// If any step fails, an appropriate error is returned.
+// NewAdminWithXPub initializes a new AdminAPI instance using an extended public key (xPub).
+// This function configures the API client with the provided configuration and uses the xPub key for authentication.
+// If any configuration or initialization step fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will not be signed.
+// For enhanced security, it is strongly recommended to use `NewAdminAPIWithXPriv` instead.
 func NewAdminWithXPub(cfg config.Config, xPub string) (*AdminAPI, error) {
 	key, err := bip32.GetHDKeyFromExtendedPublicKey(xPub)
 	if err != nil {

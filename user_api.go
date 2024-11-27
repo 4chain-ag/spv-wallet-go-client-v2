@@ -114,7 +114,7 @@ func (u *UserAPI) ConfirmContact(ctx context.Context, contact *models.Contact, p
 }
 
 // UnconfirmContact unconfirms a user contact with the given paymail via the user contacts API.
-// // Returns an error if the API request fails or the response cannot be decoded. A nil error indicates the deleting confirmation was successful.
+// Returns an error if the API request fails or the response cannot be decoded. A nil error indicates the deleting confirmation was successful.
 func (u *UserAPI) UnconfirmContact(ctx context.Context, paymail string) error {
 	err := u.contactsAPI.UnconfirmContact(ctx, paymail)
 	if err != nil {
@@ -125,7 +125,7 @@ func (u *UserAPI) UnconfirmContact(ctx context.Context, paymail string) error {
 }
 
 // AcceptInvitation accepts a user contact with the given paymail via the user contacts API.
-// // Returns an error if the API request fails or the response cannot be decoded. A nil error indicates the acceptation was successful.
+// Returns an error if the API request fails or the response cannot be decoded. A nil error indicates the acceptation was successful.
 func (u *UserAPI) AcceptInvitation(ctx context.Context, paymail string) error {
 	err := u.invitationsAPI.AcceptInvitation(ctx, paymail)
 	if err != nil {
@@ -366,8 +366,12 @@ func (u *UserAPI) ValidateTotpForContact(contact *models.Contact, passcode, requ
 	return nil
 }
 
-// NewUserAPIWithXPub creates a new UserAPI instance using an extended public key (xPub).
-// Requests made with this instance will not be signed, that's why we strongly recommend to use `NewUserAPIWithXPriv` or `NewUserAPIWithAccessKey` option instead.
+// NewUserAPIWithXPub initializes a new UserAPI instance using an extended public key (xPub).
+// This function configures the API client with the provided configuration and uses the xPub key for authentication.
+// If any configuration or initialization step fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will not be signed.
+// For enhanced security, it is strongly recommended to use `NewUserAPIWithXPriv` or `NewUserAPIWithAccessKey` instead.
 func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 	key, err := bip32.GetHDKeyFromExtendedPublicKey(xPub)
 	if err != nil {
@@ -382,9 +386,11 @@ func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 	return initUserAPI(cfg, authenticator)
 }
 
-// NewUserAPIWithXPriv creates a new UserAPI instance using an extended private key (xPriv).
-// Generates an HD key from the provided xPriv and sets up the UserAPI instance to sign requests
-// by setting the SignRequest flag to true. The generated HD key can be used for secure communications.
+// NewUserAPIWithXPriv initializes a new UserAPI instance using an extended private key (xPriv).
+// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
+// If any step fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will be securely signed.
 func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 	key, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
@@ -405,10 +411,11 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 	return userAPI, nil
 }
 
-// NewUserAPIWithAccessKey creates a new UserAPI instance using an access key.
-// Function attempts to convert the provided access key from either hex or WIF format
-// to a PrivateKey. The resulting PrivateKey is used to sign requests made by the UserAPI instance
-// by setting the SignRequest flag to true.
+// NewUserAPIWithAccessKey initializes a new UserAPI instance using an access key.
+// This function configures the API client and converts the provided access key from either hex or WIF format into a private key.
+// This private key is used for authentication. If any step in the process fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will be securely signed.
 func NewUserAPIWithAccessKey(cfg config.Config, accessKey string) (*UserAPI, error) {
 	key, err := cryptoutil.PrivateKeyFromHexOrWIF(accessKey)
 	if err != nil {

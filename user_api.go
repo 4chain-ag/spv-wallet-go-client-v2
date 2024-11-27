@@ -339,6 +339,18 @@ func (u *UserAPI) MerkleRoots(ctx context.Context, opts ...queries.MerkleRootsQu
 	return res, nil
 }
 
+// SyncMerkleRoots synchronizes Merkle roots known to the SPV Wallet with the client database.
+// This method sends a series of HTTP GET requests to the "/merkleroots" endpoint, fetching
+// Merkle roots and storing them in the client database. The process continues until all
+func (u *UserAPI) SyncMerkleRoots(ctx context.Context, repo merkleroots.MerkleRootsRepository) error {
+	err := u.merkleRootsAPI.SyncMerkleRoots(ctx, repo)
+	if err != nil {
+		return fmt.Errorf("failed to sync Merkle roots: %w", err)
+	}
+
+	return nil
+}
+
 // GenerateTotpForContact generates a TOTP code for the specified contact.
 func (u *UserAPI) GenerateTotpForContact(contact *models.Contact, period, digits uint) (string, error) {
 	if u.totp == nil {

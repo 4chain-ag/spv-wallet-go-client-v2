@@ -50,7 +50,7 @@ func TestAccessKeyAPI_GenerateAccessKey(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// then:
@@ -99,7 +99,7 @@ func TestAccessKeyAPI_AccessKey(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
@@ -143,7 +143,7 @@ func TestAccessKeyAPI_AccessKeys(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
@@ -186,7 +186,7 @@ func TestAccessKeyAPI_RevokeAccessKey(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:

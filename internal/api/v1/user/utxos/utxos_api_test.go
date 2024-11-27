@@ -47,7 +47,7 @@ func TestUTXOAPI_UTXOs(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:

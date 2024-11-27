@@ -48,7 +48,7 @@ func TestXPubAPI_UpdateXPubMetadata(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodPatch, url, tc.responder)
 
 			// then:
@@ -96,7 +96,7 @@ func TestXPubAPI_XPub(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:

@@ -45,7 +45,7 @@ func TestInvitationsAPI_AcceptInvitation(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// then:
@@ -86,7 +86,7 @@ func TestInvitationsAPI_RejectInvitation(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wallet, transport := spvwallettest.GivenSPVWalletClient(t)
+			wallet, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:

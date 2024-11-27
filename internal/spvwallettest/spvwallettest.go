@@ -48,7 +48,7 @@ func PrivateKey(t *testing.T) *ec.PrivateKey {
 	return key
 }
 
-func GivenSPVWalletClient(t *testing.T) (*spvwallet.UserAPI, *httpmock.MockTransport) {
+func GivenSPVUserAPI(t *testing.T) (*spvwallet.UserAPI, *httpmock.MockTransport) {
 	t.Helper()
 	transport := httpmock.NewMockTransport()
 	cfg := config.Config{

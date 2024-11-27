@@ -51,7 +51,7 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			spvWalletClient, transport := spvwallettest.GivenSPVWalletClient(t)
+			spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodPatch, url, tc.responder)
 
 			// then:
@@ -100,7 +100,7 @@ func TestTransactionsAPI_RecordTransaction(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			spvWalletClient, transport := spvwallettest.GivenSPVWalletClient(t)
+			spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// then:
@@ -143,7 +143,7 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			spvWalletClient, transport := spvwallettest.GivenSPVWalletClient(t)
+			spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// then:
@@ -190,7 +190,7 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			spvWalletClient, transport := spvwallettest.GivenSPVWalletClient(t)
+			spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
@@ -233,7 +233,7 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			spvWalletClient, transport := spvwallettest.GivenSPVWalletClient(t)
+			spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:

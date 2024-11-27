@@ -2,16 +2,28 @@ package merkleroots
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/errutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/go-resty/resty/v2"
 )
 
 const route = "api/v1/merkleroots"
+
+// MerkleRootsRepository is an interface responsible for storing synchronized MerkleRoots and retrieving the last evaluation key from the database.
+type MerkleRootsRepository interface {
+	// GetLastMerkleRoot should return the Merkle root with the highest height from your memory, or undefined if empty.
+	GetLastMerkleRoot() string
+	// SaveMerkleRoots should store newly synced merkle roots into your storage;
+	// NOTE: items are sorted in ascending order by block height.
+	SaveMerkleRoots(syncedMerkleRoots []models.MerkleRoot) error
+}
 
 type API struct {
 	url        *url.URL
@@ -55,5 +67,49 @@ func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
 		Action: action,
 		API:    "User Merkle roots API",
 		Err:    err,
+	}
+}
+
+func (a *API) SyncMerkleRoots(ctx context.Context, repo MerkleRootsRepository) error {
+	lastEvaluatedKey := repo.GetLastMerkleRoot()
+	previousLastEvaluatedKey := lastEvaluatedKey
+
+	for {
+		select {
+		case <-ctx.Done():
+			return goclienterr.ErrSyncMerkleRootsTimeout
+		default:
+			// Query the MerkleRoots API
+			result, err := a.MerkleRoots(ctx, queries.MerkleRootsQueryWithLastEvaluatedKey(lastEvaluatedKey))
+			if err != nil {
+				if errors.Is(err, context.DeadlineExceeded) {
+					return goclienterr.ErrSyncMerkleRootsTimeout
+				}
+				return fmt.Errorf("failed to fetch merkle roots from API: %w", err)
+			}
+
+			// Handle empty results
+			if len(result.Content) == 0 {
+				return nil
+			}
+
+			// Update the last evaluated key
+			lastEvaluatedKey = result.Page.LastEvaluatedKey
+			if lastEvaluatedKey != "" && previousLastEvaluatedKey == lastEvaluatedKey {
+				return goclienterr.ErrStaleLastEvaluatedKey
+			}
+
+			// Save fetched Merkle roots
+			err = repo.SaveMerkleRoots(result.Content)
+			if err != nil {
+				return fmt.Errorf("failed to save merkle roots: %w", err)
+			}
+
+			if lastEvaluatedKey == "" {
+				return nil
+			}
+
+			previousLastEvaluatedKey = lastEvaluatedKey
+		}
 	}
 }

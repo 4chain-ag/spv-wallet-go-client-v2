@@ -12,12 +12,12 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	transaction, err := spv.DraftTransaction(context.Background(), &commands.DraftTransaction{
+	transaction, err := usersAPI.DraftTransaction(context.Background(), &commands.DraftTransaction{
 		Config: response.TransactionConfig{
 			Outputs: []*response.TransactionOutput{
 				{

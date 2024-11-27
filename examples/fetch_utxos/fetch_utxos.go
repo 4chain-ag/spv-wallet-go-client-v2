@@ -10,12 +10,12 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	page, err := spv.UTXOs(context.Background())
+	page, err := usersAPI.UTXOs(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}

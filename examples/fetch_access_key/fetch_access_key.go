@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	accessKeyID := "35465782-e247-42dd-a2e7-a01ba5b56285"
-	accessKey, err := spv.AccessKey(context.Background(), accessKeyID)
+	accessKey, err := usersAPI.AccessKey(context.Background(), accessKeyID)
 	if err != nil {
 		log.Fatal(err)
 	}

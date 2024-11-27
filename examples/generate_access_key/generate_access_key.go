@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	ctx := context.Background()
-	accessKey, err := spv.GenerateAccessKey(ctx, &commands.GenerateAccessKey{
+	accessKey, err := usersAPI.GenerateAccessKey(ctx, &commands.GenerateAccessKey{
 		Metadata: map[string]any{"key": "value"},
 	})
 	if err != nil {

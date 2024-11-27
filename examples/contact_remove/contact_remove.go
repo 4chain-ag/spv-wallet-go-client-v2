@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	paymail := "john.doe@example.com"
-	err = spv.RemoveContact(context.Background(), paymail)
+	err = usersAPI.RemoveContact(context.Background(), paymail)
 	if err != nil {
 		log.Fatal(err)
 	}

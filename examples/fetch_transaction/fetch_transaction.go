@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	transactionID := "d291ac4c-04b3-48cc-a7e3-1338ac42810b"
-	transaction, err := spv.Transaction(context.Background(), transactionID)
+	transaction, err := usersAPI.Transaction(context.Background(), transactionID)
 	if err != nil {
 		log.Fatal(err)
 	}

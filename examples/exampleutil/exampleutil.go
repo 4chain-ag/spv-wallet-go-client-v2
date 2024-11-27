@@ -6,10 +6,10 @@ import (
 	"log"
 	"strings"
 
-	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 )
 
-var ExampleConfig = wallet.NewDefaultConfig("http://localhost:3003")
+var ExampleConfig = config.NewDefaultConfig("http://localhost:3003")
 
 func Print(s string, a any) {
 	fmt.Println(strings.Repeat("~", 100))

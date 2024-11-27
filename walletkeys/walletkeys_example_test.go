@@ -13,10 +13,9 @@ func ExampleRandomKeysWithMnemonic() {
 		log.Fatal(err)
 	}
 
-	inner := keys.Keys()
 	fmt.Println("Mnemonic: ", keys.Mnemonic())
-	fmt.Println("xPriv: ", inner.XPriv())
-	fmt.Println("XPub: ", inner.XPub())
+	fmt.Println("xPriv: ", keys.Keys.XPriv())
+	fmt.Println("XPub: ", keys.Keys.XPub())
 }
 
 func ExampleXPrivFromString() {

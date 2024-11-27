@@ -12,13 +12,13 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	paymail := "john.doe@example.com"
-	contact, err := spv.UpsertContact(context.Background(), commands.UpsertContact{
+	contact, err := usersAPI.UpsertContact(context.Background(), commands.UpsertContact{
 		FullName: "John Doe",
 		Metadata: map[string]any{
 			"key": "value",

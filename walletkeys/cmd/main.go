@@ -13,8 +13,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	inner := keys.Keys()
-	fmt.Println("XPriv: ", inner.XPriv())
-	fmt.Println("XPub: ", inner.XPub())
+	fmt.Println("XPriv: ", keys.Keys.XPriv())
+	fmt.Println("XPub: ", keys.Keys.XPub())
 	fmt.Println("Mnemonic: ", keys.Mnemonic())
 }

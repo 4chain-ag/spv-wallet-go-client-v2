@@ -4,8 +4,8 @@ In this directory you can find bunch of examples describing how to use
 the wallet client package during interaction wit the SPV Wallet API. 
 
 1. [Before you run](#before-you-run)
-1. [How to run example](#how-to-run-an-example)
 1. [Authorization](#authroization)
+1. [How to run example](#how-to-run-an-example)
 
 ## Before you run
 
@@ -64,10 +64,7 @@ Mnemonic:  mnemonic
 ==================================================================
 ```
 
-Once the keys are successfully generated, you can use one of two methods to create an SPV Wallet Go Client instance. 
-
-1. _NewWithXPub_
-1. _NewWithXPriv_
+## 
 
 > [!TIP]
 > Previously generated keys can be used as function parameters.

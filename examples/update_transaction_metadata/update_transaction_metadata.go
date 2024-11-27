@@ -12,13 +12,13 @@ import (
 )
 
 func main() {
-	spv, err := wallet.NewWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	transactionID := "86cafa5b-fdaa-4629-ae46-78d68d6a180b"
-	transaction, err := spv.UpdateTransactionMetadata(context.Background(), &commands.UpdateTransactionMetadata{
+	transaction, err := usersAPI.UpdateTransactionMetadata(context.Background(), &commands.UpdateTransactionMetadata{
 		ID:       transactionID,
 		Metadata: map[string]any{"new_key": "new_value"},
 	})

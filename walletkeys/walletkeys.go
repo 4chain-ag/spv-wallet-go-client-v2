@@ -29,15 +29,12 @@ func (k *Keys) XPub() string { return k.xPub }
 // KeysWithMnemonic extends the Keys struct by including the mnemonic phrase
 // used to generate the associated xPriv and XPub HD keys as strings.
 type KeysWithMnemonic struct {
-	keys     Keys
+	Keys
 	mnemonic string
 }
 
 // Mnemonic returns the mnemonic phrase used to generate the keys.
 func (k *KeysWithMnemonic) Mnemonic() string { return k.mnemonic }
-
-// Keys returns the associated Keys struct.
-func (k *KeysWithMnemonic) Keys() Keys { return k.keys }
 
 // XPrivFromString generates an extended private key (xPriv) from a string.
 // It returns the extended private key and an error if the conversion fails.
@@ -134,5 +131,5 @@ func RandomKeysWithMnemonic() (*KeysWithMnemonic, error) {
 	}
 
 	keys := Keys{xPriv: xPriv.String(), xPub: xPub}
-	return &KeysWithMnemonic{mnemonic: mnemonic, keys: keys}, nil
+	return &KeysWithMnemonic{mnemonic: mnemonic, Keys: keys}, nil
 }

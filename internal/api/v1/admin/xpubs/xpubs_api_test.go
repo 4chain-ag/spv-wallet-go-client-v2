@@ -23,7 +23,7 @@ func TestXPubsAPI_CreateXPub(t *testing.T) {
 	}{
 		"HTTP POST /api/v1/admin/users response: 201": {
 			expectedResponse: xpubstest.ExpectedXPub(t),
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusCreated, httpmock.File("userstest/post_xpub_201.json")),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusCreated, httpmock.File("xpubstest/post_xpub_201.json")),
 		},
 		"HTTP POST /api/v1/admin/users response: 400": {
 			expectedErr: xpubstest.NewBadRequestSPVError(),
@@ -61,7 +61,7 @@ func TestXPubsAPI_XPubs(t *testing.T) {
 	}{
 		"HTTP GET /api/v1/admin/users response: 200": {
 			expectedResponse: xpubstest.ExpectedXPubsPage(t),
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("userstest/get_xpubs_200.json")),
+			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("xpubstest/get_xpubs_200.json")),
 		},
 		"HTTP GET /api/v1/admin/users response: 400": {
 			expectedErr: xpubstest.NewBadRequestSPVError(),

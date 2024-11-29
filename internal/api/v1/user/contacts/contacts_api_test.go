@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/require"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts/contactstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestContactsAPI_Contacts(t *testing.T) {
@@ -249,9 +250,8 @@ func TestContactsAPI_ConfirmContact(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			wrappedTransport := spvwallettest.NewTransportWrapper()
-			aliceClient, _ := spvwallettest.GivenSPVWalletClientWithTransport(t, wrappedTransport)
-			wrappedTransport.RegisterResponder(http.MethodPost, url, tc.responder)
+			aliceClient, transport := spvwallettest.GivenSPVUserAPI(t)
+			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			passcode, err := aliceClient.GenerateTotpForContact(contact, 3600, 6)
 			require.NoError(t, err)

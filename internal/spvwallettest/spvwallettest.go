@@ -2,15 +2,15 @@ package spvwallettest
 
 import (
 	"encoding/hex"
-	"net/http"
 	"testing"
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/jarcoal/httpmock"
+
 	spvwallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
-	"github.com/jarcoal/httpmock"
 )
 
 const TestAPIAddr = "http://localhost:3003"
@@ -80,33 +80,6 @@ func GivenSPVAdminAPI(t *testing.T) (*spvwallet.AdminAPI, *httpmock.MockTranspor
 	}
 
 	return api, transport
-}
-
-func GivenSPVWalletClientWithTransport(t *testing.T, transport http.RoundTripper) (*spvwallet.UserAPI, *httpmock.MockTransport) {
-	t.Helper()
-
-	// Extract the wrapped MockTransport if it's a TransportWrapper
-	var mockTransport *httpmock.MockTransport
-	if wrapper, ok := transport.(*TransportWrapper); ok {
-		mockTransport = wrapper.MockTransport
-	} else if mt, ok := transport.(*httpmock.MockTransport); ok {
-		mockTransport = mt
-	} else {
-		t.Fatalf("expected transport to be of type *httpmock.MockTransport or *httpmockwrapper.TransportWrapper, got %T", transport)
-	}
-
-	cfg := config.Config{
-		Addr:      TestAPIAddr,
-		Timeout:   5 * time.Second,
-		Transport: transport,
-	}
-
-	spv, err := spvwallet.NewUserAPIWithXPriv(cfg, UserXPriv)
-	if err != nil {
-		t.Fatalf("test helper - spv wallet client with xpriv: %s", err)
-	}
-
-	return spv, mockTransport
 }
 
 func MockPKI(t *testing.T, xpub string) string {

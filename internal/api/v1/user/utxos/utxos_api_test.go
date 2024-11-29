@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/require"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos/utxostest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/require"
+	"github.com/bitcoin-sv/spv-wallet/models"
 )
 
 func TestUTXOAPI_UTXOs(t *testing.T) {
@@ -28,8 +29,16 @@ func TestUTXOAPI_UTXOs(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, utxostest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/utxos str response: 500": {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			},
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			}),
 		},
 	}
 

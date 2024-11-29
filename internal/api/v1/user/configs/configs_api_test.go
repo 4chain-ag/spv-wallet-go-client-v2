@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs/configstest"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs/configstest"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 )
 
 func TestConfigsAPI_SharedConfig_APIResponses(t *testing.T) {
@@ -34,8 +34,8 @@ func TestConfigsAPI_SharedConfig_APIResponses(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, configstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/configs/shared str response: 500": {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: configstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, configstest.NewInternalServerSPVError()),
 		},
 	}
 

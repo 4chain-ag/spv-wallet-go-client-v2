@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
-	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts/contactstest"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
-	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts/contactstest"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 )
 
 func TestContactsAPI_Contacts(t *testing.T) {
@@ -32,8 +32,16 @@ func TestContactsAPI_Contacts(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/contacts str response: 500": {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			},
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			}),
 		},
 	}
 
@@ -70,8 +78,16 @@ func TestContactsAPI_ContactWithPaymail(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/contacts/%s str response: 500", paymail): {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			},
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			}),
 		},
 	}
 
@@ -108,8 +124,16 @@ func TestContactsAPI_UpsertContact(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP PUT /api/v1/contacts/%s str response: 500", paymail): {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			},
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			}),
 		},
 	}
 
@@ -148,8 +172,16 @@ func TestContactsAPI_RemoveContact(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/contacts/%s str response: 500", paymail): {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			},
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			}),
 		},
 	}
 
@@ -187,8 +219,16 @@ func TestContactsAPI_ConfirmContact(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP POST /api/v1/contacts/%s/confirmation str response: 500", contact.Paymail): {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			},
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			}),
 		},
 	}
 
@@ -230,8 +270,16 @@ func TestContactsAPI_UnconfirmContact(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/contacts/%s/confirmation str response: 500", paymail): {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			},
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
+				Message:    http.StatusText(http.StatusInternalServerError),
+				StatusCode: http.StatusInternalServerError,
+				Code:       models.UnknownErrorCode,
+			}),
 		},
 	}
 

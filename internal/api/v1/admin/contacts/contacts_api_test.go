@@ -31,18 +31,22 @@ func TestContactsAPI_Contacts(t *testing.T) {
 			expectedErr: contactstest.NewBadRequestSPVError(),
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
+		"HTTP GET /api/v1/admin/contacts response: 500": {
+			expectedErr: contactstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewInternalServerSPVError()),
+		},
 		"HTTP GET /api/v1/admin/contacts str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	URL := spvwallettest.TestAPIAddr + "/api/v1/admin/contacts"
+	url := spvwallettest.TestAPIAddr + "/api/v1/admin/contacts"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := spvwallettest.GivenSPVAdminAPI(t)
-			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
+			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
 			got, err := wallet.Contacts(context.Background(), queries.ContactQueryWithPageFilter(filter.Page{Size: 1}))
@@ -53,32 +57,36 @@ func TestContactsAPI_Contacts(t *testing.T) {
 }
 
 func TestContactsAPI_ContactUpdate(t *testing.T) {
-	ID := "4d570959-dd85-4f53-bad1-18d0671761e9"
+	id := "4d570959-dd85-4f53-bad1-18d0671761e9"
 	tests := map[string]struct {
 		responder        httpmock.Responder
 		expectedResponse *response.Contact
 		expectedErr      error
 	}{
-		fmt.Sprintf("HTTP PUT /api/v1/admin/contacts/%s response: 200", ID): {
+		fmt.Sprintf("HTTP PUT /api/v1/admin/contacts/%s response: 200", id): {
 			expectedResponse: contactstest.ExpectedUpdatedUserContact(t),
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/put_contact_update_200.json")),
 		},
-		fmt.Sprintf("HTTP PUT /api/v1/admin/contacts/%s response: 400", ID): {
+		fmt.Sprintf("HTTP PUT /api/v1/admin/contacts/%s response: 400", id): {
 			expectedErr: contactstest.NewBadRequestSPVError(),
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
-		fmt.Sprintf("HTTP PUT /api/v1/admin/contacts/%s response: 500", ID): {
+		fmt.Sprintf("HTTP PUT /api/v1/admin/contacts/%s response: 500", id): {
+			expectedErr: contactstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewInternalServerSPVError()),
+		},
+		fmt.Sprintf("HTTP PUT /api/v1/admin/contacts/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	URL := spvwallettest.TestAPIAddr + "/api/v1/admin/contacts/" + ID
+	url := spvwallettest.TestAPIAddr + "/api/v1/admin/contacts/" + id
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := spvwallettest.GivenSPVAdminAPI(t)
-			transport.RegisterResponder(http.MethodPut, URL, tc.responder)
+			transport.RegisterResponder(http.MethodPut, url, tc.responder)
 
 			// then:
 			got, err := wallet.ContactUpdate(context.Background(), &commands.UpdateContact{
@@ -93,29 +101,29 @@ func TestContactsAPI_ContactUpdate(t *testing.T) {
 }
 
 func TestContactsAPI_RemoveContact(t *testing.T) {
-	ID := "4d570959-dd85-4f53-bad1-18d0671761e9"
+	id := "4d570959-dd85-4f53-bad1-18d0671761e9"
 	tests := map[string]struct {
 		responder   httpmock.Responder
-		statusCode  int
 		expectedErr error
 	}{
-		fmt.Sprintf("HTTP DELETE /api/v1/admin/contacts/%s response: 200", ID): {
-			statusCode: http.StatusOK,
-			responder:  httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
+		fmt.Sprintf("HTTP DELETE /api/v1/admin/contacts/%s response: 200", id): {
+			responder: httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
 		},
-		fmt.Sprintf("HTTP DELETE/api/v1/admin/contacts/%s response: 400", ID): {
+		fmt.Sprintf("HTTP DELETE/api/v1/admin/contacts/%s response: 400", id): {
 			expectedErr: contactstest.NewBadRequestSPVError(),
-			statusCode:  http.StatusOK,
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewBadRequestSPVError()),
 		},
-		fmt.Sprintf("HTTP DELETE /api/v1/admin/contacts/%s str response: 500", ID): {
+		fmt.Sprintf("HTTP DELETE /api/v1/admin/contacts/%s response: 500", id): {
+			expectedErr: contactstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, contactstest.NewInternalServerSPVError()),
+		},
+		fmt.Sprintf("HTTP DELETE /api/v1/admin/contacts/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	url := spvwallettest.TestAPIAddr + "/api/v1/admin/contacts/" + ID
+	url := spvwallettest.TestAPIAddr + "/api/v1/admin/contacts/" + id
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
@@ -123,7 +131,7 @@ func TestContactsAPI_RemoveContact(t *testing.T) {
 			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:
-			err := wallet.RemoveContact(context.Background(), ID)
+			err := wallet.RemoveContact(context.Background(), id)
 			require.ErrorIs(t, err, tc.expectedErr)
 		})
 	}

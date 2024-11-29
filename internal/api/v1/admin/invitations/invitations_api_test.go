@@ -14,29 +14,29 @@ import (
 )
 
 func TestInvitationsAPI_AcceptInvitation(t *testing.T) {
-	ID := "34d0b1f9-6d00-4bdb-ba2e-146a3cbadd35"
+	id := "34d0b1f9-6d00-4bdb-ba2e-146a3cbadd35"
 	tests := map[string]struct {
 		responder   httpmock.Responder
-		statusCode  int
 		expectedErr error
 	}{
-		fmt.Sprintf("HTTP POST /api/v1/admin/invitations/%s response: 200", ID): {
-			statusCode: http.StatusOK,
-			responder:  httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
+		fmt.Sprintf("HTTP POST /api/v1/admin/invitations/%s response: 200", id): {
+			responder: httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
 		},
-		fmt.Sprintf("HTTP POST /api/v1/admin/invitations/%s response: 400", ID): {
+		fmt.Sprintf("HTTP POST /api/v1/admin/invitations/%s response: 400", id): {
 			expectedErr: invitationstest.NewBadRequestSPVError(),
-			statusCode:  http.StatusOK,
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, invitationstest.NewBadRequestSPVError()),
 		},
-		fmt.Sprintf("HTTP POST /api/v1/admin/invitations/%s str response: 500", ID): {
+		fmt.Sprintf("HTTP POST /api/v1/admin/invitations/%s response: 500", id): {
+			expectedErr: invitationstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, invitationstest.NewInternalServerSPVError()),
+		},
+		fmt.Sprintf("HTTP POST /api/v1/admin/invitations/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	url := spvwallettest.TestAPIAddr + "/api/v1/admin/invitations/" + ID
+	url := spvwallettest.TestAPIAddr + "/api/v1/admin/invitations/" + id
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
@@ -44,36 +44,36 @@ func TestInvitationsAPI_AcceptInvitation(t *testing.T) {
 			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// then:
-			err := wallet.AcceptInvitation(context.Background(), ID)
+			err := wallet.AcceptInvitation(context.Background(), id)
 			require.ErrorIs(t, err, tc.expectedErr)
 		})
 	}
 }
 
 func TestInvitationsAPI_RejectInvitation(t *testing.T) {
-	ID := "34d0b1f9-6d00-4bdb-ba2e-146a3cbadd35"
+	id := "34d0b1f9-6d00-4bdb-ba2e-146a3cbadd35"
 	tests := map[string]struct {
 		responder   httpmock.Responder
-		statusCode  int
 		expectedErr error
 	}{
-		fmt.Sprintf("HTTP DELETE /api/v1/admin/invitations/%s response: 200", ID): {
-			statusCode: http.StatusOK,
-			responder:  httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
+		fmt.Sprintf("HTTP DELETE /api/v1/admin/invitations/%s response: 200", id): {
+			responder: httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
 		},
-		fmt.Sprintf("HTTP DELETE /api/v1/admin/invitations/%s response: 400", ID): {
+		fmt.Sprintf("HTTP DELETE /api/v1/admin/invitations/%s response: 400", id): {
 			expectedErr: invitationstest.NewBadRequestSPVError(),
-			statusCode:  http.StatusOK,
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, invitationstest.NewBadRequestSPVError()),
 		},
-		fmt.Sprintf("HTTP DELETE /api/v1/admin/invitations/%s str response: 500", ID): {
+		fmt.Sprintf("HTTP DELETE /api/v1/admin/invitations/%s response: 500", id): {
+			expectedErr: invitationstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, invitationstest.NewInternalServerSPVError()),
+		},
+		fmt.Sprintf("HTTP DELETE /api/v1/admin/invitations/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			statusCode:  http.StatusInternalServerError,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	url := spvwallettest.TestAPIAddr + "/api/v1/admin/invitations/" + ID
+	url := spvwallettest.TestAPIAddr + "/api/v1/admin/invitations/" + id
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
@@ -81,7 +81,7 @@ func TestInvitationsAPI_RejectInvitation(t *testing.T) {
 			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:
-			err := wallet.RejectInvitation(context.Background(), ID)
+			err := wallet.RejectInvitation(context.Background(), id)
 			require.ErrorIs(t, err, tc.expectedErr)
 		})
 	}

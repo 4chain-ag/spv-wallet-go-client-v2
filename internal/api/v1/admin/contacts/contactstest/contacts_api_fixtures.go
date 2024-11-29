@@ -71,6 +71,14 @@ func NewBadRequestSPVError() models.SPVError {
 	}
 }
 
+func NewInternalServerSPVError() models.SPVError {
+	return models.SPVError{
+		Message:    http.StatusText(http.StatusInternalServerError),
+		StatusCode: http.StatusInternalServerError,
+		Code:       models.UnknownErrorCode,
+	}
+}
+
 func parseTime(t *testing.T, s string) time.Time {
 	ts, err := time.Parse(time.RFC3339Nano, s)
 	if err != nil {

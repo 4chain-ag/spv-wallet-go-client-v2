@@ -29,18 +29,22 @@ func TestXPubsAPI_CreateXPub(t *testing.T) {
 			expectedErr: xpubstest.NewBadRequestSPVError(),
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, xpubstest.NewBadRequestSPVError()),
 		},
+		"HTTP POST /api/v1/admin/users response: 500": {
+			expectedErr: xpubstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, xpubstest.NewInternalServerSPVError()),
+		},
 		"HTTP POST /api/v1/admin/users str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	URL := spvwallettest.TestAPIAddr + "/api/v1/admin/users"
+	url := spvwallettest.TestAPIAddr + "/api/v1/admin/users"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := spvwallettest.GivenSPVAdminAPI(t)
-			transport.RegisterResponder(http.MethodPost, URL, tc.responder)
+			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// then:
 			got, err := wallet.CreateXPub(context.Background(), &commands.CreateUserXpub{
@@ -67,18 +71,22 @@ func TestXPubsAPI_XPubs(t *testing.T) {
 			expectedErr: xpubstest.NewBadRequestSPVError(),
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, xpubstest.NewBadRequestSPVError()),
 		},
+		"HTTP GET /api/v1/admin/users response: 500": {
+			expectedErr: xpubstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, xpubstest.NewInternalServerSPVError()),
+		},
 		"HTTP GET /api/v1/admin/users str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
 			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
 		},
 	}
 
-	URL := spvwallettest.TestAPIAddr + "/api/v1/admin/users"
+	url := spvwallettest.TestAPIAddr + "/api/v1/admin/users"
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
 			wallet, transport := spvwallettest.GivenSPVAdminAPI(t)
-			transport.RegisterResponder(http.MethodGet, URL, tc.responder)
+			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// then:
 			got, err := wallet.XPubs(context.Background())

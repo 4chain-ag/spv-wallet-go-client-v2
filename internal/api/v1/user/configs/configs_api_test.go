@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs/configstest"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs/configstest"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 )
 
 func TestConfigsAPI_SharedConfig_APIResponses(t *testing.T) {

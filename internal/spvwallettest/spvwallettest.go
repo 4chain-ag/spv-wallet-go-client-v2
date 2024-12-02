@@ -2,7 +2,6 @@ package spvwallettest
 
 import (
 	"encoding/hex"
-	"net/http"
 	"testing"
 	"time"
 
@@ -82,33 +81,6 @@ func GivenSPVAdminAPI(t *testing.T) (*spvwallet.AdminAPI, *httpmock.MockTranspor
 	return api, transport
 }
 
-func GivenSPVWalletClientWithTransport(t *testing.T, transport http.RoundTripper) (*spvwallet.UserAPI, *httpmock.MockTransport) {
-	t.Helper()
-
-	// Extract the wrapped MockTransport if it's a TransportWrapper
-	var mockTransport *httpmock.MockTransport
-	if wrapper, ok := transport.(*TransportWrapper); ok {
-		mockTransport = wrapper.MockTransport
-	} else if mt, ok := transport.(*httpmock.MockTransport); ok {
-		mockTransport = mt
-	} else {
-		t.Fatalf("expected transport to be of type *httpmock.MockTransport or *httpmockwrapper.TransportWrapper, got %T", transport)
-	}
-
-	cfg := config.Config{
-		Addr:      TestAPIAddr,
-		Timeout:   5 * time.Second,
-		Transport: transport,
-	}
-
-	spv, err := spvwallet.NewUserAPIWithXPriv(cfg, UserXPriv)
-	if err != nil {
-		t.Fatalf("test helper - spv wallet client with xpriv: %s", err)
-	}
-
-	return spv, mockTransport
-}
-
 func MockPKI(t *testing.T, xpub string) string {
 	t.Helper()
 	xPub, _ := bip32.NewKeyFromString(xpub)
@@ -116,7 +88,7 @@ func MockPKI(t *testing.T, xpub string) string {
 	for i := 0; i < 3; i++ { //magicNumberOfInheritance is 3 -> 2+1; 2: because of the way spv-wallet stores xpubs in db; 1: to make a PKI
 		xPub, err = xPub.Child(0)
 		if err != nil {
-			panic(err)
+			t.Fatalf("test helper - retrieve a derived child extended key at index 0 failed: %s", err)
 		}
 	}
 

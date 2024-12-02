@@ -21,7 +21,11 @@ the wallet client package during interaction wit the SPV Wallet API.
 ```
 task: [default] task --list
 task: Available tasks for this project:
+* create-paymail-as-admin:                Create a paymail address.
 * default:                                Display all available tasks.
+* delete-paymail-as-admin:                Delete paymail address.
+* fetch-paymail-as-admin:                 Fetch paymail with a given address.
+* fetch-paymails-as-admin:                Fetch paymails page.
 * fetch-user-contact-by-paymail:          Fetch user contact by given paymail.
 * fetch-user-contacts:                    Fetch user contacts page.
 * fetch-user-merkleroots:                 Fetch user Merkle roots page.

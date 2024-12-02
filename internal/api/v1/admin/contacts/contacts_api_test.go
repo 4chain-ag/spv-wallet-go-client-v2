@@ -100,7 +100,7 @@ func TestContactsAPI_ContactUpdate(t *testing.T) {
 	}
 }
 
-func TestContactsAPI_RemoveContact(t *testing.T) {
+func TestContactsAPI_DeleteContact(t *testing.T) {
 	id := "4d570959-dd85-4f53-bad1-18d0671761e9"
 	tests := map[string]struct {
 		responder   httpmock.Responder
@@ -131,7 +131,7 @@ func TestContactsAPI_RemoveContact(t *testing.T) {
 			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:
-			err := wallet.RemoveContact(context.Background(), id)
+			err := wallet.DeleteContact(context.Background(), id)
 			require.ErrorIs(t, err, tc.expectedErr)
 		})
 	}

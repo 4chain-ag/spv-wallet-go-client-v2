@@ -16,7 +16,7 @@ func main() {
 	}
 
 	id := "88db6027-e38a-43b7-97a0-45f08d535256"
-	err = adminAPI.RemoveContact(context.Background(), id)
+	err = adminAPI.DeleteContact(context.Background(), id)
 	if err != nil {
 		log.Fatal(err)
 	}

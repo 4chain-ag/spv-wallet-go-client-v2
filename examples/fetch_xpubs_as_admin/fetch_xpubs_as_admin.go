@@ -7,6 +7,8 @@ import (
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/examples"
 	"github.com/bitcoin-sv/spv-wallet-go-client/examples/exampleutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
 
 func main() {
@@ -15,7 +17,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	page, err := adminAPI.XPubs(context.Background())
+	page, err := adminAPI.XPubs(context.Background(), queries.XPubQueryWithPageFilter(filter.Page{
+		Size: 1,
+	}))
 	if err != nil {
 		log.Fatal(err)
 	}

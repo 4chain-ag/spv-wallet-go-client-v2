@@ -29,7 +29,7 @@ func (a *API) AcceptInvitation(ctx context.Context, ID string) error {
 	return nil
 }
 
-func (a *API) RejectInvitation(ctx context.Context, ID string) error {
+func (a *API) DeleteInvitation(ctx context.Context, ID string) error {
 	URL := a.url.JoinPath(ID).String()
 	_, err := a.httpClient.
 		R().

@@ -16,7 +16,7 @@ func main() {
 	}
 
 	id := "bc84cb22-c9aa-415f-93e1-2ed0af27a6ef"
-	err = adminAPI.RejectInvitation(context.Background(), id)
+	err = adminAPI.DeleteContact(context.Background(), id)
 	if err != nil {
 		log.Fatal(err)
 	}

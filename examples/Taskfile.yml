@@ -20,11 +20,11 @@ tasks:
     cmds:
       - go run ./accept_invitation_as_admin/accept_invitation_as_admin.go
 
-  reject-invitation-as-admin:
-    desc: "Reject invitation with a given ID as Admin."
+  delete-invitation-as-admin:
+    desc: "Delete invitation with a given ID as Admin."
     silent: true
     cmds:
-      - go run ./reject_invitation_as_admin/reject_invitation_as_admin.go
+      - go run ./delete_invitation_as_admin/delete_invitation_as_admin.go
 
   fetch-contacts-as-admin:
     desc: "Fetch contacts page as Admin."
@@ -38,11 +38,11 @@ tasks:
     cmds:
       - go run ./update_contact_as_admin/update_contact_as_admin.go
 
-  remove-contact-as-admin:
-    desc: "Remove contact with a given ID as Admin."
+  delete-contact-as-admin:
+    desc: "Delete contact with a given ID as Admin."
     silent: true
     cmds:
-      - go run ./remove_contact_as_admin/remove_contact_as_admin.go
+      - go run ./delete_contact_as_admin/delete_contact_as_admin.go
 
   fetch-xpubs-as-admin:
     desc: "Fetch xPubs page as Admin."

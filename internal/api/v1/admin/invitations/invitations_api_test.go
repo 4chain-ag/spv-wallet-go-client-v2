@@ -50,7 +50,7 @@ func TestInvitationsAPI_AcceptInvitation(t *testing.T) {
 	}
 }
 
-func TestInvitationsAPI_RejectInvitation(t *testing.T) {
+func TestInvitationsAPI_DeleteInvitation(t *testing.T) {
 	id := "34d0b1f9-6d00-4bdb-ba2e-146a3cbadd35"
 	tests := map[string]struct {
 		responder   httpmock.Responder
@@ -81,7 +81,7 @@ func TestInvitationsAPI_RejectInvitation(t *testing.T) {
 			transport.RegisterResponder(http.MethodDelete, url, tc.responder)
 
 			// then:
-			err := wallet.RejectInvitation(context.Background(), id)
+			err := wallet.DeleteInvitation(context.Background(), id)
 			require.ErrorIs(t, err, tc.expectedErr)
 		})
 	}

@@ -71,7 +71,7 @@ func (a *API) UpdateContact(ctx context.Context, cmd *commands.UpdateContact) (*
 	return &result, nil
 }
 
-func (a *API) RemoveContact(ctx context.Context, ID string) error {
+func (a *API) DeleteContact(ctx context.Context, ID string) error {
 	_, err := a.httpClient.
 		R().
 		SetContext(ctx).

@@ -95,13 +95,13 @@ func (a *AdminAPI) ContactUpdate(ctx context.Context, cmd *commands.UpdateContac
 	return res, nil
 }
 
-// RemoveContact deletes a user contact with the given ID via the admin contacts API.
+// DeleteContact deletes a user contact with the given ID via the admin contacts API.
 // Returns an error if the API request fails or the response cannot be decoded.
 // A nil error indicates the deleting contact was successful.
-func (a *AdminAPI) RemoveContact(ctx context.Context, ID string) error {
-	err := a.contactsAPI.RemoveContact(ctx, ID)
+func (a *AdminAPI) DeleteContact(ctx context.Context, ID string) error {
+	err := a.contactsAPI.DeleteContact(ctx, ID)
 	if err != nil {
-		msg := fmt.Sprintf("remove contact with ID: %s", ID)
+		msg := fmt.Sprintf("delete contact with ID: %s", ID)
 		return contacts.HTTPErrorFormatter(msg, err).FormatDeleteErr()
 	}
 
@@ -120,12 +120,12 @@ func (a *AdminAPI) AcceptInvitation(ctx context.Context, ID string) error {
 	return nil
 }
 
-// RejectInvitation processes and rejects a user contact invitation using the given ID via the admin invitations API.
+// DeleteInvitation processes and deletes a user contact invitation using the given ID via the admin invitations API.
 // Returns an error if the API request fails. A nil error indicates the invitation was successfully rejected.
-func (a *AdminAPI) RejectInvitation(ctx context.Context, ID string) error {
-	err := a.invitationsAPI.RejectInvitation(ctx, ID)
+func (a *AdminAPI) DeleteInvitation(ctx context.Context, ID string) error {
+	err := a.invitationsAPI.DeleteInvitation(ctx, ID)
 	if err != nil {
-		msg := fmt.Sprintf("reject invitation with ID: %s", ID)
+		msg := fmt.Sprintf("delete invitation with ID: %s", ID)
 		return invitations.HTTPErrorFormatter(msg, err).FormatDeleteErr()
 	}
 

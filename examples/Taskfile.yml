@@ -98,7 +98,7 @@ tasks:
     cmds:
       - go run ./update_transaction_metadata/update_transaction_metadata.go
 
-  create-transaction:
+  send-op-return:
     desc: "Send OP return."
     silent: true
     cmds:

@@ -44,3 +44,11 @@ func NewBadRequestSPVError() models.SPVError {
 		Code:       "invalid-data-format",
 	}
 }
+
+func NewInternalServerSPVError() models.SPVError {
+	return models.SPVError{
+		Message:    http.StatusText(http.StatusInternalServerError),
+		StatusCode: http.StatusInternalServerError,
+		Code:       models.UnknownErrorCode,
+	}
+}

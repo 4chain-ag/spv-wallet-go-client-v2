@@ -10,7 +10,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/users/userstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -71,16 +70,8 @@ func TestXPubsAPI_XPubs(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/admin/users str response: 500": {
-			expectedErr: models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			}),
+			expectedErr: userstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, userstest.NewInternalServerSPVError()),
 		},
 	}
 

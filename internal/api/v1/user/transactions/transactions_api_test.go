@@ -7,11 +7,9 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
-	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions/transactionstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
-	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -33,8 +31,8 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s str response: 500", ID): {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: transactionstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -76,8 +74,8 @@ func TestTransactionsAPI_RecordTransaction(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/transactions str response: 500": {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: transactionstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -113,8 +111,8 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		"HTTP POST /api/v1/transactions/drafts str response: 500": {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: transactionstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -154,8 +152,8 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s str response: 500", ID): {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: transactionstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -191,16 +189,8 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/transactions str response: 500": {
-			expectedErr: models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			}),
+			expectedErr: transactionstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
 		},
 	}
 

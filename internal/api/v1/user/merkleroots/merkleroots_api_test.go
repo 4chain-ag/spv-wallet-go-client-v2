@@ -30,8 +30,8 @@ func TestMerkleRootsAPI_MerkleRoots(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, merklerootstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/merkleroots str response: 500": {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
+			expectedErr: merklerootstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, merklerootstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -99,11 +99,11 @@ func TestMerkleRootsAPI_SyncMerkleRoots(t *testing.T) {
 			expectedErr: errors.ErrStaleLastEvaluatedKey,
 		},
 		"API Returns Error Response": {
-			responder: httpmock.NewStringResponder(http.StatusInternalServerError, "Internal Server Error"),
+			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, merklerootstest.NewInternalServerSPVError()),
 			setupMock: func(mockRepo *MockMerkleRootsRepository) {
 				mockRepo.On("GetLastMerkleRoot").Return("") // No data initially
 			},
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
+			expectedErr: merklerootstest.NewInternalServerSPVError(),
 		},
 	}
 

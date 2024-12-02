@@ -8,7 +8,6 @@ import (
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/invitations/invitationstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
-	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 )
@@ -27,16 +26,8 @@ func TestInvitationsAPI_AcceptInvitation(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, invitationstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP POST /api/v1/invitations/%s/contacts str response: 500", paymail): {
-			expectedErr: models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			}),
+			expectedErr: invitationstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, invitationstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -70,16 +61,8 @@ func TestInvitationsAPI_RejectInvitation(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, invitationstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP POST /api/v1/invitations/%s str response: 500", paymail): {
-			expectedErr: models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			}),
+			expectedErr: invitationstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, invitationstest.NewInternalServerSPVError()),
 		},
 	}
 

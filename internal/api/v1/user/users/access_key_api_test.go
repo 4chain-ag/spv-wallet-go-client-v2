@@ -79,16 +79,8 @@ func TestAccessKeyAPI_AccessKey(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/users/current/keys/%s str response: 500", ID): {
-			expectedErr: models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			}),
+			expectedErr: userstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, userstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -124,16 +116,8 @@ func TestAccessKeyAPI_AccessKeys(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/users/current/keys str response: 500": {
-			expectedErr: models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			}),
+			expectedErr: userstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, userstest.NewInternalServerSPVError()),
 		},
 	}
 
@@ -168,16 +152,8 @@ func TestAccessKeyAPI_RevokeAccessKey(t *testing.T) {
 			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, userstest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/users/current/keys/%s str response: 500", ID): {
-			expectedErr: models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			},
-			responder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, models.SPVError{
-				Message:    http.StatusText(http.StatusInternalServerError),
-				StatusCode: http.StatusInternalServerError,
-				Code:       models.UnknownErrorCode,
-			}),
+			expectedErr: userstest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, userstest.NewInternalServerSPVError()),
 		},
 	}
 

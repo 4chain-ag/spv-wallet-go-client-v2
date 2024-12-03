@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
-	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/errutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/transactionsigner"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
@@ -18,12 +17,13 @@ import (
 const route = "api/v1/transactions"
 
 type API struct {
-	url        *url.URL
-	httpClient *resty.Client
+	url               *url.URL
+	httpClient        *resty.Client
+	transactionSigner *transactionsigner.TransactionSigner
 }
 
-func (a *API) FinalizeTransaction(draft *response.DraftTransaction, xPriv *bip32.ExtendedKey) (string, error) {
-	res, err := auth.GetSignedHex(draft, xPriv)
+func (a *API) FinalizeTransaction(draft *response.DraftTransaction) (string, error) {
+	res, err := a.transactionSigner.GetSignedHex(draft)
 	if err != nil {
 		return "", err
 	}
@@ -52,14 +52,14 @@ func (a *API) DraftToRecipients(ctx context.Context, r *commands.SendToRecipient
 	return a.DraftTransaction(ctx, draftTransactionCmd)
 }
 
-func (a *API) SendToRecipients(ctx context.Context, r *commands.SendToRecipients, xPriv *bip32.ExtendedKey) (*response.Transaction, error) {
+func (a *API) SendToRecipients(ctx context.Context, r *commands.SendToRecipients) (*response.Transaction, error) {
 	draft, err := a.DraftToRecipients(ctx, r)
 	if err != nil {
 		return nil, err
 	}
 
 	var hex string
-	if hex, err = a.FinalizeTransaction(draft, xPriv); err != nil {
+	if hex, err = a.FinalizeTransaction(draft); err != nil {
 		return nil, err
 	}
 
@@ -162,10 +162,11 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.Tran
 	return &result, nil
 }
 
-func NewAPI(URL *url.URL, httpClient *resty.Client) *API {
+func NewAPI(URL *url.URL, httpClient *resty.Client, txSigner *transactionsigner.TransactionSigner) *API {
 	return &API{
-		url:        URL.JoinPath(route),
-		httpClient: httpClient,
+		url:               URL.JoinPath(route),
+		httpClient:        httpClient,
+		transactionSigner: txSigner,
 	}
 }
 

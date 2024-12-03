@@ -20,6 +20,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/transactionsigner"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
@@ -37,7 +38,6 @@ import (
 // UserAPI methods may return wrapped errors, including models.SPVError or
 // ErrUnrecognizedAPIResponse, depending on the behavior of the SPV Wallet API.
 type UserAPI struct {
-	xPriv           *bip32.ExtendedKey
 	xpubAPI         *users.XPubAPI
 	accessKeyAPI    *users.AccessKeyAPI
 	configsAPI      *configs.API
@@ -46,7 +46,7 @@ type UserAPI struct {
 	invitationsAPI  *invitations.API
 	transactionsAPI *transactions.API
 	utxosAPI        *utxos.API
-	totp            *totp.Client //only available when using xPriv
+	totpAPI         *totp.API //only available when using xPriv
 }
 
 // Contacts retrieves a paginated list of user contacts from the user contacts API.
@@ -233,7 +233,7 @@ func (u *UserAPI) Transaction(ctx context.Context, ID string) (*response.Transac
 // The response is the signed transaction in hex format.
 // Returns an error if the transaction cannot be finalized.
 func (u *UserAPI) FinalizeTransaction(draft *response.DraftTransaction) (string, error) {
-	res, err := u.transactionsAPI.FinalizeTransaction(draft, u.xPriv)
+	res, err := u.transactionsAPI.FinalizeTransaction(draft)
 	if err != nil {
 		return "", fmt.Errorf("couldn't finalize transaction with ID: %s, %w", draft.ID, err)
 	}
@@ -247,7 +247,7 @@ func (u *UserAPI) FinalizeTransaction(draft *response.DraftTransaction) (string,
 // The response is unmarshalled into a *response.Transaction struct.
 // Returns an error if the transaction fails at any step, such as drafting, finalization or recording.
 func (u *UserAPI) SendToRecipients(ctx context.Context, cmd *commands.SendToRecipients) (*response.Transaction, error) {
-	res, err := u.transactionsAPI.SendToRecipients(ctx, cmd, u.xPriv)
+	res, err := u.transactionsAPI.SendToRecipients(ctx, cmd)
 	if err != nil {
 		return nil, transactions.HTTPErrorFormatter("send to recipients", err).FormatPostErr()
 	}
@@ -382,11 +382,11 @@ func (u *UserAPI) SyncMerkleRoots(ctx context.Context, repo merkleroots.MerkleRo
 
 // GenerateTotpForContact generates a TOTP code for the specified contact.
 func (u *UserAPI) GenerateTotpForContact(contact *models.Contact, period, digits uint) (string, error) {
-	if u.totp == nil {
+	if u.totpAPI == nil {
 		return "", errors.New("totp client not initialized - xPriv authentication required")
 	}
 
-	totp, err := u.totp.GenerateTotpForContact(contact, period, digits)
+	totp, err := u.totpAPI.GenerateTotpForContact(contact, period, digits)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate TOTP for contact: %w", err)
 	}
@@ -396,11 +396,11 @@ func (u *UserAPI) GenerateTotpForContact(contact *models.Contact, period, digits
 
 // ValidateTotpForContact validates a TOTP code for the specified contact.
 func (u *UserAPI) ValidateTotpForContact(contact *models.Contact, passcode, requesterPaymail string, period, digits uint) error {
-	if u.totp == nil {
+	if u.totpAPI == nil {
 		return errors.New("totp client not initialized - xPriv authentication required")
 	}
 
-	if err := u.totp.ValidateTotpForContact(contact, passcode, requesterPaymail, period, digits); err != nil {
+	if err := u.totpAPI.ValidateTotpForContact(contact, passcode, requesterPaymail, period, digits); err != nil {
 		return fmt.Errorf("failed to validate TOTP for contact: %w", err)
 	}
 
@@ -448,7 +448,7 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to create new client: %w", err)
 	}
 
-	userAPI.totp = totp.New(key)
+	userAPI.totpAPI = totp.New(key)
 	return userAPI, nil
 }
 
@@ -482,11 +482,11 @@ func initUserAPI(cfg config.Config, xPriv *bip32.ExtendedKey, auth authenticator
 	}
 
 	httpClient := restyutil.NewHTTPClient(cfg, auth)
+	txSigner := transactionsigner.New(xPriv)
 	return &UserAPI{
-		xPriv:           xPriv,
 		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
 		configsAPI:      configs.NewAPI(url, httpClient),
-		transactionsAPI: transactions.NewAPI(url, httpClient),
+		transactionsAPI: transactions.NewAPI(url, httpClient, txSigner),
 		utxosAPI:        utxos.NewAPI(url, httpClient),
 		accessKeyAPI:    users.NewAccessKeyAPI(url, httpClient),
 		xpubAPI:         users.NewXPubAPI(url, httpClient),

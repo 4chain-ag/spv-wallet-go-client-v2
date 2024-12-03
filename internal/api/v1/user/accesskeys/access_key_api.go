@@ -58,9 +58,9 @@ func (a *API) AccessKeys(ctx context.Context, opts ...queries.AccessKeyQueryOpti
 	queryBuilder := querybuilders.NewQueryBuilder(
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.PageFilter),
-		querybuilders.WithFilterQueryBuilder(&accessKeyFilterQueryBuilder{
-			accessKeyFilter:    query.AccessKeyFilter,
-			modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.AccessKeyFilter.ModelFilter},
+		querybuilders.WithFilterQueryBuilder(&AccessKeyFilterQueryBuilder{
+			AccessKeyFilter:    query.AccessKeyFilter,
+			ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.AccessKeyFilter.ModelFilter},
 		}),
 	)
 	params, err := queryBuilder.Build()

@@ -8,7 +8,8 @@ import (
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
-	xpubs "github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/users"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/accesskeys"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/xpubs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
@@ -25,7 +26,8 @@ import (
 // Methods may return wrapped errors, including models.SPVError or
 // ErrUnrecognizedAPIResponse, depending on the behavior of the SPV Wallet API.
 type AdminAPI struct {
-	xpubsAPI *xpubs.API // Internal API for managing operations related to XPubs.
+	xpubsAPI     *xpubs.API // Internal API for managing operations related to XPubs.
+	accessKeyAPI *accesskeys.API
 }
 
 // CreateXPub creates a new XPub record via the Admin XPubs API.
@@ -55,6 +57,22 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 	res, err := a.xpubsAPI.XPubs(ctx, opts...)
 	if err != nil {
 		return nil, xpubs.HTTPErrorFormatter("failed to retrieve XPubs page", err).FormatGetErr()
+	}
+
+	return res, nil
+}
+
+// AccessKeys retrieves a paginated list of access keys via the Admin XPubs API.
+// The response includes access keys and pagination details, such as the page number,
+// sort order, and sorting field (sortBy).
+//
+// This method allows optional query parameters to be applied via the provided query options.
+// The response is expected to unmarshal into a *queries.AccessKeyPage struct.
+// Returns an error if the request fails or the response cannot be decoded.
+func (a *AdminAPI) AccessKeys(ctx context.Context, accessKeyOpts ...queries.AdminAccessKeyQueryOption) (*queries.AccessKeyPage, error) {
+	res, err := a.accessKeyAPI.AccessKeys(ctx, accessKeyOpts...)
+	if err != nil {
+		return nil, accesskeys.HTTPErrorFormatter("retrieve access keys page ", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -106,5 +124,8 @@ func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
 	}
 
 	httpClient := restyutil.NewHTTPClient(cfg, auth)
-	return &AdminAPI{xpubsAPI: xpubs.NewAPI(url, httpClient)}, nil
+	return &AdminAPI{
+		xpubsAPI:     xpubs.NewAPI(url, httpClient),
+		accessKeyAPI: accesskeys.NewAPI(url, httpClient),
+	}, nil
 }

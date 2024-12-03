@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
@@ -44,7 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Finalized transaction hex : ", finalized)
+	exampleutil.Print("Finalized transaction hex : ", finalized)
 
 	recordTransactionCmd := commands.RecordTransaction{
 		Hex:         finalized,
@@ -55,11 +54,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Transaction with OP_RETURN: ", transaction)
+	exampleutil.Print("Transaction with OP_RETURN: ", transaction)
 
 	transactionG, err := usersAPI.Transaction(context.Background(), transaction.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Transaction: ", transactionG)
+	exampleutil.Print("Transaction: ", transactionG)
 }

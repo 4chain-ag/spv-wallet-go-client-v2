@@ -9,14 +9,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
-// TODO: find a way to change tx.Change = true
-// gotta change the hex somehow
-func ExpectedDraftTransactionWithWrongFeeComputed(t *testing.T) *response.DraftTransaction {
-	draftWithWrongFeeComputed := ExpectedDraftTransactionWithHex(t)
-	draftWithWrongFeeComputed.Hex = "01000000014c037d55e72d2ee6a95ff67bd758c4cee9c7545bb4d72ba77584152fcfa070120000000000ffffffff0400000000000000000e006a0568656c6c6f05776f726c6400000000000000001976a914702cef80a7039a1aebb70dc05ce1e439646fa33788ac00000000000000001976a9141d0f172a0ecb48aee1be1f2687d2963ae33f71a188ac00000000000000001976a9146637345046fd4d78a9ce187370db0ab7c15dd10488ac00000000"
-	return draftWithWrongFeeComputed
-}
-
 func ExpectedDraftTransactionWithWrongInputs(t *testing.T) *response.DraftTransaction {
 	draftWithWrongInputs := ExpectedDraftTransactionWithHex(t)
 	draftWithWrongInputs.Configuration.Inputs[0].TransactionID = "wrong-input-transaction-id"
@@ -129,6 +121,31 @@ func ExpectedDraftTransactionWithHex(t *testing.T) *response.DraftTransaction {
 				},
 			},
 		},
+	}
+}
+
+func ExpectedSendToRecipientsTransaction(t *testing.T) *response.Transaction {
+	return &response.Transaction{
+		Model: response.Model{
+			Metadata:  nil,
+			DeletedAt: nil,
+			CreatedAt: ParseTime(t, "2024-12-03T16:10:48.551774Z"),
+			UpdatedAt: ParseTime(t, "2024-12-03T16:10:49.080876Z"),
+		},
+		ID:                   "a4f86cdfefc3339bd3bd7861ad642feab05798f8a31cd67f81aec3c8c87083e0",
+		Hex:                  "01000000017c8b38da58d766c75d94ca65f919723651090ed03e89a6cbc31ab7b87923d6ea010000006b483045022100b2e654169dda17a68c74b24d21e7b2e0dfef7fccdad9ab1e1ec87d2cab910e1d02206e247df32c4fe845af61001c8ec1dda718d737021df27c1d3f2e47d9fe76dd4241210265332864a94ed4c82bf3dacafbb828479b0a7fd0a73e62f60f6224dbf1504261ffffffff0200000000000000000e006a0568656c6c6f05776f726c6407000000000000001976a91464d00b8045c9e432b469f762b7e5beac2ef5a20c88ac00000000",
+		XpubInIDs:            []string{"55e5aeae101bf7dc49db2abfccfab9fb5f56a6b594fdcc87e5f5a94bfe94b973"},
+		XpubOutIDs:           []string{"55e5aeae101bf7dc49db2abfccfab9fb5f56a6b594fdcc87e5f5a94bfe94b973"},
+		BlockHash:            "47758f612c6bf5b454bcd642fe8031f6",
+		BlockHeight:          1024,
+		Fee:                  1,
+		NumberOfInputs:       1,
+		NumberOfOutputs:      2,
+		DraftID:              "4b0571c11a8a96d5af85bfbc32b98d4de6f3cc788afa2a6cd028ef9b69acc779",
+		TotalValue:           0,
+		OutputValue:          -1,
+		Status:               "BROADCASTED",
+		TransactionDirection: "outgoing",
 	}
 }
 

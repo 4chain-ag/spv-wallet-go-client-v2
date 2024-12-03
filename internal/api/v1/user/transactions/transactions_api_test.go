@@ -15,8 +15,59 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTransactionsAPI_FinalizeTransaction(t *testing.T) {
+func TestTransactionsAPI_SendToRecipients(t *testing.T) {
+	tests := map[string]struct {
+		draftTransactionResponder  httpmock.Responder
+		recordTransactionResponder httpmock.Responder
+		expectedResponse           *response.Transaction
+		expectedErr                error
+	}{
+		"HTTP POST /api/v1/transactions/drafts & /api/v1/transactions response: 200": {
+			expectedResponse:           transactionstest.ExpectedSendToRecipientsTransaction(t),
+			recordTransactionResponder: httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/transaction_send_to_recipients_200.json")),
+			draftTransactionResponder:  httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/transaction_draft_with_hex_200.json")),
+		},
+		"HTTP POST /api/v1/transactions/drafts & /api/v1/transactions response: 400": {
+			expectedErr: transactionstest.NewBadRequestSPVError(),
+			draftTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			recordTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+		},
+		"HTTP POST /api/v1/transactions/drafts & /api/v1/transactions response: 500": {
+			expectedErr: transactionstest.NewInternalServerSPVError(),
+			draftTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+			recordTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+		},
+	}
 
+	drafTransactionURL := spvwallettest.TestAPIAddr + "/api/v1/transactions/drafts"
+	recordTransactionURL := spvwallettest.TestAPIAddr + "/api/v1/transactions"
+	opReturn := &response.OpReturn{StringParts: []string{"hello", "world"}}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			// given:
+			spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
+			transport.RegisterResponder(http.MethodPost, drafTransactionURL, tc.draftTransactionResponder)
+			transport.RegisterResponder(http.MethodPost, recordTransactionURL, tc.recordTransactionResponder)
+			ctx := context.Background()
+
+			// when:
+			result, err := spvWalletClient.SendToRecipients(ctx, &commands.SendToRecipients{
+				Recipients: []*commands.Recipients{
+					{
+						OpReturn: opReturn,
+					},
+				},
+			})
+
+			// then:
+			require.ErrorIs(t, err, tc.expectedErr)
+			require.Equal(t, tc.expectedResponse, result)
+		})
+	}
+}
+
+func TestTransactionsAPI_FinalizeTransaction(t *testing.T) {
 	tests := map[string]struct {
 		draft       *response.DraftTransaction
 		expectedHex string
@@ -38,10 +89,6 @@ func TestTransactionsAPI_FinalizeTransaction(t *testing.T) {
 			draft:       transactionstest.ExpectedDraftTransactionWithWrongInputs(t),
 			expectedErr: "failed to add inputs to transaction",
 		},
-		// "Finalize Transaction fail sign transaction": {
-		// 	draft:       transactionstest.ExpectedDraftTransactionWithWrongFeeComputed(t),
-		// 	expectedErr: "failed to sign transaction",
-		// },
 	}
 
 	for name, tc := range tests {

@@ -180,11 +180,14 @@ func TestTransactionFilterBuilder_Build(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			tfb := transactionFilterBuilder{
+			// when:
+			queryBuilder := TransactionFilterBuilder{
 				TransactionFilter:  tc.filter,
 				ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
 			}
-			got, err := tfb.Build()
+
+			// then:
+			got, err := queryBuilder.Build()
 			require.ErrorIs(t, tc.expectedErr, err)
 			require.Equal(t, tc.expectedParams, got)
 		})

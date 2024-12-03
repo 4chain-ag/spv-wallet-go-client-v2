@@ -1,0 +1,29 @@
+{
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null,
+    "metadata": {
+     "domain": "john.doe.test.4chain.space",
+     "ip_address": "127.0.0.1",
+     "p2p_tx_metadata": {
+      "pubkey": "cf626a9e-420c-40ba-95bc-74cdc175d615",
+      "sender": "john.doe@handcash.io"
+     },
+     "paymail_request": "HandleReceivedP2pTransaction",
+     "reference_id": "08f193b8-1526-490b-b0de-9ed2cd0548b9",
+     "user_agent": "node-fetch"
+    },
+    "id": "117e1812-0cec-4188-b471-6dbcb7679227",
+    "hex": "c3785c45-a6e2-4810-9993-b388a3341a66",
+    "xpubInIds": null,
+    "xpubOutIds": null,
+    "blockHash": "",
+    "blockHeight": 0,
+    "fee": 0,
+    "numberOfInputs": 0,
+    "numberOfOutputs": 0,
+    "draftId": "",
+    "totalValue": 0,
+    "status": "",
+    "direction": "outgoing"
+   }

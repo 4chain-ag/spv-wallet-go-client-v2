@@ -219,7 +219,7 @@ func (u *UserAPI) Transactions(ctx context.Context, opts ...queries.Transactions
 func (u *UserAPI) Transaction(ctx context.Context, ID string) (*response.Transaction, error) {
 	res, err := u.transactionsAPI.Transaction(ctx, ID)
 	if err != nil {
-		msg := fmt.Sprintf("record a transaction with ID: %s", ID)
+		msg := fmt.Sprintf("retrieve a transaction with ID: %s", ID)
 		return nil, transactions.HTTPErrorFormatter(msg, err).FormatGetErr()
 	}
 

@@ -14,48 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTransactionsAPI_RecordTransaction(t *testing.T) {
-	tests := map[string]struct {
-		responder        httpmock.Responder
-		expectedResponse *response.Transaction
-		expectedErr      error
-	}{
-		"HTTP POST /v1/admin/transactions/record  response: 201": {
-			expectedResponse: transactionstest.ExpectedRecordTransaction(t),
-			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/post_transaction_record_201.json")),
-		},
-		"HTTP POST /v1/admin/transactions/record response: 400": {
-			expectedErr: transactionstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
-		},
-		"HTTP POST /v1/admin/transactions/record response: 500": {
-			expectedErr: transactionstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
-		},
-		"HTTP POST /v1/admin/transactions/record str response: 500": {
-			expectedErr: errors.ErrUnrecognizedAPIResponse,
-			responder:   httpmock.NewStringResponder(http.StatusInternalServerError, "unexpected internal server failure"),
-		},
-	}
-
-	url := spvwallettest.TestAPIAddr + "/v1/admin/transactions/record"
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			// given:
-			spvWalletClient, transport := spvwallettest.GivenSPVAdminAPI(t)
-			transport.RegisterResponder(http.MethodPost, url, tc.responder)
-
-			// when:
-			hex := "c3785c45-a6e2-4810-9993-b388a3341a66"
-			got, err := spvWalletClient.RecordTransaction(context.Background(), hex)
-
-			// then:
-			require.ErrorIs(t, err, tc.expectedErr)
-			require.Equal(t, tc.expectedResponse, got)
-		})
-	}
-}
-
 func TestTransactionsAPI_Transaction(t *testing.T) {
 	id := "1024"
 	tests := map[string]struct {

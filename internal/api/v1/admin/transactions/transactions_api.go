@@ -20,31 +20,12 @@ type API struct {
 	url        *url.URL
 }
 
-func (a *API) RecordTransaction(ctx context.Context, hex string) (*response.Transaction, error) {
-	type body struct {
-		Hex string `json:"hex"`
-	}
-
-	url := a.url.JoinPath("v1/admin/transactions/record").String()
-	var result response.Transaction
-	_, err := a.httpClient.R().
-		SetContext(ctx).
-		SetResult(&result).
-		SetBody(&body{Hex: hex}).
-		Post(url)
-	if err != nil {
-		return nil, fmt.Errorf("HTTP response failure: %w", err)
-	}
-
-	return &result, nil
-}
-
 func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction, error) {
 	var result response.Transaction
 	_, err := a.httpClient.R().
 		SetContext(ctx).
 		SetResult(&result).
-		Get(a.url.JoinPath(route, ID).String())
+		Get(a.url.JoinPath(ID).String())
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
@@ -76,7 +57,7 @@ func (a *API) Transactions(ctx context.Context, opts ...queries.TransactionsQuer
 		SetContext(ctx).
 		SetResult(&result).
 		SetQueryParams(params.ParseToMap()).
-		Get(a.url.JoinPath(route).String())
+		Get(a.url.String())
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
@@ -85,7 +66,7 @@ func (a *API) Transactions(ctx context.Context, opts ...queries.TransactionsQuer
 }
 
 func NewAPI(url *url.URL, httpClient *resty.Client) *API {
-	return &API{url: url, httpClient: httpClient}
+	return &API{url: url.JoinPath(route), httpClient: httpClient}
 }
 
 func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {

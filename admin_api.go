@@ -62,22 +62,6 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 	return res, nil
 }
 
-// RecordTransaction saves and completes a transaction directly via the Admin transactions API.
-// The response is unmarshaled into a *response.Transaction struct.
-// Returns an error if the request fails or the response cannot be decoded.
-//
-// Note: Use this method with caution as the transaction is saved directly into the datastore
-// without validation or broadcasting.
-func (a *AdminAPI) RecordTransaction(ctx context.Context, hex string) (*response.Transaction, error) {
-	res, err := a.transactionsAPI.RecordTransaction(ctx, hex)
-	if err != nil {
-		msg := fmt.Sprintf("failed record transaction with hex: %s", hex)
-		return nil, transactions.HTTPErrorFormatter(msg, err).FormatPostErr()
-	}
-
-	return res, nil
-}
-
 // Transactions retrieves a paginated list of transactions via the Admin transactions API.
 // The returned response includes transactions and pagination details, such as the page number,
 // sort order, and sorting field (sortBy).

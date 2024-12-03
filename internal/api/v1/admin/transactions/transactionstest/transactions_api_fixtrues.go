@@ -9,29 +9,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
-func ExpectedRecordTransaction(t *testing.T) *response.Transaction {
-	return &response.Transaction{
-		Model: response.Model{
-			CreatedAt: parseTime(t, "0001-01-01T00:00:00Z"),
-			UpdatedAt: parseTime(t, "0001-01-01T00:00:00Z"),
-			Metadata: map[string]any{
-				"domain":     "john.doe.test.4chain.space",
-				"ip_address": "127.0.0.1",
-				"p2p_tx_metadata": map[string]any{
-					"pubkey": "cf626a9e-420c-40ba-95bc-74cdc175d615",
-					"sender": "john.doe@handcash.io",
-				},
-				"paymail_request": "HandleReceivedP2pTransaction",
-				"reference_id":    "08f193b8-1526-490b-b0de-9ed2cd0548b9",
-				"user_agent":      "node-fetch",
-			},
-		},
-		ID:                   "117e1812-0cec-4188-b471-6dbcb7679227",
-		Hex:                  "c3785c45-a6e2-4810-9993-b388a3341a66",
-		TransactionDirection: "outgoing",
-	}
-}
-
 func ExpectedTransaction(t *testing.T) *response.Transaction {
 	return &response.Transaction{
 		Model: response.Model{

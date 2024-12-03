@@ -9,15 +9,10 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/examples"
 	"github.com/bitcoin-sv/spv-wallet-go-client/examples/exampleutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/walletkeys"
 )
 
 func main() {
 	ctx := context.Background()
-	keys, err := walletkeys.RandomKeys()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	adminAPI, err := wallet.NewAdminAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
 	if err != nil {
@@ -26,7 +21,7 @@ func main() {
 
 	xPub, err := adminAPI.CreateXPub(ctx, &commands.CreateUserXpub{
 		Metadata: map[string]any{"xpub_key": "xpub_val"},
-		XPub:     keys.XPub(),
+		XPub:     examples.XPub,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +30,7 @@ func main() {
 
 	addr := exampleutil.RandomPaymail()
 	paymail, err := adminAPI.CreatePaymail(ctx, &commands.CreatePaymail{
-		Key:      keys.XPub(),
+		Key:      examples.XPub,
 		Address:  addr,
 		Metadata: querybuilders.Metadata{"key": "value"},
 	})

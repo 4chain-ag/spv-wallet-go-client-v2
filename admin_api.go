@@ -120,10 +120,10 @@ func (a *AdminAPI) AcceptInvitation(ctx context.Context, ID string) error {
 	return nil
 }
 
-// DeleteInvitation processes and deletes a user contact invitation using the given ID via the admin invitations API.
+// RejectInvitation processes and rejects a user contact invitation using the given ID via the admin invitations API.
 // Returns an error if the API request fails. A nil error indicates the invitation was successfully rejected.
-func (a *AdminAPI) DeleteInvitation(ctx context.Context, ID string) error {
-	err := a.invitationsAPI.DeleteInvitation(ctx, ID)
+func (a *AdminAPI) RejectInvitation(ctx context.Context, ID string) error {
+	err := a.invitationsAPI.RejectInvitation(ctx, ID)
 	if err != nil {
 		msg := fmt.Sprintf("delete invitation with ID: %s", ID)
 		return invitations.HTTPErrorFormatter(msg, err).FormatDeleteErr()

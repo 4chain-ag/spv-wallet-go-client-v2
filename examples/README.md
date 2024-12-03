@@ -25,7 +25,6 @@ task: Available tasks for this project:
 * create-xpub-as-admin:                   Create xPub as Admin.
 * default:                                Display all available tasks.
 * delete-contact-as-admin:                Delete contact with a given ID as Admin.
-* delete-invitation-as-admin:             Delete invitation with a given ID as Admin.
 * fetch-contacts-as-admin:                Fetch contacts page as Admin.
 * fetch-user-contact-by-paymail:          Fetch user contact by given paymail.
 * fetch-user-contacts:                    Fetch user contacts page.
@@ -37,6 +36,7 @@ task: Available tasks for this project:
 * fetch-user-xpub:                        Fetch current authorized user's xpub info.
 * fetch-xpubs-as-admin:                   Fetch xPubs page as Admin.
 * generate-keys:                          Generate keys for SPV Wallet API access.
+* reject-invitation-as-admin:             Reject invitation with a given ID as Admin.
 * update-contact-as-admin:                Update contact with a given ID as Admin.
 * user-contact-confirmation:              Confirm user contact with a given paymail address.
 * user-contact-remove:                    Remove user contact with a given paymail address.

@@ -28,14 +28,14 @@ func TestTransactionsAPI_SendToRecipients(t *testing.T) {
 			draftTransactionResponder:  httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/transaction_draft_with_hex_200.json")),
 		},
 		"HTTP POST /api/v1/transactions/drafts & /api/v1/transactions response: 400": {
-			expectedErr: transactionstest.NewBadRequestSPVError(),
-			draftTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
-			recordTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			expectedErr:                transactionstest.NewBadRequestSPVError(),
+			draftTransactionResponder:  httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			recordTransactionResponder: httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
 		},
 		"HTTP POST /api/v1/transactions/drafts & /api/v1/transactions response: 500": {
-			expectedErr: transactionstest.NewInternalServerSPVError(),
-			draftTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
-			recordTransactionResponder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+			expectedErr:                transactionstest.NewInternalServerSPVError(),
+			draftTransactionResponder:  httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+			recordTransactionResponder: httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
 		},
 	}
 

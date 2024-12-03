@@ -1,4 +1,4 @@
-package users
+package accesskeys
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package users
+package accesskeys
 
 import (
 	"context"
@@ -13,12 +13,14 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-type AccessKeyAPI struct {
+const route = "api/v1/users/current"
+
+type API struct {
 	url        *url.URL
 	httpClient *resty.Client
 }
 
-func (a *AccessKeyAPI) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
+func (a *API) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
 	var result response.AccessKey
 
 	_, err := a.httpClient.R().
@@ -33,7 +35,7 @@ func (a *AccessKeyAPI) GenerateAccessKey(ctx context.Context, cmd *commands.Gene
 	return &result, nil
 }
 
-func (a *AccessKeyAPI) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
+func (a *API) AccessKey(ctx context.Context, ID string) (*response.AccessKey, error) {
 	var result response.AccessKey
 
 	_, err := a.httpClient.R().
@@ -47,7 +49,7 @@ func (a *AccessKeyAPI) AccessKey(ctx context.Context, ID string) (*response.Acce
 	return &result, nil
 }
 
-func (a *AccessKeyAPI) AccessKeys(ctx context.Context, opts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
+func (a *API) AccessKeys(ctx context.Context, opts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
 	var query queries.AccessKeyQuery
 	for _, o := range opts {
 		o(&query)
@@ -80,7 +82,7 @@ func (a *AccessKeyAPI) AccessKeys(ctx context.Context, opts ...queries.AccessKey
 	return &result, nil
 }
 
-func (a *AccessKeyAPI) RevokeAccessKey(ctx context.Context, ID string) error {
+func (a *API) RevokeAccessKey(ctx context.Context, ID string) error {
 	_, err := a.httpClient.R().
 		SetContext(ctx).
 		Delete(a.url.JoinPath("keys", ID).String())
@@ -91,14 +93,14 @@ func (a *AccessKeyAPI) RevokeAccessKey(ctx context.Context, ID string) error {
 	return nil
 }
 
-func NewAccessKeyAPI(url *url.URL, httpClient *resty.Client) *AccessKeyAPI {
-	return &AccessKeyAPI{
+func NewAPI(url *url.URL, httpClient *resty.Client) *API {
+	return &API{
 		url:        url.JoinPath(route),
 		httpClient: httpClient,
 	}
 }
 
-func AccessKeysHTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
+func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
 	return &errutil.HTTPErrorFormatter{
 		Action: action,
 		API:    "User Access Keys API",

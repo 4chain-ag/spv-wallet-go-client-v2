@@ -1,9 +1,12 @@
-package userstest
+package accesskeystest
 
 import (
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
@@ -83,5 +86,33 @@ func ExpectedAccessKeyPage(t *testing.T) *queries.AccessKeyPage {
 			TotalElements: 7,
 			TotalPages:    1,
 		},
+	}
+}
+
+func Ptr[T any](value T) *T {
+	return &value
+}
+
+func ParseTime(t *testing.T, s string) time.Time {
+	ts, err := time.Parse(time.RFC3339Nano, s)
+	if err != nil {
+		t.Fatalf("test helper - time parse: %s", err)
+	}
+	return ts
+}
+
+func NewBadRequestSPVError() models.SPVError {
+	return models.SPVError{
+		Message:    http.StatusText(http.StatusBadRequest),
+		StatusCode: http.StatusBadRequest,
+		Code:       "invalid-data-format",
+	}
+}
+
+func NewInternalServerSPVError() models.SPVError {
+	return models.SPVError{
+		Message:    http.StatusText(http.StatusInternalServerError),
+		StatusCode: http.StatusInternalServerError,
+		Code:       models.UnknownErrorCode,
 	}
 }

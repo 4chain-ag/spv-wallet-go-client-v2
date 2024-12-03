@@ -73,7 +73,7 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 func (a *AdminAPI) Contacts(ctx context.Context, opts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
 	res, err := a.contactsAPI.Contacts(ctx, opts...)
 	if err != nil {
-		return nil, contacts.HTTPErrorFormatter("retrieve user contacts page", err).FormatGetErr()
+		return nil, contacts.HTTPErrorFormatter("failed to retrieve user contacts page", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -88,7 +88,7 @@ func (a *AdminAPI) Contacts(ctx context.Context, opts ...queries.ContactQueryOpt
 func (a *AdminAPI) ContactUpdate(ctx context.Context, cmd *commands.UpdateContact) (*response.Contact, error) {
 	res, err := a.contactsAPI.UpdateContact(ctx, cmd)
 	if err != nil {
-		msg := fmt.Sprintf("update contact with ID: %s", cmd.ID)
+		msg := fmt.Sprintf("failed to update contact with ID: %s", cmd.ID)
 		return nil, contacts.HTTPErrorFormatter(msg, err).FormatPutErr()
 	}
 
@@ -101,7 +101,7 @@ func (a *AdminAPI) ContactUpdate(ctx context.Context, cmd *commands.UpdateContac
 func (a *AdminAPI) DeleteContact(ctx context.Context, ID string) error {
 	err := a.contactsAPI.DeleteContact(ctx, ID)
 	if err != nil {
-		msg := fmt.Sprintf("delete contact with ID: %s", ID)
+		msg := fmt.Sprintf("failed to delete contact with ID: %s", ID)
 		return contacts.HTTPErrorFormatter(msg, err).FormatDeleteErr()
 	}
 
@@ -113,7 +113,7 @@ func (a *AdminAPI) DeleteContact(ctx context.Context, ID string) error {
 func (a *AdminAPI) AcceptInvitation(ctx context.Context, ID string) error {
 	err := a.invitationsAPI.AcceptInvitation(ctx, ID)
 	if err != nil {
-		msg := fmt.Sprintf("accept invitation with ID: %s", ID)
+		msg := fmt.Sprintf("failed to accept invitation with ID: %s", ID)
 		return invitations.HTTPErrorFormatter(msg, err).FormatDeleteErr()
 	}
 
@@ -125,7 +125,7 @@ func (a *AdminAPI) AcceptInvitation(ctx context.Context, ID string) error {
 func (a *AdminAPI) RejectInvitation(ctx context.Context, ID string) error {
 	err := a.invitationsAPI.RejectInvitation(ctx, ID)
 	if err != nil {
-		msg := fmt.Sprintf("delete invitation with ID: %s", ID)
+		msg := fmt.Sprintf("failed to reject invitation with ID: %s", ID)
 		return invitations.HTTPErrorFormatter(msg, err).FormatDeleteErr()
 	}
 

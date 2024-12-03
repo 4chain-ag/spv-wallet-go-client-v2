@@ -25,7 +25,7 @@ type API struct {
 func (a *API) FinalizeTransaction(draft *response.DraftTransaction) (string, error) {
 	res, err := a.transactionSigner.GetSignedHex(draft)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to finalize transaction: %w", err)
 	}
 
 	return res, nil

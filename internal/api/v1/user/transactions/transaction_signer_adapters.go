@@ -1,6 +1,7 @@
-package transactionsigner
+package transactions
 
 import (
+	"errors"
 	"fmt"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
@@ -9,70 +10,60 @@ import (
 	trx "github.com/bitcoin-sv/go-sdk/transaction"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
+	walleterrors "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
+
+type NoopTransactionSigner struct {
+}
+
+func (*NoopTransactionSigner) TransactionSignedHex(dt *response.DraftTransaction) (string, error) {
+	return "", nil
+}
 
 type TransactionSigner struct {
 	xPriv *bip32.ExtendedKey
 }
 
-func New(xPriv *bip32.ExtendedKey) *TransactionSigner {
-	return &TransactionSigner{
-		xPriv: xPriv,
-	}
-}
-
-func (ts *TransactionSigner) GetSignedHex(dt *response.DraftTransaction) (string, error) {
+func (ts *TransactionSigner) TransactionSignedHex(dt *response.DraftTransaction) (string, error) {
 	// Create transaction from hex
 	tx, err := trx.NewTransactionFromHex(dt.Hex)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse hex, %w", err)
+		return "", errors.Join(walleterrors.ErrFailedToParseHex, err)
 	}
 	// we need to reset the inputs as we are going to add them via tx.AddInputFrom (ts-sdk method) and then sign
 	tx.Inputs = make([]*trx.TransactionInput, 0)
 
 	// Enrich inputs
 	for _, draftInput := range dt.Configuration.Inputs {
-		lockingScript, err := prepareLockingScript(&draftInput.Destination)
+		lockingScript, err := script.NewFromHex(draftInput.Destination.LockingScript)
 		if err != nil {
-			return "", fmt.Errorf("failed to prepare locking script, %w", err)
+			return "", errors.Join(walleterrors.ErrCreateLockingScript, err)
 		}
 
-		unlockScript, err := prepareUnlockingScript(ts.xPriv, &draftInput.Destination)
+		// prepare unlocking script
+		key, err := getDerivedKeyForDestination(ts.xPriv, &draftInput.Destination)
 		if err != nil {
-			return "", fmt.Errorf("failed to prepare unlocking script, %w", err)
+			return "", errors.Join(walleterrors.ErrGetDerivedKeyForDestination, err)
+		}
+		sigHashFlags := sighash.AllForkID
+		unlockScript, err := p2pkh.Unlock(key, &sigHashFlags)
+		if err != nil {
+			return "", errors.Join(walleterrors.ErrCreateUnlockingScript, err)
 		}
 
 		err = tx.AddInputFrom(draftInput.TransactionID, draftInput.OutputIndex, lockingScript.String(), draftInput.Satoshis, unlockScript)
 		if err != nil {
-			return "", fmt.Errorf("failed to add inputs to transaction, %w", err)
+			return "", errors.Join(walleterrors.ErrAddInputsToTransaction, err)
 		}
 	}
 
 	err = tx.Sign()
 	if err != nil {
-		return "", fmt.Errorf("failed to sign transaction, %w", err)
+		return "", errors.Join(walleterrors.ErrSignTransaction, err)
 	}
 
 	return tx.String(), nil
-}
-
-func prepareLockingScript(dst *response.Destination) (*script.Script, error) {
-	lockingScript, err := script.NewFromHex(dst.LockingScript)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create locking script from hex for destination: %w", err)
-	}
-
-	return lockingScript, nil
-}
-
-func prepareUnlockingScript(xPriv *bip32.ExtendedKey, dst *response.Destination) (*p2pkh.P2PKH, error) {
-	key, err := getDerivedKeyForDestination(xPriv, dst)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get derived key for destination: %w", err)
-	}
-
-	return getUnlockingScript(key)
 }
 
 func getDerivedKeyForDestination(xPriv *bip32.ExtendedKey, dst *response.Destination) (*ec.PrivateKey, error) {
@@ -97,14 +88,4 @@ func getDerivedKeyForDestination(xPriv *bip32.ExtendedKey, dst *response.Destina
 	}
 
 	return priv, nil
-}
-
-func getUnlockingScript(privateKey *ec.PrivateKey) (*p2pkh.P2PKH, error) {
-	sigHashFlags := sighash.AllForkID
-	unlocked, err := p2pkh.Unlock(privateKey, &sigHashFlags)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create unlocking script, %w", err)
-	}
-
-	return unlocked, nil
 }

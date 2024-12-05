@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
+	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/errutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/transactionsigner"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
@@ -16,19 +16,18 @@ import (
 
 const route = "api/v1/transactions"
 
+type TransactionSignerAdapter interface {
+	TransactionSignedHex(dt *response.DraftTransaction) (string, error)
+}
+
 type API struct {
 	url               *url.URL
 	httpClient        *resty.Client
-	transactionSigner *transactionsigner.TransactionSigner
+	transactionSigner TransactionSignerAdapter
 }
 
 func (a *API) FinalizeTransaction(draft *response.DraftTransaction) (string, error) {
-	res, err := a.transactionSigner.GetSignedHex(draft)
-	if err != nil {
-		return "", fmt.Errorf("failed to finalize transaction: %w", err)
-	}
-
-	return res, nil
+	return a.transactionSigner.TransactionSignedHex(draft)
 }
 
 func (a *API) DraftToRecipients(ctx context.Context, r *commands.SendToRecipients) (*response.DraftTransaction, error) {
@@ -42,33 +41,30 @@ func (a *API) DraftToRecipients(ctx context.Context, r *commands.SendToRecipient
 		})
 	}
 
-	draftTransactionCmd := &commands.DraftTransaction{
+	return a.DraftTransaction(ctx, &commands.DraftTransaction{
 		Config: response.TransactionConfig{
 			Outputs: outputs,
 		},
 		Metadata: r.Metadata,
-	}
-
-	return a.DraftTransaction(ctx, draftTransactionCmd)
+	})
 }
 
 func (a *API) SendToRecipients(ctx context.Context, r *commands.SendToRecipients) (*response.Transaction, error) {
 	draft, err := a.DraftToRecipients(ctx, r)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to send draft to recipients: %w", err)
 	}
 
 	var hex string
 	if hex, err = a.FinalizeTransaction(draft); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to finalize transaction: %w", err)
 	}
 
-	recordTransactionCmd := &commands.RecordTransaction{
+	return a.RecordTransaction(ctx, &commands.RecordTransaction{
 		Metadata:    r.Metadata,
 		Hex:         hex,
 		ReferenceID: draft.ID,
-	}
-	return a.RecordTransaction(ctx, recordTransactionCmd)
+	})
 }
 
 func (a *API) DraftTransaction(ctx context.Context, r *commands.DraftTransaction) (*response.DraftTransaction, error) {
@@ -162,11 +158,21 @@ func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.Tran
 	return &result, nil
 }
 
-func NewAPI(URL *url.URL, httpClient *resty.Client, txSigner *transactionsigner.TransactionSigner) *API {
+func NewAPIWithXPriv(URL *url.URL, httpClient *resty.Client, xPriv *bip32.ExtendedKey) *API {
+	return &API{
+		url:        URL.JoinPath(route),
+		httpClient: httpClient,
+		transactionSigner: &TransactionSigner{
+			xPriv: xPriv,
+		},
+	}
+}
+
+func NewAPI(URL *url.URL, httpClient *resty.Client) *API {
 	return &API{
 		url:               URL.JoinPath(route),
 		httpClient:        httpClient,
-		transactionSigner: txSigner,
+		transactionSigner: &NoopTransactionSigner{},
 	}
 }
 

@@ -20,7 +20,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/transactionsigner"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
@@ -229,7 +228,7 @@ func (u *UserAPI) Transaction(ctx context.Context, ID string) (*response.Transac
 
 // FinalizeTransaction finalizes a draft transaction and returns its signed hex representation.
 // It uses the draft transaction details to construct, enrich, and sign the transaction
-// through the `auth.GetSignedHex` utility function.
+// through the `transactionsigner.TransactionSignedHex` utility function.
 // The response is the signed transaction in hex format.
 // Returns an error if the transaction cannot be finalized.
 func (u *UserAPI) FinalizeTransaction(draft *response.DraftTransaction) (string, error) {
@@ -424,7 +423,7 @@ func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to intialized xPub authenticator: %w", err)
 	}
 
-	return initUserAPI(cfg, nil, authenticator)
+	return initUserAPI(cfg, authenticator)
 }
 
 // NewUserAPIWithXPriv initializes a new UserAPI instance using an extended private key (xPriv).
@@ -443,12 +442,11 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to intialized xPriv authenticator: %w", err)
 	}
 
-	userAPI, err := initUserAPI(cfg, key, authenticator)
+	userAPI, err := initUserAPIWithXPriv(cfg, key, authenticator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new client: %w", err)
 	}
 
-	userAPI.totpAPI = totp.New(key)
 	return userAPI, nil
 }
 
@@ -468,25 +466,44 @@ func NewUserAPIWithAccessKey(cfg config.Config, accessKey string) (*UserAPI, err
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}
 
-	return initUserAPI(cfg, nil, authenticator)
+	return initUserAPI(cfg, authenticator)
 }
 
 type authenticator interface {
 	Authenticate(r *resty.Request) error
 }
 
-func initUserAPI(cfg config.Config, xPriv *bip32.ExtendedKey, auth authenticator) (*UserAPI, error) {
+func initUserAPIWithXPriv(cfg config.Config, xPriv *bip32.ExtendedKey, auth authenticator) (*UserAPI, error) {
 	url, err := url.Parse(cfg.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)
 	}
 
 	httpClient := restyutil.NewHTTPClient(cfg, auth)
-	txSigner := transactionsigner.New(xPriv)
 	return &UserAPI{
 		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
 		configsAPI:      configs.NewAPI(url, httpClient),
-		transactionsAPI: transactions.NewAPI(url, httpClient, txSigner),
+		transactionsAPI: transactions.NewAPIWithXPriv(url, httpClient, xPriv),
+		utxosAPI:        utxos.NewAPI(url, httpClient),
+		accessKeyAPI:    users.NewAccessKeyAPI(url, httpClient),
+		xpubAPI:         users.NewXPubAPI(url, httpClient),
+		contactsAPI:     contacts.NewAPI(url, httpClient),
+		invitationsAPI:  invitations.NewAPI(url, httpClient),
+		totpAPI:         totp.New(xPriv),
+	}, nil
+}
+
+func initUserAPI(cfg config.Config, auth authenticator) (*UserAPI, error) {
+	url, err := url.Parse(cfg.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse addr to url.URL: %w", err)
+	}
+
+	httpClient := restyutil.NewHTTPClient(cfg, auth)
+	return &UserAPI{
+		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
+		configsAPI:      configs.NewAPI(url, httpClient),
+		transactionsAPI: transactions.NewAPI(url, httpClient),
 		utxosAPI:        utxos.NewAPI(url, httpClient),
 		accessKeyAPI:    users.NewAccessKeyAPI(url, httpClient),
 		xpubAPI:         users.NewXPubAPI(url, httpClient),

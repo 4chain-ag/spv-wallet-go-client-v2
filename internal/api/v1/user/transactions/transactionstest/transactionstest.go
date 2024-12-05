@@ -32,7 +32,6 @@ func ExpectedDraftTransactionWithHex(t *testing.T) *response.DraftTransaction {
 		Model: response.Model{
 			CreatedAt: ParseTime(t, "2024-12-02T12:04:33.855018Z"),
 			UpdatedAt: ParseTime(t, "2024-12-02T13:04:33.855036+01:00"),
-			Metadata:  nil,
 		},
 		ID:        "de3b8ef7041b2a528bc47ecdb3b87b06b61407fe24789bc02f9d49bfc234b4d5",
 		Hex:       "01000000014c037d55e72d2ee6a95ff67bd758c4cee9c7545bb4d72ba77584152fcfa070120100000000ffffffff0200000000000000000e006a0568656c6c6f05776f726c6408000000000000001976a914702cef80a7039a1aebb70dc05ce1e439646fa33788ac00000000",
@@ -127,8 +126,6 @@ func ExpectedDraftTransactionWithHex(t *testing.T) *response.DraftTransaction {
 func ExpectedSendToRecipientsTransaction(t *testing.T) *response.Transaction {
 	return &response.Transaction{
 		Model: response.Model{
-			Metadata:  nil,
-			DeletedAt: nil,
 			CreatedAt: ParseTime(t, "2024-12-03T16:10:48.551774Z"),
 			UpdatedAt: ParseTime(t, "2024-12-03T16:10:49.080876Z"),
 		},

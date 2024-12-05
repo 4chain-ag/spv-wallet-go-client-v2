@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
+	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions/transactionstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
@@ -71,7 +72,7 @@ func TestTransactionsAPI_FinalizeTransaction(t *testing.T) {
 	tests := map[string]struct {
 		draft       *response.DraftTransaction
 		expectedHex string
-		expectedErr string
+		expectedErr error
 	}{
 		"Finalize Transaction with proper draft": {
 			draft:       transactionstest.ExpectedDraftTransactionWithHex(t),
@@ -79,15 +80,15 @@ func TestTransactionsAPI_FinalizeTransaction(t *testing.T) {
 		},
 		"Finalize Transaction fail to parse hex": {
 			draft:       transactionstest.ExpectedDraftTransactionWithWrongHex(t),
-			expectedErr: "failed to parse hex",
+			expectedErr: errors.ErrFailedToParseHex,
 		},
 		"Finalize Transaction fail to prepare locking script": {
 			draft:       transactionstest.ExpectedDraftTransactionWithWrongLockingScript(t),
-			expectedErr: "failed to prepare locking script",
+			expectedErr: errors.ErrCreateLockingScript,
 		},
 		"Finalize Transaction fail to add inputs to transaction": {
 			draft:       transactionstest.ExpectedDraftTransactionWithWrongInputs(t),
-			expectedErr: "failed to add inputs to transaction",
+			expectedErr: errors.ErrAddInputsToTransaction,
 		},
 	}
 
@@ -100,11 +101,7 @@ func TestTransactionsAPI_FinalizeTransaction(t *testing.T) {
 			hex, err := spvWalletClient.FinalizeTransaction(tc.draft)
 
 			//then:
-			if tc.expectedErr != "" {
-				require.ErrorContains(t, err, tc.expectedErr)
-			} else {
-				require.NoError(t, err)
-			}
+			require.ErrorIs(t, err, tc.expectedErr)
 			require.Equal(t, tc.expectedHex, hex)
 		})
 	}

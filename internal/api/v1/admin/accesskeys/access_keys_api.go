@@ -11,7 +11,10 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const route = "/api/v1/admin/users/keys"
+const (
+	route = "/api/v1/admin/users/keys"
+	api   = "Admin Access Keys API"
+)
 
 type API struct {
 	httpClient *resty.Client
@@ -55,7 +58,7 @@ func NewAPI(url *url.URL, httpClient *resty.Client) *API {
 func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
 	return &errutil.HTTPErrorFormatter{
 		Action: action,
-		API:    "Admin Access Keys API",
+		API:    api,
 		Err:    err,
 	}
 }

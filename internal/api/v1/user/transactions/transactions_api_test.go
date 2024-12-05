@@ -28,12 +28,12 @@ func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/patch_transaction_update_metadata_200.json")),
 		},
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s response: 400", id): {
-			expectedErr: transactionstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s response: 500", id): {
-			expectedErr: transactionstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, spvwallettest.NewInternalServerSPVError()),
 		},
 		fmt.Sprintf("HTTP PATCH /api/v1/transactions/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
@@ -75,12 +75,12 @@ func TestTransactionsAPI_RecordTransaction(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/post_transaction_record_201.json")),
 		},
 		"HTTP POST /api/v1/transactions response: 400": {
-			expectedErr: transactionstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		"HTTP POST /api/v1/transactions response: 500": {
-			expectedErr: transactionstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewInternalServerSPVError()),
 		},
 		"HTTP POST /api/v1/transactions str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
@@ -116,12 +116,12 @@ func TestTransactionsAPI_DraftTransaction(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/post_transaction_draft_200.json")),
 		},
 		"HTTP POST /api/v1/transactions/drafts response: 400": {
-			expectedErr: transactionstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		"HTTP POST /api/v1/transactions/drafts response: 500": {
-			expectedErr: transactionstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, spvwallettest.NewInternalServerSPVError()),
 		},
 		"HTTP POST /api/v1/transactions/drafts str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
@@ -161,12 +161,12 @@ func TestTransactionsAPI_Transaction(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/get_transaction_200.json")),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/transactions/%s response: 400", id): {
-			expectedErr: transactionstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/transactions/%s response: 500", id): {
-			expectedErr: transactionstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, spvwallettest.NewInternalServerSPVError()),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/transactions/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
@@ -202,12 +202,12 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/get_transactions_200.json")),
 		},
 		"HTTP GET /api/v1/transactions response: 400": {
-			expectedErr: transactionstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/transactions response: 500": {
-			expectedErr: transactionstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, transactionstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, spvwallettest.NewInternalServerSPVError()),
 		},
 		"HTTP GET /api/v1/transactions str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,

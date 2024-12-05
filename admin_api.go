@@ -209,6 +209,10 @@ func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
 	}
 
 	httpClient := restyutil.NewHTTPClient(cfg, auth)
+	if httpClient == nil {
+		return nil, fmt.Errorf("failed to initialize HTTP client - nil value.")
+	}
+
 	return &AdminAPI{
 		transactionsAPI: transactions.NewAPI(url, httpClient),
 		xpubsAPI:        xpubs.NewAPI(url, httpClient),

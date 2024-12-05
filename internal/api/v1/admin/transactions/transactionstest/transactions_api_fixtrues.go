@@ -1,19 +1,17 @@
 package transactionstest
 
 import (
-	"net/http"
 	"testing"
-	"time"
 
-	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
 func ExpectedTransaction(t *testing.T) *response.Transaction {
 	return &response.Transaction{
 		Model: response.Model{
-			CreatedAt: parseTime(t, "2024-10-02T10:34:57.931744Z"),
-			UpdatedAt: parseTime(t, "2024-10-18T13:59:02.237607Z"),
+			CreatedAt: spvwallettest.ParseTime(t, "2024-10-02T10:34:57.931744Z"),
+			UpdatedAt: spvwallettest.ParseTime(t, "2024-10-18T13:59:02.237607Z"),
 			Metadata: map[string]any{
 				"domain":     "john.doe.test.4chain.space",
 				"ip_address": "127.0.0.1",
@@ -44,8 +42,8 @@ func ExpectedTransactionsPage(t *testing.T) *response.PageModel[response.Transac
 		Content: []*response.Transaction{
 			{
 				Model: response.Model{
-					CreatedAt: parseTime(t, "2024-11-18T07:19:51.661646Z"),
-					UpdatedAt: parseTime(t, "2024-11-18T08:24:08.217141Z"),
+					CreatedAt: spvwallettest.ParseTime(t, "2024-11-18T07:19:51.661646Z"),
+					UpdatedAt: spvwallettest.ParseTime(t, "2024-11-18T08:24:08.217141Z"),
 					Metadata: map[string]any{
 						"receiver": "john.doe.test@john.test.4chain.space",
 						"sender":   "jane.doe.test@jane.test.4chain.space",
@@ -69,8 +67,8 @@ func ExpectedTransactionsPage(t *testing.T) *response.PageModel[response.Transac
 			},
 			{
 				Model: response.Model{
-					CreatedAt: parseTime(t, "2024-11-18T07:16:04.821925Z"),
-					UpdatedAt: parseTime(t, "2024-11-19T13:09:39.501356Z"),
+					CreatedAt: spvwallettest.ParseTime(t, "2024-11-18T07:16:04.821925Z"),
+					UpdatedAt: spvwallettest.ParseTime(t, "2024-11-19T13:09:39.501356Z"),
 					Metadata: map[string]any{
 						"domain":     "john.doe.test.4chain.space",
 						"ip_address": "127.0.0.1",
@@ -105,28 +103,4 @@ func ExpectedTransactionsPage(t *testing.T) *response.PageModel[response.Transac
 			TotalPages:    1,
 		},
 	}
-}
-
-func NewBadRequestSPVError() models.SPVError {
-	return models.SPVError{
-		Message:    http.StatusText(http.StatusBadRequest),
-		StatusCode: http.StatusBadRequest,
-		Code:       "invalid-data-format",
-	}
-}
-
-func NewInternalServerSPVError() models.SPVError {
-	return models.SPVError{
-		Message:    http.StatusText(http.StatusInternalServerError),
-		StatusCode: http.StatusInternalServerError,
-		Code:       models.UnknownErrorCode,
-	}
-}
-
-func parseTime(t *testing.T, s string) time.Time {
-	ts, err := time.Parse(time.RFC3339Nano, s)
-	if err != nil {
-		t.Fatalf("test helper - time parse: %s", err)
-	}
-	return ts
 }

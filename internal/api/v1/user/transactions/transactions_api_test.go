@@ -45,7 +45,7 @@ func TestTransactionsAPI_SendToRecipients(t *testing.T) {
 	t.Run("SendToRecipients - DraftToRecipients error", func(t *testing.T) {
 		// given:
 		spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
-		transport.RegisterResponder(http.MethodPost, drafTransactionURL, httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()))
+		transport.RegisterResponder(http.MethodPost, drafTransactionURL, httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()))
 		ctx := context.Background()
 
 		// when:
@@ -58,7 +58,7 @@ func TestTransactionsAPI_SendToRecipients(t *testing.T) {
 		})
 
 		// then:
-		require.ErrorIs(t, err, transactionstest.NewBadRequestSPVError())
+		require.ErrorIs(t, err, spvwallettest.NewBadRequestSPVError())
 		require.Nil(t, result)
 	})
 
@@ -86,7 +86,7 @@ func TestTransactionsAPI_SendToRecipients(t *testing.T) {
 		// given:
 		spvWalletClient, transport := spvwallettest.GivenSPVUserAPI(t)
 		transport.RegisterResponder(http.MethodPost, drafTransactionURL, httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("transactionstest/transaction_draft_with_hex_200.json")))
-		transport.RegisterResponder(http.MethodPost, recordTransactionURL, httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, transactionstest.NewBadRequestSPVError()))
+		transport.RegisterResponder(http.MethodPost, recordTransactionURL, httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()))
 		ctx := context.Background()
 
 		// when:
@@ -99,7 +99,7 @@ func TestTransactionsAPI_SendToRecipients(t *testing.T) {
 		})
 
 		// then:
-		require.ErrorIs(t, err, transactionstest.NewBadRequestSPVError())
+		require.ErrorIs(t, err, spvwallettest.NewBadRequestSPVError())
 		require.Nil(t, result)
 
 	})

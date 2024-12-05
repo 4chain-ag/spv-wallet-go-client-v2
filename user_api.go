@@ -58,7 +58,7 @@ type UserAPI struct {
 func (u *UserAPI) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
 	res, err := u.contactsAPI.Contacts(ctx, contactOpts...)
 	if err != nil {
-		return nil, contacts.HTTPErrorFormatter("retrieve user contacts page", err).FormatGetErr()
+		return nil, contacts.HTTPErrorFormatter("retrieve contacts page", err).FormatGetErr()
 	}
 
 	return res, nil

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/accesskeys/accesskeystest"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/xpubs/xpubstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
@@ -25,16 +24,16 @@ func TestAccessKeyAPI_AccessKeys(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("accesskeystest/get_access_keys_200.json")),
 		},
 		"HTTP GET /api/v1/admin/users/keys response: 400": {
-			expectedErr: accesskeystest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, accesskeystest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/admin/users/keys response: 500": {
-			expectedErr: accesskeystest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, accesskeystest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, spvwallettest.NewInternalServerSPVError()),
 		},
 		"HTTP GET /api/v1/admin/users/keys str response: 500": {
-			expectedErr: xpubstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, xpubstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, spvwallettest.NewInternalServerSPVError()),
 		},
 	}
 

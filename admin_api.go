@@ -29,9 +29,8 @@ import (
 // Methods may return wrapped errors, including models.SPVError or
 // ErrUnrecognizedAPIResponse, depending on the behavior of the SPV Wallet API.
 type AdminAPI struct {
-	xpubsAPI    *xpubs.API
-	paymailsAPI *paymails.API
-
+	xpubsAPI        *xpubs.API
+	paymailsAPI     *paymails.API
 	transactionsAPI *transactions.API
 	contactsAPI     *contacts.API
 	invitationsAPI  *invitations.API

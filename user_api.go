@@ -58,7 +58,7 @@ type UserAPI struct {
 func (u *UserAPI) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
 	res, err := u.contactsAPI.Contacts(ctx, contactOpts...)
 	if err != nil {
-		return nil, contacts.HTTPErrorFormatter("retrieve contact", err).FormatGetErr()
+		return nil, contacts.HTTPErrorFormatter("retrieve user contacts page", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -220,7 +220,7 @@ func (u *UserAPI) Transactions(ctx context.Context, opts ...queries.Transactions
 func (u *UserAPI) Transaction(ctx context.Context, ID string) (*response.Transaction, error) {
 	res, err := u.transactionsAPI.Transaction(ctx, ID)
 	if err != nil {
-		msg := fmt.Sprintf("record a transaction with ID: %s", ID)
+		msg := fmt.Sprintf("retrieve a transaction with ID: %s", ID)
 		return nil, transactions.HTTPErrorFormatter(msg, err).FormatGetErr()
 	}
 
@@ -454,6 +454,10 @@ func initUserAPI(cfg config.Config, auth authenticator) (*UserAPI, error) {
 	}
 
 	httpClient := restyutil.NewHTTPClient(cfg, auth)
+	if httpClient == nil {
+		return nil, fmt.Errorf("failed to initialize HTTP client - nil value.")
+	}
+
 	return &UserAPI{
 		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
 		configsAPI:      configs.NewAPI(url, httpClient),

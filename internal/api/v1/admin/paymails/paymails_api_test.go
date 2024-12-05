@@ -29,12 +29,12 @@ func TestPaymailsAPI_DeletePaymail(t *testing.T) {
 			responder:        httpmock.NewStringResponder(http.StatusOK, http.StatusText(http.StatusOK)),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/admin/paymails/%s response: 400", id): {
-			expectedErr: paymailstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/admin/paymails/%s response: 500", id): {
-			expectedErr: paymailstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewInternalServerSPVError()),
 		},
 		fmt.Sprintf("HTTP DELETE /api/v1/admin/paymails/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
@@ -67,12 +67,12 @@ func TestPaymailsAPI_CreatePaymail(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("paymailstest/post_paymail_200.json")),
 		},
 		"HTTP POST /api/v1/admin/paymails response: 400": {
-			expectedErr: paymailstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		"HTTP POST /api/v1/admin/paymails response: 500": {
-			expectedErr: paymailstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewInternalServerSPVError()),
 		},
 		"HTTP POST /api/v1/admin/paymails str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
@@ -108,12 +108,12 @@ func TestPaymailsAPI_Paymails(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("paymailstest/get_paymails_200.json")),
 		},
 		"HTTP GET /api/v1/admin/paymails response: 400": {
-			expectedErr: paymailstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		"HTTP GET /api/v1/admin/paymails response: 500": {
-			expectedErr: paymailstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewInternalServerSPVError()),
 		},
 		"HTTP GET /api/v1/admin/paymails str response: 500": {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,
@@ -148,12 +148,12 @@ func TestPaymailsAPI_Paymail(t *testing.T) {
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("paymailstest/get_paymail_200.json")),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/admin/paymails/%s response: 400", id): {
-			expectedErr: paymailstest.NewBadRequestSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewBadRequestSPVError()),
+			expectedErr: spvwallettest.NewBadRequestSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewBadRequestSPVError()),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/admin/paymails/%s response: 500", id): {
-			expectedErr: paymailstest.NewInternalServerSPVError(),
-			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, paymailstest.NewInternalServerSPVError()),
+			expectedErr: spvwallettest.NewInternalServerSPVError(),
+			responder:   httpmock.NewJsonResponderOrPanic(http.StatusBadRequest, spvwallettest.NewInternalServerSPVError()),
 		},
 		fmt.Sprintf("HTTP GET /api/v1/admin/paymails/%s str response: 500", id): {
 			expectedErr: errors.ErrUnrecognizedAPIResponse,

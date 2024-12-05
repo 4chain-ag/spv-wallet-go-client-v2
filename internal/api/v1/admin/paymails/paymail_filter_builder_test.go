@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/paymails/paymailstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
@@ -21,7 +20,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'id' field set": {
 			filter: filter.AdminPaymailFilter{
-				ID: paymailstest.Ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
+				ID: ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
 			},
 			expectedParams: url.Values{
 				"id": []string{"b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"},
@@ -29,7 +28,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'xPubId' field set": {
 			filter: filter.AdminPaymailFilter{
-				XpubID: paymailstest.Ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
+				XpubID: ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
 			},
 			expectedParams: url.Values{
 				"xpubId": []string{"7d373830-1d74-4c4b-a435-04ce09398027"},
@@ -37,7 +36,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'alias' field set": {
 			filter: filter.AdminPaymailFilter{
-				Alias: paymailstest.Ptr("alias"),
+				Alias: ptr("alias"),
 			},
 			expectedParams: url.Values{
 				"alias": []string{"alias"},
@@ -45,7 +44,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'public name' field set": {
 			filter: filter.AdminPaymailFilter{
-				PublicName: paymailstest.Ptr("Alice"),
+				PublicName: ptr("Alice"),
 			},
 			expectedParams: url.Values{
 				"publicName": []string{"Alice"},
@@ -53,10 +52,10 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: all fields set": {
 			filter: filter.AdminPaymailFilter{
-				ID:         paymailstest.Ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
-				XpubID:     paymailstest.Ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
-				PublicName: paymailstest.Ptr("Alice"),
-				Alias:      paymailstest.Ptr("alias"),
+				ID:         ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
+				XpubID:     ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
+				PublicName: ptr("Alice"),
+				Alias:      ptr("alias"),
 			},
 			expectedParams: url.Values{
 				"publicName": []string{"Alice"},
@@ -81,4 +80,8 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 			require.Equal(t, tc.expectedParams, got)
 		})
 	}
+}
+
+func ptr[T any](value T) *T {
+	return &value
 }

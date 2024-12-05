@@ -13,7 +13,10 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const route = "api/v1/admin/paymails"
+const (
+	route = "api/v1/admin/paymails"
+	api   = "Admin User Paymails API"
+)
 
 type API struct {
 	httpClient *resty.Client
@@ -106,7 +109,7 @@ func NewAPI(url *url.URL, httpClient *resty.Client) *API {
 func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
 	return &errutil.HTTPErrorFormatter{
 		Action: action,
-		API:    "Admin User Paymails API",
+		API:    api,
 		Err:    err,
 	}
 }

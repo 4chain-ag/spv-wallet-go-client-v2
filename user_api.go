@@ -7,6 +7,10 @@ import (
 	"net/url"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/accesskeys"
@@ -22,9 +26,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/go-resty/resty/v2"
 )
 
 // UserAPI provides methods for interacting with user-related APIs.
@@ -410,7 +411,7 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
 	}
 
-	authenticator, err := auth.NewXprivAuthenticator(key)
+	authenticator, err := auth.NewXprivAuthenticator(xPriv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xPriv authenticator: %w", err)
 	}

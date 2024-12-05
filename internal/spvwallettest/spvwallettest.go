@@ -8,10 +8,11 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	spvwallet "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/jarcoal/httpmock"
+
+	spvwallet "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 )
 
 const TestAPIAddr = "http://localhost:3003"
@@ -30,6 +31,16 @@ const (
 )
 
 func ExtendedKey(t *testing.T) *bip32.ExtendedKey {
+	t.Helper()
+	key, err := bip32.GenerateHDKeyFromString(UserXPriv)
+	if err != nil {
+		t.Fatalf("test helper - bip32 generate hd key from string: %s", err)
+	}
+
+	return key
+}
+
+func ExtendedKeyString(t *testing.T) *bip32.ExtendedKey {
 	t.Helper()
 	key, err := bip32.GenerateHDKeyFromString(UserXPriv)
 	if err != nil {

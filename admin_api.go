@@ -218,12 +218,7 @@ func (a *AdminAPI) UnsubscribeWebhook(ctx context.Context, cmd *commands.CancelW
 //
 // Note: Requests made with this instance will be securely signed.
 func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
-	key, err := bip32.GenerateHDKeyFromString(xPriv)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
-	}
-
-	authenticator, err := auth.NewXprivAuthenticator(key)
+	authenticator, err := auth.NewXprivAuthenticator(xPriv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
 	}

@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 )
 
 const (
@@ -18,6 +19,44 @@ const (
 	xAuthTimeKey      = "X-Auth-Time"
 	xAuthSignatureKey = "X-Auth-Signature"
 )
+
+// func TestAccessKeyAuthenitcator_NewXprivAuthenticatorFromString(t *testing.T) {
+// 	// Given:
+// 	xpriv := spvwallettest.ExtendedKey(t)
+// 	authenticator, err := auth.NewXprivAuthenticator(xpriv)
+
+// 	// When:
+// 	authenticatorFromStr, err := auth.NewXprivAuthenticatorFromString(spvwallettest.UserXPriv)
+
+// 	// Then:
+// 	require.NotNil(t, authenticator)
+// 	require.NoError(t, err)
+// 	require.Equal(t, authenticator, authenticatorFromStr)
+// }
+
+// func TestAccessKeyAuthenitcator_NewAccessKeyAuthenticatorFromString(t *testing.T) {
+// 	// Given:
+// 	privKeyStr := spvwallettest.PrivateKeyHexString(t)
+
+// 	// When:
+// 	authenticator, err := auth.NewAccessKeyAuthenticatorFromString(privKeyStr)
+
+// 	// Then:
+// 	require.NotNil(t, authenticator)
+// 	require.NoError(t, err)
+// }
+
+// func TestAccessKeyAuthenitcator_NewXpubOnlyAuthenticatorFromString(t *testing.T) {
+// 	// Given:
+// 	xpubStr := spvwallettest.ExtendedKeyString(t)
+
+// 	// When:
+// 	authenticator, err := auth.NewXpubOnlyAuthenticatorFromString(xpubStr)
+
+// 	// Then:
+// 	require.NotNil(t, authenticator)
+// 	require.NoError(t, err)
+// }
 
 func TestAccessKeyAuthenitcator_NewWithNilAccessKey(t *testing.T) {
 	// when:
@@ -48,7 +87,7 @@ func TestAccessKeyAuthenticator_Authenticate(t *testing.T) {
 
 func TestXprivAuthenitcator_NewWithNilXpriv(t *testing.T) {
 	// when:
-	authenticator, err := auth.NewXprivAuthenticator(nil)
+	authenticator, err := auth.NewXprivAuthenticator("")
 
 	// then:
 	require.Nil(t, authenticator)
@@ -57,8 +96,7 @@ func TestXprivAuthenitcator_NewWithNilXpriv(t *testing.T) {
 
 func TestXprivAuthenitcator_Authenticate(t *testing.T) {
 	// given:
-	key := spvwallettest.ExtendedKey(t)
-	authenticator, err := auth.NewXprivAuthenticator(key)
+	authenticator, err := auth.NewXprivAuthenticator(spvwallettest.UserXPriv)
 	require.NotNil(t, authenticator)
 	require.NoError(t, err)
 

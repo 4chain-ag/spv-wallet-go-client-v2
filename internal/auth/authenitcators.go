@@ -10,6 +10,8 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/go-resty/resty/v2"
+
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 )
 
 type XpubAuthenticator struct {
@@ -81,9 +83,25 @@ func bodyString(r *resty.Request) string {
 	return ""
 }
 
-func NewXprivAuthenticator(xpriv *bip32.ExtendedKey) (*XprivAuthenticator, error) {
+func NewXprivAuthenticator(xprivStr string) (*XprivAuthenticator, error) {
+	if xprivStr == "" {
+		return nil, errors.New("key string cannot be empty")
+	}
+
+	hdKey, err := bip32.GenerateHDKeyFromString(xprivStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse xpriv key: %w", err)
+	}
+
+	return &XprivAuthenticator{
+		xpriv:    hdKey,
+		xpubAuth: &XpubAuthenticator{hdKey: hdKey},
+	}, nil
+}
+
+func NewXprivAuthenticatorOld(xpriv *bip32.ExtendedKey) (*XprivAuthenticator, error) {
 	if xpriv == nil {
-		return nil, ErrBip32ExtendedKey
+		return nil, goclienterr.ErrBip32ExtendedKey
 	}
 
 	x := XprivAuthenticator{
@@ -95,7 +113,7 @@ func NewXprivAuthenticator(xpriv *bip32.ExtendedKey) (*XprivAuthenticator, error
 
 func NewAccessKeyAuthenticator(accessKey *ec.PrivateKey) (*AccessKeyAuthenticator, error) {
 	if accessKey == nil {
-		return nil, ErrEcPrivateKey
+		return nil, goclienterr.ErrEcPrivateKey
 	}
 
 	a := AccessKeyAuthenticator{
@@ -107,14 +125,9 @@ func NewAccessKeyAuthenticator(accessKey *ec.PrivateKey) (*AccessKeyAuthenticato
 
 func NewXpubOnlyAuthenticator(xpub *bip32.ExtendedKey) (*XpubAuthenticator, error) {
 	if xpub == nil {
-		return nil, ErrBip32ExtendedKey
+		return nil, goclienterr.ErrBip32ExtendedKey
 	}
 
 	x := XpubAuthenticator{hdKey: xpub}
 	return &x, nil
 }
-
-var (
-	ErrBip32ExtendedKey = errors.New("authenticator failed: expected a BIP32 extended key but none was provided")
-	ErrEcPrivateKey     = errors.New("authenticator failed: expected an EC private key but none was provided")
-)

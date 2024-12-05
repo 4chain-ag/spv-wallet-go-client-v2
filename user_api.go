@@ -453,6 +453,10 @@ func initUserAPI(cfg config.Config, auth authenticator) (*UserAPI, error) {
 	}
 
 	httpClient := restyutil.NewHTTPClient(cfg, auth)
+	if httpClient == nil {
+		return nil, fmt.Errorf("failed to initialize HTTP client - nil value.")
+	}
+
 	return &UserAPI{
 		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
 		configsAPI:      configs.NewAPI(url, httpClient),

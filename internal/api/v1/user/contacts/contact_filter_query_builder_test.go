@@ -1,11 +1,12 @@
-package contacts
+package contacts_test
 
 import (
 	"net/url"
 	"testing"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts/contactstest"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +22,7 @@ func TestContactFilterQueryBuilder_Build(t *testing.T) {
 		},
 		"contact filter: filter with only 'id' field set": {
 			filter: filter.ContactFilter{
-				ID: contactstest.Ptr("e3a1e174-cdf8-4683-b112-e198144eb9d2"),
+				ID: spvwallettest.Ptr("e3a1e174-cdf8-4683-b112-e198144eb9d2"),
 			},
 			expectedParams: url.Values{
 				"id": []string{"e3a1e174-cdf8-4683-b112-e198144eb9d2"},
@@ -29,7 +30,7 @@ func TestContactFilterQueryBuilder_Build(t *testing.T) {
 		},
 		"contact filter: filter with only 'full name' field set": {
 			filter: filter.ContactFilter{
-				FullName: contactstest.Ptr("John Doe"),
+				FullName: spvwallettest.Ptr("John Doe"),
 			},
 			expectedParams: url.Values{
 				"fullName": []string{"John Doe"},
@@ -37,7 +38,7 @@ func TestContactFilterQueryBuilder_Build(t *testing.T) {
 		},
 		"contact filter: filter with only 'paymail' field set": {
 			filter: filter.ContactFilter{
-				Paymail: contactstest.Ptr("john.doe@test.com"),
+				Paymail: spvwallettest.Ptr("john.doe@test.com"),
 			},
 			expectedParams: url.Values{
 				"paymail": []string{"john.doe@test.com"},
@@ -45,7 +46,7 @@ func TestContactFilterQueryBuilder_Build(t *testing.T) {
 		},
 		"contact filter: filter with only 'status' field set": {
 			filter: filter.ContactFilter{
-				Status: contactstest.Ptr("confirmed"),
+				Status: spvwallettest.Ptr("confirmed"),
 			},
 			expectedParams: url.Values{
 				"status": []string{"confirmed"},
@@ -53,10 +54,10 @@ func TestContactFilterQueryBuilder_Build(t *testing.T) {
 		},
 		"contact filter: filter with all fields set": {
 			filter: filter.ContactFilter{
-				ID:       contactstest.Ptr("e3a1e174-cdf8-4683-b112-e198144eb9d2"),
-				FullName: contactstest.Ptr("John Doe"),
-				Paymail:  contactstest.Ptr("john.doe@test.com"),
-				Status:   contactstest.Ptr("confirmed"),
+				ID:       spvwallettest.Ptr("e3a1e174-cdf8-4683-b112-e198144eb9d2"),
+				FullName: spvwallettest.Ptr("John Doe"),
+				Paymail:  spvwallettest.Ptr("john.doe@test.com"),
+				Status:   spvwallettest.Ptr("confirmed"),
 			},
 			expectedParams: url.Values{
 				"paymail":  []string{"john.doe@test.com"},
@@ -70,9 +71,9 @@ func TestContactFilterQueryBuilder_Build(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// when:
-			queryBuilder := contactFilterQueryBuilder{
-				contactFilter:      tc.filter,
-				modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
+			queryBuilder := contacts.ContactFilterQueryBuilder{
+				ContactFilter:      tc.filter,
+				ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: tc.filter.ModelFilter},
 			}
 
 			// then:

@@ -14,7 +14,10 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const route = "api/v1/transactions"
+const (
+	route = "api/v1/transactions"
+	api   = "User Transactions API"
+)
 
 type TransactionSignerAdapter interface {
 	TransactionSignedHex(dt *response.DraftTransaction) (string, error)
@@ -131,15 +134,15 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 	return &result, nil
 }
 
-func (a *API) Transactions(ctx context.Context, transactionsOpts ...queries.TransactionsQueryOption) (*queries.TransactionPage, error) {
+func (a *API) Transactions(ctx context.Context, opts ...queries.TransactionsQueryOption) (*queries.TransactionPage, error) {
 	var query queries.TransactionsQuery
-	for _, o := range transactionsOpts {
+	for _, o := range opts {
 		o(&query)
 	}
 
 	queryBuilder := querybuilders.NewQueryBuilder(querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.Page),
-		querybuilders.WithFilterQueryBuilder(&transactionFilterBuilder{
+		querybuilders.WithFilterQueryBuilder(&TransactionFilterBuilder{
 			TransactionFilter:  query.Filter,
 			ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.Filter.ModelFilter},
 		}),
@@ -184,7 +187,7 @@ func NewAPI(URL *url.URL, httpClient *resty.Client) *API {
 func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
 	return &errutil.HTTPErrorFormatter{
 		Action: action,
-		API:    "User Transactions API",
+		API:    api,
 		Err:    err,
 	}
 }

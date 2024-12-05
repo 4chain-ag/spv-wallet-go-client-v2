@@ -13,7 +13,10 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const route = "api/v1/contacts"
+const (
+	route = "api/v1/contacts"
+	api   = "User Contacts API"
+)
 
 type API struct {
 	url        *url.URL
@@ -29,9 +32,9 @@ func (a *API) Contacts(ctx context.Context, opts ...queries.ContactQueryOption) 
 	queryBuilder := querybuilders.NewQueryBuilder(
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.PageFilter),
-		querybuilders.WithFilterQueryBuilder(&contactFilterQueryBuilder{
-			contactFilter: query.ContactFilter,
-			modelFilterBuilder: querybuilders.ModelFilterBuilder{
+		querybuilders.WithFilterQueryBuilder(&ContactFilterQueryBuilder{
+			ContactFilter: query.ContactFilter,
+			ModelFilterBuilder: querybuilders.ModelFilterBuilder{
 				ModelFilter: query.ContactFilter.ModelFilter,
 			},
 		}),
@@ -137,7 +140,7 @@ func NewAPI(url *url.URL, httpClient *resty.Client) *API {
 func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
 	return &errutil.HTTPErrorFormatter{
 		Action: action,
-		API:    "User Contacts API",
+		API:    api,
 		Err:    err,
 	}
 }

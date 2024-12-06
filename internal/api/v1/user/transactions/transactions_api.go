@@ -19,14 +19,14 @@ const (
 	api   = "User Transactions API"
 )
 
-type TransactionSignerAdapter interface {
+type TransactionSigner interface {
 	TransactionSignedHex(dt *response.DraftTransaction) (string, error)
 }
 
 type API struct {
 	url               *url.URL
 	httpClient        *resty.Client
-	transactionSigner TransactionSignerAdapter
+	transactionSigner TransactionSigner
 }
 
 func (a *API) FinalizeTransaction(draft *response.DraftTransaction) (string, error) {
@@ -170,7 +170,7 @@ func NewAPIWithXPriv(URL *url.URL, httpClient *resty.Client, xPriv *bip32.Extend
 	return &API{
 		url:        URL.JoinPath(route),
 		httpClient: httpClient,
-		transactionSigner: &TransactionSigner{
+		transactionSigner: &xPrivTransactionSigner{
 			xPriv: xPriv,
 		},
 	}
@@ -180,7 +180,7 @@ func NewAPI(URL *url.URL, httpClient *resty.Client) *API {
 	return &API{
 		url:               URL.JoinPath(route),
 		httpClient:        httpClient,
-		transactionSigner: &NoopTransactionSigner{},
+		transactionSigner: &noopTransactionSigner{},
 	}
 }
 

@@ -14,18 +14,18 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
-type NoopTransactionSigner struct {
+type noopTransactionSigner struct {
 }
 
-func (*NoopTransactionSigner) TransactionSignedHex(dt *response.DraftTransaction) (string, error) {
+func (*noopTransactionSigner) TransactionSignedHex(dt *response.DraftTransaction) (string, error) {
 	return "", nil
 }
 
-type TransactionSigner struct {
+type xPrivTransactionSigner struct {
 	xPriv *bip32.ExtendedKey
 }
 
-func (ts *TransactionSigner) TransactionSignedHex(dt *response.DraftTransaction) (string, error) {
+func (ts *xPrivTransactionSigner) TransactionSignedHex(dt *response.DraftTransaction) (string, error) {
 	// Create transaction from hex
 	tx, err := trx.NewTransactionFromHex(dt.Hex)
 	if err != nil {

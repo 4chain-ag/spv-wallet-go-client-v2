@@ -36,4 +36,11 @@ var (
 	ErrAddInputsToTransaction = errors.New("failed to add inputs to transaction")
 	// ErrSignTransaction is when TransactionSignedHex fails to sign the transaction
 	ErrSignTransaction = errors.New("failed to sign transaction")
+	// ErrEmptyXprivKey is returned when the xpriv string is empty.
+	ErrEmptyXprivKey = errors.New("key string cannot be empty")
+
+	// ErrEmptyAccessKey is returned when the access key string is empty.
+	ErrEmptyAccessKey = errors.New("key hex string cannot be empty")
+	// ErrEmptyPubKey is returned when the key string is empty.
+	ErrEmptyPubKey = errors.New("key string cannot be empty")
 )

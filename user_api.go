@@ -403,15 +403,16 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to intialized xPriv authenticator: %w", err)
 	}
 
+	totp, err := totp.New(xPriv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize TOTP: %w", err)
+	}
+
 	userAPI, err := initUserAPI(cfg, authenticator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new client: %w", err)
 	}
-
-	userAPI.totp = totp.New(xPriv)
-	if userAPI.totp == nil {
-		return nil, errors.New("failed to initialize TOTP client")
-	}
+	userAPI.totp = totp
 	return userAPI, nil
 }
 

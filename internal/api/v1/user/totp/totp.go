@@ -27,15 +27,13 @@ type Client struct {
 	xPriv *bip32.ExtendedKey
 }
 
-func New(xPriv string) *Client {
-	if xPriv == "" {
-		return nil
-	}
+func New(xPriv string) (*Client, error) {
 	hdKey, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("failed to generate HD key from xPriv str: %w", err)
 	}
-	return &Client{xPriv: hdKey}
+
+	return &Client{xPriv: hdKey}, nil
 }
 
 // GenerateTotpForContact generates a time-based one-time password (TOTP) for a contact.

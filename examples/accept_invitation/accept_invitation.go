@@ -22,5 +22,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	exampleutil.Print(fmt.Sprintf("\n[HTTP POST] Accept contact invitation - api/v1/invitations/%s/contacts", paymail), nil)
+	fmt.Printf("\n[HTTP POST] Accept contact invitation - api/v1/invitations/%s/contacts\n", paymail)
 }

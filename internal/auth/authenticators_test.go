@@ -4,12 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/go-resty/resty/v2"
-	"github.com/stretchr/testify/require"
-
 	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
+	"github.com/go-resty/resty/v2"
+	"github.com/stretchr/testify/require"
 )
 
 const (

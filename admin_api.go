@@ -231,20 +231,6 @@ func (a *AdminAPI) UTXOs(ctx context.Context, opts ...queries.AdminUtxoQueryOpti
 	return res, nil
 }
 
-// NewAdminAPIWithXPriv initializes a new AdminAPI instance using an extended private key (xPriv).
-// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
-// If any step fails, an appropriate error is returned.
-//
-// Note: Requests made with this instance will be securely signed.
-func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
-	authenticator, err := auth.NewXprivAuthenticator(xPriv)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
-	}
-
-	return initAdminAPI(cfg, authenticator)
-}
-
 // Paymails retrieves a paginated list of paymail addresses via the Admin Paymails API.
 // The response includes user paymails along with pagination metadata, such as
 // the current page number, sort order, and the field used for sorting (sortBy).
@@ -301,6 +287,20 @@ func (a *AdminAPI) DeletePaymail(ctx context.Context, address string) error {
 	}
 
 	return nil
+}
+
+// NewAdminAPIWithXPriv initializes a new AdminAPI instance using an extended private key (xPriv).
+// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
+// If any step fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will be securely signed.
+func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
+	authenticator, err := auth.NewXprivAuthenticator(xPriv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
+	}
+
+	return initAdminAPI(cfg, authenticator)
 }
 
 // NewAdminWithXPub initializes a new AdminAPI instance using an extended public key (xPub).

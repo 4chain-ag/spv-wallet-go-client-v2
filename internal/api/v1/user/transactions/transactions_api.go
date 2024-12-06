@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 
-	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/errutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
@@ -166,22 +165,25 @@ func (a *API) Transactions(ctx context.Context, opts ...queries.TransactionsQuer
 	return &result, nil
 }
 
-func NewAPIWithXPriv(URL *url.URL, httpClient *resty.Client, xPriv *bip32.ExtendedKey) *API {
-	return &API{
-		url:        URL.JoinPath(route),
-		httpClient: httpClient,
-		transactionSigner: &xPrivTransactionSigner{
-			xPriv: xPriv,
-		},
+func NewAPIWithXPriv(URL *url.URL, httpClient *resty.Client, xPriv string) (*API, error) {
+	transactionSigner, err := NewXPrivTransactionSigner(xPriv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create transactionSigner: %w", err)
 	}
+
+	return &API{
+			url:               URL.JoinPath(route),
+			httpClient:        httpClient,
+			transactionSigner: transactionSigner},
+		nil
 }
 
-func NewAPI(URL *url.URL, httpClient *resty.Client) *API {
+func NewAPI(URL *url.URL, httpClient *resty.Client) (*API, error) {
 	return &API{
 		url:               URL.JoinPath(route),
 		httpClient:        httpClient,
 		transactionSigner: &noopTransactionSigner{},
-	}
+	}, nil
 }
 
 func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {

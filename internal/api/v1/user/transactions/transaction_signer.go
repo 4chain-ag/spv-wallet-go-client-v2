@@ -25,6 +25,15 @@ type xPrivTransactionSigner struct {
 	xPriv *bip32.ExtendedKey
 }
 
+func NewXPrivTransactionSigner(xPriv string) (*xPrivTransactionSigner, error) {
+	hdKey, err := bip32.GenerateHDKeyFromString(xPriv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate HD key from xPriv str: %w", err)
+	}
+
+	return &xPrivTransactionSigner{xPriv: hdKey}, nil
+}
+
 func (ts *xPrivTransactionSigner) TransactionSignedHex(dt *response.DraftTransaction) (string, error) {
 	// Create transaction from hex
 	tx, err := trx.NewTransactionFromHex(dt.Hex)

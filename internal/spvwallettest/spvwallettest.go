@@ -2,6 +2,7 @@ package spvwallettest
 
 import (
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -52,6 +53,8 @@ func ExtendedKeyString(t *testing.T) *bip32.ExtendedKey {
 
 func PrivateKey(t *testing.T) *ec.PrivateKey {
 	t.Helper()
+	x, p := ec.PrivateKeyFromBytes([]byte(UserPrivAccessKey))
+	fmt.Println(x.PubKey().Y.String(), "-----", p.X.String())
 	key, err := ec.PrivateKeyFromHex(UserPrivAccessKey)
 	if err != nil {
 		t.Fatalf("test helper - ec private key from hex: %s", err)

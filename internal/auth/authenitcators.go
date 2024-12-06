@@ -85,7 +85,7 @@ func bodyString(r *resty.Request) string {
 
 func NewXprivAuthenticator(xprivStr string) (*XprivAuthenticator, error) {
 	if xprivStr == "" {
-		return nil, errors.New("key string cannot be empty")
+		return nil, goclienterr.ErrEmptyXprivKey
 	}
 
 	hdKey, err := bip32.GenerateHDKeyFromString(xprivStr)
@@ -99,35 +99,36 @@ func NewXprivAuthenticator(xprivStr string) (*XprivAuthenticator, error) {
 	}, nil
 }
 
-func NewXprivAuthenticatorOld(xpriv *bip32.ExtendedKey) (*XprivAuthenticator, error) {
-	if xpriv == nil {
-		return nil, goclienterr.ErrBip32ExtendedKey
+func NewAccessKeyAuthenticator(accessKeyHex string) (*AccessKeyAuthenticator, error) {
+	if accessKeyHex == "" {
+		return nil, goclienterr.ErrEmptyAccessKey
 	}
 
-	x := XprivAuthenticator{
-		xpriv:    xpriv,
-		xpubAuth: &XpubAuthenticator{hdKey: xpriv},
+	privKeyBytes, err := hex.DecodeString(accessKeyHex)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode private key string: %w", err)
 	}
-	return &x, nil
+
+	privKey, pubKey := ec.PrivateKeyFromBytes(privKeyBytes)
+	if privKey == nil || pubKey == nil {
+		return nil, errors.New("failed to parse private key: key generation resulted in nil")
+	}
+
+	return &AccessKeyAuthenticator{
+		priv: privKey,
+		pub:  pubKey,
+	}, nil
 }
 
-func NewAccessKeyAuthenticator(accessKey *ec.PrivateKey) (*AccessKeyAuthenticator, error) {
-	if accessKey == nil {
-		return nil, goclienterr.ErrEcPrivateKey
+func NewXpubOnlyAuthenticator(xpub string) (*XpubAuthenticator, error) {
+	if xpub == "" {
+		return nil, goclienterr.ErrEmptyPubKey
 	}
 
-	a := AccessKeyAuthenticator{
-		priv: accessKey,
-		pub:  accessKey.PubKey(),
-	}
-	return &a, nil
-}
-
-func NewXpubOnlyAuthenticator(xpub *bip32.ExtendedKey) (*XpubAuthenticator, error) {
-	if xpub == nil {
-		return nil, goclienterr.ErrBip32ExtendedKey
+	xpubKey, err := bip32.GetHDKeyFromExtendedPublicKey(xpub)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse xpub key: %w", err)
 	}
 
-	x := XpubAuthenticator{hdKey: xpub}
-	return &x, nil
+	return &XpubAuthenticator{hdKey: xpubKey}, nil
 }

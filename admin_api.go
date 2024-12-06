@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
-	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/accesskeys"
@@ -17,7 +18,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
 // AdminAPI provides a simplified interface for interacting with admin-related APIs.
@@ -233,12 +233,7 @@ func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
 // Note: Requests made with this instance will not be signed.
 // For enhanced security, it is strongly recommended to use `NewAdminAPIWithXPriv` instead.
 func NewAdminWithXPub(cfg config.Config, xPub string) (*AdminAPI, error) {
-	key, err := bip32.GetHDKeyFromExtendedPublicKey(xPub)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xPub: %w", err)
-	}
-
-	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
+	authenticator, err := auth.NewXpubOnlyAuthenticator(xPub)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize xPub authenticator: %w", err)
 	}

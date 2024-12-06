@@ -23,7 +23,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/xpubs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 )
@@ -387,12 +386,7 @@ func (u *UserAPI) ValidateTotpForContact(contact *models.Contact, passcode, requ
 // Note: Requests made with this instance will not be signed.
 // For enhanced security, it is strongly recommended to use `NewUserAPIWithXPriv` or `NewUserAPIWithAccessKey` instead.
 func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
-	key, err := bip32.GetHDKeyFromExtendedPublicKey(xPub)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xPub: %w", err)
-	}
-
-	authenticator, err := auth.NewXpubOnlyAuthenticator(key)
+	authenticator, err := auth.NewXpubOnlyAuthenticator(xPub)
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xPub authenticator: %w", err)
 	}
@@ -431,12 +425,7 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 //
 // Note: Requests made with this instance will be securely signed.
 func NewUserAPIWithAccessKey(cfg config.Config, accessKey string) (*UserAPI, error) {
-	key, err := cryptoutil.PrivateKeyFromHexOrWIF(accessKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to return private key from hex or WIF: %w", err)
-	}
-
-	authenticator, err := auth.NewAccessKeyAuthenticator(key)
+	authenticator, err := auth.NewAccessKeyAuthenticator(accessKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized access key authenticator: %w", err)
 	}

@@ -24,10 +24,11 @@ var (
 	ErrStaleLastEvaluatedKey = errors.New("the last evaluated key has not changed between requests, indicating a possible loop or synchronization issue.")
 	// ErrFailedToFetchMerkleRootsFromAPI is returned when the API fails to fetch merkle roots.
 	ErrFailedToFetchMerkleRootsFromAPI = errors.New("failed to fetch merkle roots from API")
-	// ErrBip32ExtendedKey is returned when a BIP32 extended key is expected but none is provided.
-	ErrBip32ExtendedKey = errors.New("authenticator failed: expected a BIP32 extended key but none was provided")
-	// ErrEcPrivateKey is returned when an EC private key is expected but none is provided.
-	ErrEcPrivateKey = errors.New("authenticator failed: expected an EC private key but none was provided")
-	// ErrEmptyXpriv is returned when the xpriv string is empty.
-	ErrEmptyXpriv = errors.New("key string cannot be empty")
+	// ErrEmptyXprivKey is returned when the xpriv string is empty.
+	ErrEmptyXprivKey = errors.New("key string cannot be empty")
+
+	// ErrEmptyAccessKey is returned when the access key string is empty.
+	ErrEmptyAccessKey = errors.New("key hex string cannot be empty")
+	// ErrEmptyPubKey is returned when the key string is empty.
+	ErrEmptyPubKey = errors.New("key string cannot be empty")
 )

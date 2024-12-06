@@ -94,4 +94,10 @@ func TestClient_ValidateTotpForContact(t *testing.T) {
 		// when
 		require.Contains(t, err.Error(), "contact's PubKey is invalid")
 	})
+
+	t.Run("xpriv empty", func(t *testing.T) {
+		_, err := client.NewUserAPIWithXPriv(cfg, "")
+		require.Error(t, err)
+		require.ErrorIs(t, err, errors.ErrEmptyXprivKey)
+	})
 }

@@ -409,6 +409,9 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 	}
 
 	userAPI.totp = totp.New(xPriv)
+	if userAPI.totp == nil {
+		return nil, errors.New("failed to initialize TOTP client")
+	}
 	return userAPI, nil
 }
 

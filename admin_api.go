@@ -13,6 +13,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/invitations"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/paymails"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/transactions"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/webhooks"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/xpubs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
@@ -36,6 +37,7 @@ type AdminAPI struct {
 	transactionsAPI *transactions.API
 	contactsAPI     *contacts.API
 	invitationsAPI  *invitations.API
+	webhooksAPI     *webhooks.API
 }
 
 // CreateXPub creates a new XPub record via the Admin XPubs API.
@@ -183,6 +185,54 @@ func (a *AdminAPI) AccessKeys(ctx context.Context, accessKeyOpts ...queries.Admi
 	return res, nil
 }
 
+// SubscribeWebhook registers a webhook subscription using the Admin Webhooks API.
+// The provided command contains the parameters required to define the webhook subscription.
+// Accepts context for controlling cancellation and timeout for the API request.
+// The CreateWebhookSubscription command includes the webhook URL and authentication details.
+// Returns a formatted error if the API request fails. A nil error indicates the webhook subscription was successful.
+func (a *AdminAPI) SubscribeWebhook(ctx context.Context, cmd *commands.CreateWebhookSubscription) error {
+	err := a.webhooksAPI.SubscribeWebhook(ctx, cmd)
+	if err != nil {
+		msg := fmt.Sprintf("failed to subscribe webhook URL address: %s", cmd.URL)
+		return webhooks.HTTPErrorFormatter(msg, err).FormatPostErr()
+	}
+
+	return nil
+}
+
+// UnsubscribeWebhook removes a webhook subscription using the Admin Webhooks API.
+// Accepts the context for controlling cancellation and timeout for the API request.
+// CancelWebhookSubscription command specifies the webhook URL to be unsubscribed.
+// Returns a formatted error if the API request fails. A nil error indicates the webhook subscription was successfully deleted.
+func (a *AdminAPI) UnsubscribeWebhook(ctx context.Context, cmd *commands.CancelWebhookSubscription) error {
+	err := a.webhooksAPI.UnsubscribeWebhook(ctx, cmd)
+	if err != nil {
+		msg := fmt.Sprintf("failed to unsubscribe webhook URL address: %s", cmd.URL)
+		return webhooks.HTTPErrorFormatter(msg, err).FormatDeleteErr()
+	}
+
+	return nil
+}
+
+// NewAdminAPIWithXPriv initializes a new AdminAPI instance using an extended private key (xPriv).
+// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
+// If any step fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will be securely signed.
+func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
+	key, err := bip32.GenerateHDKeyFromString(xPriv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
+	}
+
+	authenticator, err := auth.NewXprivAuthenticator(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
+	}
+
+	return initAdminAPI(cfg, authenticator)
+}
+
 // Paymails retrieves a paginated list of paymail addresses via the Admin Paymails API.
 // The response includes user paymails along with pagination metadata, such as
 // the current page number, sort order, and the field used for sorting (sortBy).
@@ -214,7 +264,7 @@ func (a *AdminAPI) Paymail(ctx context.Context, ID string) (*response.PaymailAdd
 	return res, nil
 }
 
-// CreatePaymail creates a new paymial address record via the Admin Paymails API.
+// CreatePaymail creates a new paymail address record via the Admin Paymails API.
 // The provided command contains the necessary parameters to define the paymail address record.
 //
 // The API response is unmarshaled into a *response.Xpub PaymailAddress.
@@ -239,25 +289,6 @@ func (a *AdminAPI) DeletePaymail(ctx context.Context, address string) error {
 	}
 
 	return nil
-}
-
-// NewAdminAPIWithXPriv initializes a new AdminAPI instance using an extended private key (xPriv).
-// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
-// If any step fails, an appropriate error is returned.
-//
-// Note: Requests made with this instance will be securely signed.
-func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
-	key, err := bip32.GenerateHDKeyFromString(xPriv)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
-	}
-
-	authenticator, err := auth.NewXprivAuthenticator(key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
-	}
-
-	return initAdminAPI(cfg, authenticator)
 }
 
 // NewAdminWithXPub initializes a new AdminAPI instance using an extended public key (xPub).
@@ -296,6 +327,7 @@ func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
 		transactionsAPI: transactions.NewAPI(url, httpClient),
 		xpubsAPI:        xpubs.NewAPI(url, httpClient),
 		accessKeyAPI:    accesskeys.NewAPI(url, httpClient),
+		webhooksAPI:     webhooks.NewAPI(url, httpClient),
 		contactsAPI:     contacts.NewAPI(url, httpClient),
 		invitationsAPI:  invitations.NewAPI(url, httpClient),
 	}, nil

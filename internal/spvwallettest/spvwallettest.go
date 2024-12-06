@@ -2,17 +2,16 @@ package spvwallettest
 
 import (
 	"encoding/hex"
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	spvwallet "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/jarcoal/httpmock"
+
+	spvwallet "github.com/bitcoin-sv/spv-wallet-go-client"
+	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 )
 
 const TestAPIAddr = "http://localhost:3003"
@@ -29,38 +28,6 @@ const (
 	BobXPriv   = "xprv9s21ZrQH143K4VneY3UWCF1o5Kk2tmgGrGtMtsrThCTsHsszEZ6H1iP37ZTwuUBvMwudG68SRkcfTjeu8h3rkayfyqkjKAStFBkuNsBnAkS"
 	BobXPub    = "xpub661MyMwAqRbcGys7e51WZNxXdMaXJEQ8DVoxhGG5FXzrAgD8n6QXZWhWxrm2yMzH8e9fxV8TYxmkL9sivVEEoPfDpg4u5mrp2VTqvfGT1Us"
 )
-
-func ExtendedKey(t *testing.T) *bip32.ExtendedKey {
-	t.Helper()
-	key, err := bip32.GenerateHDKeyFromString(UserXPriv)
-	if err != nil {
-		t.Fatalf("test helper - bip32 generate hd key from string: %s", err)
-	}
-
-	return key
-}
-
-func ExtendedKeyString(t *testing.T) *bip32.ExtendedKey {
-	t.Helper()
-	key, err := bip32.GenerateHDKeyFromString(UserXPriv)
-	if err != nil {
-		t.Fatalf("test helper - bip32 generate hd key from string: %s", err)
-	}
-
-	return key
-}
-
-func PrivateKey(t *testing.T) *ec.PrivateKey {
-	t.Helper()
-	x, p := ec.PrivateKeyFromBytes([]byte(UserPrivAccessKey))
-	fmt.Println(x.PubKey().Y.String(), "-----", p.X.String())
-	key, err := ec.PrivateKeyFromHex(UserPrivAccessKey)
-	if err != nil {
-		t.Fatalf("test helper - ec private key from hex: %s", err)
-	}
-
-	return key
-}
 
 func GivenSPVUserAPI(t *testing.T) (*spvwallet.UserAPI, *httpmock.MockTransport) {
 	t.Helper()

@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"net/url"
 
-	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/response"
+	"github.com/go-resty/resty/v2"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/accesskeys"
@@ -21,9 +24,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/bitcoin-sv/spv-wallet/models/response"
-	"github.com/go-resty/resty/v2"
 )
 
 // UserAPI provides methods for interacting with user-related APIs.
@@ -399,11 +399,6 @@ func NewUserAPIWithXPub(cfg config.Config, xPub string) (*UserAPI, error) {
 //
 // Note: Requests made with this instance will be securely signed.
 func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
-	key, err := bip32.GenerateHDKeyFromString(xPriv)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate HD key from xPriv: %w", err)
-	}
-
 	authenticator, err := auth.NewXprivAuthenticator(xPriv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to intialized xPriv authenticator: %w", err)
@@ -414,7 +409,7 @@ func NewUserAPIWithXPriv(cfg config.Config, xPriv string) (*UserAPI, error) {
 		return nil, fmt.Errorf("failed to create new client: %w", err)
 	}
 
-	userAPI.totp = totp.New(key)
+	userAPI.totp = totp.New(xPriv)
 	return userAPI, nil
 }
 

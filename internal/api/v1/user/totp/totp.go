@@ -8,11 +8,12 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
-	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	utils "github.com/bitcoin-sv/spv-wallet-go-client/internal/cryptoutil"
 )
 
 const (
@@ -28,8 +29,16 @@ type Client struct {
 }
 
 // New creates a new TOTP WalletClient.
-func New(xPriv *bip32.ExtendedKey) *Client {
+func NewOld(xPriv *bip32.ExtendedKey) *Client {
 	return &Client{xPriv: xPriv}
+}
+
+func New(xPriv string) *Client {
+	hdKey, err := bip32.GenerateHDKeyFromString(xPriv)
+	if err != nil {
+		return nil
+	}
+	return &Client{xPriv: hdKey}
 }
 
 // GenerateTotpForContact generates a time-based one-time password (TOTP) for a contact.

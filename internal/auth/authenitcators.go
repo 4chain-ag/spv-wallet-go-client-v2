@@ -8,9 +8,10 @@ import (
 
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/go-resty/resty/v2"
+
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 )
 
 type XpubAuthenticator struct {
@@ -82,12 +83,12 @@ func bodyString(r *resty.Request) string {
 	return ""
 }
 
-func NewXprivAuthenticator(xprivStr string) (*XprivAuthenticator, error) {
-	if xprivStr == "" {
+func NewXprivAuthenticator(xpriv string) (*XprivAuthenticator, error) {
+	if xpriv == "" {
 		return nil, goclienterr.ErrEmptyXprivKey
 	}
 
-	hdKey, err := bip32.GenerateHDKeyFromString(xprivStr)
+	hdKey, err := bip32.GenerateHDKeyFromString(xpriv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse xpriv key: %w", err)
 	}

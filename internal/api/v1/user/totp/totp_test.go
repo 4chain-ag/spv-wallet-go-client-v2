@@ -4,20 +4,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/stretchr/testify/require"
+
 	client "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet-go-client/errors"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
-	"github.com/bitcoin-sv/spv-wallet/models"
-	"github.com/stretchr/testify/require"
 )
 
 func TestClient_GenerateTotpForContact(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// given
 		contact := models.Contact{PubKey: spvwallettest.PubKey}
-		wc := totp.New(spvwallettest.ExtendedKey(t))
+		wc := totp.New(spvwallettest.UserXPriv)
 
 		// when
 		pass, err := wc.GenerateTotpForContact(&contact, 30, 2)
@@ -30,7 +31,7 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 	t.Run("contact has invalid PubKey - returns error", func(t *testing.T) {
 		// given
 		contact := models.Contact{PubKey: "invalid-pk-format"}
-		wc := totp.New(spvwallettest.ExtendedKey(t))
+		wc := totp.New(spvwallettest.UserXPriv)
 
 		// when
 		_, err := wc.GenerateTotpForContact(&contact, 30, 2)

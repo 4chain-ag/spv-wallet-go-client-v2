@@ -17,7 +17,8 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// given
 		contact := models.Contact{PubKey: spvwallettest.PubKey}
-		wc := totp.New(spvwallettest.UserXPriv)
+		wc, err := totp.New(spvwallettest.UserXPriv)
+		require.NoError(t, err)
 
 		// when
 		pass, err := wc.GenerateTotpForContact(&contact, 30, 2)
@@ -30,10 +31,11 @@ func TestClient_GenerateTotpForContact(t *testing.T) {
 	t.Run("contact has invalid PubKey - returns error", func(t *testing.T) {
 		// given
 		contact := models.Contact{PubKey: "invalid-pk-format"}
-		wc := totp.New(spvwallettest.UserXPriv)
+		wc, err := totp.New(spvwallettest.UserXPriv)
+		require.NoError(t, err)
 
 		// when
-		_, err := wc.GenerateTotpForContact(&contact, 30, 2)
+		_, err = wc.GenerateTotpForContact(&contact, 30, 2)
 
 		// then
 		require.ErrorIs(t, err, errors.ErrContactPubKeyInvalid)

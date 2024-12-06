@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 tasks:
   default:
@@ -14,6 +14,29 @@ tasks:
       - go run ../walletkeys/cmd/main.go
       - echo "=================================================================="
 
+  fetch-paymails-as-admin:
+    desc: "Fetch paymails page."
+    silent: true
+    cmds:
+      - go run ./fetch_paymails_as_admin/fetch_paymails_as_admin.go
+
+  fetch-paymail-as-admin:
+    desc: "Fetch paymail with a given address."
+    silent: true
+    cmds:
+      - go run ./fetch_paymail_as_admin/fetch_paymail_as_admin.go
+
+  create-paymail-as-admin:
+    desc: "Create a paymail address."
+    silent: true
+    cmds:
+      - go run ./create_paymail_as_admin/create_paymail_as_admin.go
+
+  delete-paymail-as-admin:
+    desc: "Delete paymail address."
+    silent: true
+    cmds:
+      - go run ./delete_paymail_as_admin/delete_paymail_as_admin.go
   accept-invitation-as-admin:
     desc: "Accept invitation with a given ID as Admin."
     silent: true
@@ -139,6 +162,12 @@ tasks:
     silent: true
     cmds:
       - go run ./update_transaction_metadata/update_transaction_metadata.go
+
+  send-op-return:
+    desc: "Send OP return."
+    silent: true
+    cmds:
+      - go run ./send_op_return/send_op_return.go
 
   fetch-user-utxos:
     desc: "Fetch user UTXOs page."

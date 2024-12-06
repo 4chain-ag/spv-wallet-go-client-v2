@@ -27,12 +27,10 @@ type Client struct {
 	xPriv *bip32.ExtendedKey
 }
 
-// New creates a new TOTP WalletClient.
-func NewOld(xPriv *bip32.ExtendedKey) *Client {
-	return &Client{xPriv: xPriv}
-}
-
 func New(xPriv string) *Client {
+	if xPriv == "" {
+		return nil
+	}
 	hdKey, err := bip32.GenerateHDKeyFromString(xPriv)
 	if err != nil {
 		return nil

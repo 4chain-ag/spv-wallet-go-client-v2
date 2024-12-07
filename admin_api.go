@@ -11,6 +11,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/contacts"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/invitations"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/paymails"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/stats"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/status"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/transactions"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/utxos"
@@ -19,6 +20,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
@@ -41,6 +43,7 @@ type AdminAPI struct {
 	invitationsAPI  *invitations.API
 	webhooksAPI     *webhooks.API
 	statusAPI       *status.API
+	statsAPI        *stats.API
 }
 
 // CreateXPub creates a new XPub record via the Admin XPubs API.
@@ -51,7 +54,7 @@ type AdminAPI struct {
 func (a *AdminAPI) CreateXPub(ctx context.Context, cmd *commands.CreateUserXpub) (*response.Xpub, error) {
 	res, err := a.xpubsAPI.CreateXPub(ctx, cmd)
 	if err != nil {
-		return nil, xpubs.HTTPErrorFormatter("failed to create XPub", err).FormatPostErr()
+		return nil, xpubs.HTTPErrorFormatter("create XPub", err).FormatPostErr()
 	}
 
 	return res, nil
@@ -69,7 +72,7 @@ func (a *AdminAPI) CreateXPub(ctx context.Context, cmd *commands.CreateUserXpub)
 func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (*queries.XPubPage, error) {
 	res, err := a.xpubsAPI.XPubs(ctx, opts...)
 	if err != nil {
-		return nil, xpubs.HTTPErrorFormatter("failed to retrieve XPubs page", err).FormatGetErr()
+		return nil, xpubs.HTTPErrorFormatter("retrieve XPubs page", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -291,6 +294,20 @@ func (a *AdminAPI) DeletePaymail(ctx context.Context, address string) error {
 	return nil
 }
 
+// Stats retrieves information about the login status via the Admin XPubs API.
+// It accepts a context for controlling cancellation and timeout of the API request.
+// The response is expected to be unmarshaled into a *models.AdminStats struct.
+// A nil error with a valid response indicates the request was successful.
+// Returns a formatted error if the API request fails.
+func (a *AdminAPI) Stats(ctx context.Context) (*models.AdminStats, error) {
+	res, err := a.statsAPI.Stats(ctx)
+	if err != nil {
+		return nil, stats.HTTPErrorFormatter("retrieve stats", err).FormatGetErr()
+	}
+
+	return res, nil
+}
+
 // Status retrieves information about the key type used during the authentication phase.
 // If the key corresponds to the admin key, the method returns true with a nil error.
 // Otherwise, it returns false with a nil error, indicating that the key used does not match
@@ -354,5 +371,6 @@ func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
 		contactsAPI:     contacts.NewAPI(url, httpClient),
 		invitationsAPI:  invitations.NewAPI(url, httpClient),
 		statusAPI:       status.NewAPI(url, httpClient),
+		statsAPI:        stats.NewAPI(url, httpClient),
 	}, nil
 }

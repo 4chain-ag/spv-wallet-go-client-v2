@@ -13,12 +13,12 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/paymails"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/stats"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/transactions"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/webhooks"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/xpubs"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
-	"github.com/bitcoin-sv/spv-wallet/models"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
@@ -36,6 +36,7 @@ type AdminAPI struct {
 	paymailsAPI     *paymails.API
 	accessKeyAPI    *accesskeys.API
 	transactionsAPI *transactions.API
+	utxosAPI        *utxos.API
 	contactsAPI     *contacts.API
 	invitationsAPI  *invitations.API
 	webhooksAPI     *webhooks.API
@@ -216,32 +217,20 @@ func (a *AdminAPI) UnsubscribeWebhook(ctx context.Context, cmd *commands.CancelW
 	return nil
 }
 
-// Stats retrieves information about the login status via the Admin XPubs API.
-// It accepts a context for controlling cancellation and timeout of the API request.
-// The response is expected to be unmarshaled into a *models.AdminStats struct.
-// A nil error with a valid response indicates the request was successful.
-// Returns a formatted error if the API request fails.
-func (a *AdminAPI) Stats(ctx context.Context) (*models.AdminStats, error) {
-	res, err := a.statsAPI.Stats(ctx)
+// UTXOs fetches a paginated list of UTXOs via the Admin XPubs API.
+// The response includes UTXOs along with pagination details, such as page number,
+// sort order, and sorting field.
+//
+// Optional query parameters can be applied using the provided query options.
+// The response is unmarshaled into a *queries.UtxosPage struct.
+// Returns an error if the request fails or the response cannot be decoded.
+func (a *AdminAPI) UTXOs(ctx context.Context, opts ...queries.AdminUtxoQueryOption) (*queries.UtxosPage, error) {
+	res, err := a.utxosAPI.UTXOs(ctx, opts...)
 	if err != nil {
-		return nil, stats.HTTPErrorFormatter("retrieve stats", err).FormatGetErr()
+		return nil, utxos.HTTPErrorFormatter("retrieve utxos page ", err).FormatGetErr()
 	}
 
 	return res, nil
-}
-
-// NewAdminAPIWithXPriv initializes a new AdminAPI instance using an extended private key (xPriv).
-// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
-// If any step fails, an appropriate error is returned.
-//
-// Note: Requests made with this instance will be securely signed.
-func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
-	authenticator, err := auth.NewXprivAuthenticator(xPriv)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
-	}
-
-	return initAdminAPI(cfg, authenticator)
 }
 
 // Paymails retrieves a paginated list of paymail addresses via the Admin Paymails API.
@@ -302,6 +291,20 @@ func (a *AdminAPI) DeletePaymail(ctx context.Context, address string) error {
 	return nil
 }
 
+// NewAdminAPIWithXPriv initializes a new AdminAPI instance using an extended private key (xPriv).
+// This function configures the API client with the provided configuration and uses the xPriv key for authentication.
+// If any step fails, an appropriate error is returned.
+//
+// Note: Requests made with this instance will be securely signed.
+func NewAdminAPIWithXPriv(cfg config.Config, xPriv string) (*AdminAPI, error) {
+	authenticator, err := auth.NewXprivAuthenticator(xPriv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize xPriv authenticator: %w", err)
+	}
+
+	return initAdminAPI(cfg, authenticator)
+}
+
 // NewAdminWithXPub initializes a new AdminAPI instance using an extended public key (xPub).
 // This function configures the API client with the provided configuration and uses the xPub key for authentication.
 // If any configuration or initialization step fails, an appropriate error is returned.
@@ -332,6 +335,7 @@ func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
 		paymailsAPI:     paymails.NewAPI(url, httpClient),
 		transactionsAPI: transactions.NewAPI(url, httpClient),
 		xpubsAPI:        xpubs.NewAPI(url, httpClient),
+		utxosAPI:        utxos.NewAPI(url, httpClient),
 		accessKeyAPI:    accesskeys.NewAPI(url, httpClient),
 		webhooksAPI:     webhooks.NewAPI(url, httpClient),
 		contactsAPI:     contacts.NewAPI(url, httpClient),

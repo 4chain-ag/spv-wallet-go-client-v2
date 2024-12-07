@@ -28,7 +28,7 @@ func (a *API) Stats(ctx context.Context) (*models.AdminStats, error) {
 		SetResult(&result).
 		Get(a.url.String())
 	if err != nil {
-		return nil, fmt.Errorf("HTTP request failure: %w", err)
+		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}
 
 	return &result, nil

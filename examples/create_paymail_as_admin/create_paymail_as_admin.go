@@ -38,5 +38,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	exampleutil.Print("[HTTP POST][Step 2] Create Paymail - api/v1/admin/paymails", paymail)
+	exampleutil.Print("[HTTP POST][Step 2] Create RequesterPaymail - api/v1/admin/paymails", paymail)
 }

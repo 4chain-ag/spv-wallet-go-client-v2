@@ -35,11 +35,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	exampleutil.Print("[HTTP POST][Step 2] Create RequesterPaymail - api/v1/admin/paymails", paymail)
+	exampleutil.Print("[HTTP POST][Step 2] Create Paymail - api/v1/admin/paymails", paymail)
 
 	paymail, err = adminAPI.Paymail(ctx, paymail.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	exampleutil.Print("[HTTP GET][Step 3] Fetch RequesterPaymail - api/v1/admin/paymails", paymail)
+	exampleutil.Print("[HTTP GET][Step 3] Fetch Paymail - api/v1/admin/paymails", paymail)
 }

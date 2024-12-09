@@ -37,12 +37,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	exampleutil.Print("[HTTP POST][Step 2] Create RequesterPaymail - api/v1/admin/paymails", paymail)
+	exampleutil.Print("[HTTP POST][Step 2] Create Paymail - api/v1/admin/paymails", paymail)
 
 	err = adminAPI.DeletePaymail(ctx, addr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	exampleutil.Print("[HTTP DELETE][Step 3] Delete RequesterPaymail: %s - api/v1/admin/paymails", addr)
+	exampleutil.Print("[HTTP DELETE][Step 3] Delete Paymail: %s - api/v1/admin/paymails", addr)
 }

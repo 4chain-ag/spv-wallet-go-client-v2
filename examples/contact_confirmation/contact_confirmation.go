@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.NewDefaultConfig(), examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}

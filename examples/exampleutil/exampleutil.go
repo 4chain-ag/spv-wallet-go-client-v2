@@ -4,15 +4,37 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
+	"net/http"
 	"strings"
 	"time"
-
-	"math/rand"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 )
 
-var ExampleConfig = config.NewDefaultConfig("http://localhost:3003")
+// NewDefaultConfig returns a new instance of the default example configuration.
+func NewDefaultConfig() config.Config {
+	return config.NewConfig()
+}
+
+// NewCustomConfig allows creating a custom configuration with optional parameters.
+func NewCustomConfig(addr string, timeout time.Duration, transport *http.Transport) config.Config {
+	options := []config.Option{}
+
+	if addr != "" {
+		options = append(options, config.WithAddr(addr))
+	}
+
+	if timeout > 0 {
+		options = append(options, config.WithTimeout(timeout))
+	}
+
+	if transport != nil {
+		options = append(options, config.WithTransport(transport))
+	}
+
+	return config.NewConfig(options...)
+}
 
 func Print(s string, a any) {
 	fmt.Println(strings.Repeat("~", 100))

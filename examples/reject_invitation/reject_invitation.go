@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
@@ -22,5 +21,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("\n[HTTP DELETE] Reject contact invitation - api/v1/invitations/%s\n", paymail)
+	exampleutil.Print("\n[HTTP DELETE] Reject contact invitation - api/v1/invitations/%s", paymail)
 }

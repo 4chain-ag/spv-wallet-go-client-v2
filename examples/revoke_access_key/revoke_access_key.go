@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
@@ -22,5 +21,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("\n[HTTP DELETE] Revoke access key - api/v1/users/current/keys/%s", accessKeyID)
+	exampleutil.Print("\n[HTTP DELETE] Revoke access key - api/v1/users/current/keys/%s", accessKeyID)
 }

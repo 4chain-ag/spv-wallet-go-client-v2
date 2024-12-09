@@ -1,8 +1,11 @@
 package config
 
 import (
+	"log"
 	"net/http"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 // Config holds configuration settings for establishing a connection and handling
@@ -57,5 +60,56 @@ func NewConfig(options ...Option) Config {
 		opt(&cfg)
 	}
 	cfg.setDefaultValues()
+	return cfg
+}
+
+// loadConfigFromYAML loads configuration values from a YAML file using Viper.
+func loadConfigFromYAML(filePath string) (Config, error) {
+	viper.SetConfigFile(filePath)
+
+	// Read the configuration file
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("Error reading config file: %v", err)
+		return NewConfig(), err
+	}
+
+	// Set default values
+	viper.SetDefault("addr", "http://localhost:3003")
+	viper.SetDefault("timeout", 60) // Timeout in seconds
+
+	// Unmarshal into Config struct
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		log.Printf("Error unmarshaling config: %v", err)
+		return Config{}, err
+	}
+
+	// Convert timeout from seconds to time.Duration
+	if cfg.Timeout == 0 {
+		cfg.Timeout = time.Duration(viper.GetInt("timeout")) * time.Second
+	}
+
+	// Set default values for any missing fields
+	cfg.setDefaultValues()
+
+	return cfg, nil
+}
+
+/*
+example yaml file:
+---
+addr: "http://api.example.com"
+timeout: 30
+*/
+
+// LoadOrDefaultConfig attempts to load configuration from a YAML file.
+// If the file does not exist or an error occurs, it falls back to NewConfig.
+func LoadOrDefaultConfig(filePath string) Config {
+	cfg, err := loadConfigFromYAML(filePath)
+	if err != nil {
+		log.Printf("loading default config: %v", err)
+		// Fall back to default configuration
+		return NewConfig()
+	}
 	return cfg
 }

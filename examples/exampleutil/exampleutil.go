@@ -17,6 +17,11 @@ func NewDefaultConfig() config.Config {
 	return config.NewConfig()
 }
 
+// LoadConfigFromFile loads a configuration from a file.
+func LoadConfigFromFile(filePath string) config.Config {
+	return config.LoadOrDefaultConfig(filePath)
+}
+
 // NewCustomConfig allows creating a custom configuration with optional parameters.
 func NewCustomConfig(addr string, timeout time.Duration, transport *http.Transport) config.Config {
 	options := []config.Option{}

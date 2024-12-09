@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/bitcoin-sv/spv-wallet/models"
@@ -25,5 +24,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("\n[HTTP POST] Confirm contact - api/v1/contacts/%s/confirmation\n", paymail)
+	exampleutil.Print("\n[HTTP POST] Confirm contact - api/v1/contacts/%s/confirmation", paymail)
 }

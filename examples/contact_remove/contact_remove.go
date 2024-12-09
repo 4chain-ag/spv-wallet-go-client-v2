@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
@@ -22,5 +21,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("\n[HTTP DELETE] Remove contact - api/v1/contacts/%s\n", paymail)
+	exampleutil.Print("\n[HTTP DELETE] Remove contact - api/v1/contacts/%s", paymail)
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	"github.com/bitcoin-sv/spv-wallet-go-client/walletkeys"
-
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 

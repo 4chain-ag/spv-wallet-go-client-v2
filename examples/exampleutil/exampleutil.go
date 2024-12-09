@@ -23,7 +23,7 @@ func LoadConfigFromFile(filePath string) config.Config {
 }
 
 // NewCustomConfig allows creating a custom configuration with optional parameters.
-func NewCustomConfig(addr string, timeout time.Duration, transport *http.Transport) config.Config {
+func NewCustomConfigWithTransport(addr string, timeout time.Duration, transport *http.Transport) config.Config {
 	options := []config.Option{}
 
 	if addr != "" {
@@ -36,6 +36,21 @@ func NewCustomConfig(addr string, timeout time.Duration, transport *http.Transpo
 
 	if transport != nil {
 		options = append(options, config.WithTransport(transport))
+	}
+
+	return config.NewConfig(options...)
+}
+
+// NewCustomConfig allows creating a custom configuration with optional parameters.
+func NewCustomConfig(addr string, timeout time.Duration) config.Config {
+	options := []config.Option{}
+
+	if addr != "" {
+		options = append(options, config.WithAddr(addr))
+	}
+
+	if timeout > 0 {
+		options = append(options, config.WithTimeout(timeout))
 	}
 
 	return config.NewConfig(options...)

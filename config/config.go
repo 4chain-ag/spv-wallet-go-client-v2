@@ -41,7 +41,7 @@ func (cfg *Config) Validate() error {
 		return goclienterr.ErrConfigValidationInvalidAddress
 	}
 
-	if cfg.Timeout <= 0 {
+	if cfg.Timeout < 0 {
 		return goclienterr.ErrConfigValidationInvalidTimeout
 	}
 

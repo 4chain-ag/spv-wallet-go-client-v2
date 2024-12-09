@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
-	"github.com/stretchr/testify/require"
 )
 
 func TestConfig_New(t *testing.T) {
@@ -102,6 +103,15 @@ func TestConfig_Validate(t *testing.T) {
 			cfg: config.Config{
 				Addr:      "http://api.example.com",
 				Timeout:   0,
+				Transport: http.DefaultTransport,
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "negative Timeout",
+			cfg: config.Config{
+				Addr:      "http://api.example.com",
+				Timeout:   -10 * time.Second,
 				Transport: http.DefaultTransport,
 			},
 			expectedErr: goclienterr.ErrConfigValidationInvalidTimeout,

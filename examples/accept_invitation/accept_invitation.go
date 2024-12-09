@@ -1,25 +1,39 @@
 package main
 
-import (
-	"context"
-	"log"
+// import (
+// 	"context"
+// 	"log"
+//
+//
 
-	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
-	"github.com/bitcoin-sv/spv-wallet-go-client/examples"
-	"github.com/bitcoin-sv/spv-wallet-go-client/examples/exampleutil"
+// 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
+// 	"github.com/bitcoin-sv/spv-wallet-go-client/examples"
+// 	"github.com/bitcoin-sv/spv-wallet-go-client/examples/exampleutil"
+// )
+
+// func main() {
+// 	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.NewDefaultConfig(), examples.XPriv)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	paymail := "john.doe@example.com"
+// 	err = usersAPI.AcceptInvitation(context.Background(), paymail)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	exampleutil.Print("\n[HTTP POST] Accept contact invitation - api/v1/invitations/%s/contacts", paymail)
+// }
+
+import (
+	"fmt"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 )
 
 func main() {
-	usersAPI, err := wallet.NewUserAPIWithXPriv(exampleutil.NewDefaultConfig(), examples.XPriv)
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := config.New()
 
-	paymail := "john.doe@example.com"
-	err = usersAPI.AcceptInvitation(context.Background(), paymail)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	exampleutil.Print("\n[HTTP POST] Accept contact invitation - api/v1/invitations/%s/contacts", paymail)
+	fmt.Printf("This is config %+v", cfg)
 }

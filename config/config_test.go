@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
-	"github.com/stretchr/testify/require"
 )
 
 func TestConfig_New(t *testing.T) {
@@ -71,6 +72,11 @@ func TestConfig_Validate(t *testing.T) {
 		cfg         config.Config
 		expectedErr error
 	}{
+		{
+			name:        "Valid configuration with constructor defaults",
+			cfg:         config.New(),
+			expectedErr: nil,
+		},
 		{
 			name: "Valid configuration",
 			cfg: config.Config{

@@ -23,11 +23,10 @@ func New(options ...Option) Config {
 	for _, opt := range options {
 		opt(&cfg)
 	}
+	cfg.setDefaultValues()
 	if err := cfg.Validate(); err != nil {
 		log.Fatalf("Error creating configuration: %v", err)
 	}
-
-	cfg.setDefaultValues()
 	return cfg
 }
 

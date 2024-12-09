@@ -5,10 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
 	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfig_New(t *testing.T) {

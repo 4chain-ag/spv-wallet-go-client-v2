@@ -98,7 +98,7 @@ func TestConfig_Validate(t *testing.T) {
 			expectedErr: goclienterr.ErrConfigValidationInvalidAddress,
 		},
 		{
-			name: "Zero Timeout",
+			name: "Zero Timeout - default 1m",
 			cfg: config.Config{
 				Addr:      "http://api.example.com",
 				Timeout:   0,
@@ -114,14 +114,6 @@ func TestConfig_Validate(t *testing.T) {
 				Transport: http.DefaultTransport,
 			},
 			expectedErr: goclienterr.ErrConfigValidationInvalidTimeout,
-		},
-		{
-			name: "Nil Transport",
-			cfg: config.Config{
-				Addr:    "http://api.example.com",
-				Timeout: 30 * time.Second,
-			},
-			expectedErr: goclienterr.ErrConfigValidationInvalidTransport,
 		},
 	}
 

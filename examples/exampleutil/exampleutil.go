@@ -52,11 +52,6 @@ func NewCustomConfigWithTransport(addr string, timeout time.Duration, transport 
 	return config.NewConfig(options...)
 }
 
-// LoadConfigFromFile loads a configuration from a file.
-func LoadConfigFromFile(filePath string) config.Config {
-	return config.LoadOrDefaultConfig(filePath)
-}
-
 // Print formats the title using the specified format and arguments, then prints the object.
 func Print(format string, args ...any) {
 	Printf(format, nil, "", 0, args...)

@@ -11,21 +11,21 @@ import (
 // Config holds configuration settings for establishing a connection and handling
 // request details in the application.
 type Config struct {
-	Addr      string            // The base address of the SPV Wallet API.
-	Timeout   time.Duration     // The HTTP requests timeout duration.
+	Addr      string            `mapstructure:"addr"`    // The base address of the SPV Wallet API.
+	Timeout   time.Duration     `mapstructure:"timeout"` // The HTTP requests timeout duration.
 	Transport http.RoundTripper // Custom HTTP transport, allowing optional customization of the HTTP client behavior.
 }
 
 // setDefaultValues assigns default values to fields that are not explicitly set.
 func (cfg *Config) setDefaultValues() {
 	if cfg.Addr == "" {
-		cfg.Addr = "http://localhost:3003" // Default address
+		cfg.Addr = "http://localhost:3003"
 	}
 	if cfg.Timeout == 0 {
-		cfg.Timeout = 1 * time.Minute // Default timeout
+		cfg.Timeout = 1 * time.Minute
 	}
 	if cfg.Transport == nil {
-		cfg.Transport = http.DefaultTransport // Default transport
+		cfg.Transport = http.DefaultTransport
 	}
 }
 
@@ -67,29 +67,24 @@ func NewConfig(options ...Option) Config {
 func loadConfigFromYAML(filePath string) (Config, error) {
 	viper.SetConfigFile(filePath)
 
-	// Read the configuration file
 	if err := viper.ReadInConfig(); err != nil {
 		log.Printf("Error reading config file: %v", err)
 		return NewConfig(), err
 	}
 
-	// Set default values
 	viper.SetDefault("addr", "http://localhost:3003")
-	viper.SetDefault("timeout", 60) // Timeout in seconds
+	viper.SetDefault("timeout", "1m")
 
-	// Unmarshal into Config struct
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Printf("Error unmarshaling config: %v", err)
 		return NewConfig(), err
 	}
 
-	// Convert timeout from seconds to time.Duration
 	if cfg.Timeout == 0 {
 		cfg.Timeout = time.Duration(viper.GetInt("timeout")) * time.Second
 	}
 
-	// Set default values for any missing fields
 	cfg.setDefaultValues()
 
 	return cfg, nil
@@ -99,7 +94,7 @@ func loadConfigFromYAML(filePath string) (Config, error) {
 example yaml file:
 ---
 addr: "http://api.example.com"
-timeout: 30
+timeout: 30s
 */
 
 // LoadOrDefaultConfig attempts to load configuration from a YAML file.

@@ -81,7 +81,7 @@ func loadConfigFromYAML(filePath string) (Config, error) {
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Printf("Error unmarshaling config: %v", err)
-		return Config{}, err
+		return NewConfig(), err
 	}
 
 	// Convert timeout from seconds to time.Duration

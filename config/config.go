@@ -45,9 +45,5 @@ func (cfg *Config) Validate() error {
 		return goclienterr.ErrConfigValidationInvalidTimeout
 	}
 
-	if cfg.Transport == nil {
-		return goclienterr.ErrConfigValidationInvalidTransport
-	}
-
 	return nil
 }

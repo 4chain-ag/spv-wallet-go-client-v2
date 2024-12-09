@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewConfig(t *testing.T) {
@@ -58,9 +60,66 @@ func TestNewConfig(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			cfg := config.NewConfig(test.options...)
-			if cfg != test.expected {
-				t.Errorf("Expected %+v, got %+v", test.expected, cfg)
-			}
+			require.Equal(t, test.expected, cfg)
+		})
+	}
+}
+
+func TestValidate(t *testing.T) {
+	tests := []struct {
+		name        string
+		cfg         config.Config
+		expectedErr error
+	}{
+		{
+			name: "Valid configuration",
+			cfg: config.Config{
+				Addr:      "http://api.example.com",
+				Timeout:   30 * time.Second,
+				Transport: http.DefaultTransport,
+			},
+			expectedErr: nil, // No error expected
+		},
+		{
+			name: "Missing Addr",
+			cfg: config.Config{
+				Timeout:   30 * time.Second,
+				Transport: http.DefaultTransport,
+			},
+			expectedErr: goclienterr.ErrConfigValidationMissingAddress,
+		},
+		{
+			name: "Invalid Addr URL",
+			cfg: config.Config{
+				Addr:      "invalid-url",
+				Timeout:   30 * time.Second,
+				Transport: http.DefaultTransport,
+			},
+			expectedErr: goclienterr.ErrConfigValidationInvalidAddress,
+		},
+		{
+			name: "Zero Timeout",
+			cfg: config.Config{
+				Addr:      "http://api.example.com",
+				Timeout:   0,
+				Transport: http.DefaultTransport,
+			},
+			expectedErr: goclienterr.ErrConfigValidationInvalidTimeout,
+		},
+		{
+			name: "Nil Transport",
+			cfg: config.Config{
+				Addr:    "http://api.example.com",
+				Timeout: 30 * time.Second,
+			},
+			expectedErr: goclienterr.ErrConfigValidationInvalidTransport,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := test.cfg.Validate()
+			require.Equal(t, test.expectedErr, err)
 		})
 	}
 }

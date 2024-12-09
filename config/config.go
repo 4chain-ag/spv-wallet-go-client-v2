@@ -1,8 +1,12 @@
 package config
 
 import (
+	"log"
 	"net/http"
+	"net/url"
 	"time"
+
+	goclienterr "github.com/bitcoin-sv/spv-wallet-go-client/errors"
 )
 
 // Config holds configuration settings for establishing a connection and handling
@@ -13,49 +17,37 @@ type Config struct {
 	Transport http.RoundTripper // Custom HTTP transport, allowing optional customization of the HTTP client behavior.
 }
 
-// setDefaultValues assigns default values to fields that are not explicitly set.
-func (cfg *Config) setDefaultValues() {
-	if cfg.Addr == "" {
-		cfg.Addr = "http://localhost:3003"
-	}
-	if cfg.Timeout == 0 {
-		cfg.Timeout = 1 * time.Minute
-	}
-	if cfg.Transport == nil {
-		cfg.Transport = http.DefaultTransport
-	}
-}
-
-// Option defines a function signature for modifying a Config.
-type Option func(*Config)
-
-// WithAddr sets the address in the configuration.
-func WithAddr(addr string) Option {
-	return func(cfg *Config) {
-		cfg.Addr = addr
-	}
-}
-
-// WithTimeout sets the timeout duration in the configuration.
-func WithTimeout(timeout time.Duration) Option {
-	return func(cfg *Config) {
-		cfg.Timeout = timeout
-	}
-}
-
-// WithTransport sets the HTTP transport in the configuration.
-func WithTransport(transport http.RoundTripper) Option {
-	return func(cfg *Config) {
-		cfg.Transport = transport
-	}
-}
-
 // NewConfig creates a new Config instance with optional customizations.
 func NewConfig(options ...Option) Config {
 	cfg := Config{}
 	for _, opt := range options {
 		opt(&cfg)
 	}
+	if err := cfg.Validate(); err != nil {
+		log.Fatalf("Error creating configuration: %v", err)
+	}
+
 	cfg.setDefaultValues()
 	return cfg
+}
+
+// Validate checks the configuration for invalid or missing values.
+func (cfg *Config) Validate() error {
+	if cfg.Addr == "" {
+		return goclienterr.ErrConfigValidationMissingAddress
+	}
+
+	if _, err := url.ParseRequestURI(cfg.Addr); err != nil {
+		return goclienterr.ErrConfigValidationInvalidAddress
+	}
+
+	if cfg.Timeout <= 0 {
+		return goclienterr.ErrConfigValidationInvalidTimeout
+	}
+
+	if cfg.Transport == nil {
+		return goclienterr.ErrConfigValidationInvalidTransport
+	}
+
+	return nil
 }

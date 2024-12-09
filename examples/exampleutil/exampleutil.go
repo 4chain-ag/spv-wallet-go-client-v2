@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"net/http"
 	"strings"
 	"time"
 
@@ -16,40 +15,6 @@ import (
 // NewDefaultConfig returns a new instance of the default example configuration.
 func NewDefaultConfig() config.Config {
 	return config.NewConfig()
-}
-
-// NewCustomConfig allows creating a custom configuration with optional parameters.
-func NewCustomConfig(addr string, timeout time.Duration) config.Config {
-	options := []config.Option{}
-
-	if addr != "" {
-		options = append(options, config.WithAddr(addr))
-	}
-
-	if timeout > 0 {
-		options = append(options, config.WithTimeout(timeout))
-	}
-
-	return config.NewConfig(options...)
-}
-
-// NewCustomConfig allows creating a custom configuration with optional parameters.
-func NewCustomConfigWithTransport(addr string, timeout time.Duration, transport *http.Transport) config.Config {
-	options := []config.Option{}
-
-	if addr != "" {
-		options = append(options, config.WithAddr(addr))
-	}
-
-	if timeout > 0 {
-		options = append(options, config.WithTimeout(timeout))
-	}
-
-	if transport != nil {
-		options = append(options, config.WithTransport(transport))
-	}
-
-	return config.NewConfig(options...)
 }
 
 // Print formats the title using the specified format and arguments, then prints the object.

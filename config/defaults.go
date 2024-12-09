@@ -1,7 +1,6 @@
 package config
 
 import (
-	"net/http"
 	"time"
 )
 
@@ -19,8 +18,5 @@ func (cfg *Config) setDefaultValues() {
 	}
 	if cfg.Timeout == 0 {
 		cfg.Timeout = defaultTimeout
-	}
-	if cfg.Transport == nil {
-		cfg.Transport = http.DefaultTransport
 	}
 }

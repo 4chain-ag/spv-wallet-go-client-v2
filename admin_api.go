@@ -122,6 +122,16 @@ func (a *AdminAPI) DeleteContact(ctx context.Context, ID string) error {
 	return nil
 }
 
+func (a *AdminAPI) ConfirmContact(ctx context.Context, cmd *commands.ConfirmContact) error {
+	err := a.contactsAPI.ConfirmContact(ctx, cmd)
+	if err != nil {
+		msg := fmt.Sprintf("confirm contacts: %s & %s", cmd.PaymailA, cmd.PaymailB)
+		return contacts.HTTPErrorFormatter(msg, err).FormatPostErr()
+	}
+
+	return nil
+}
+
 // AcceptInvitation processes and accepts a user contact invitation using the given ID via the admin invitations API.
 // Returns an error if the API request fails. A nil error indicates the invitation was successfully accepted.
 func (a *AdminAPI) AcceptInvitation(ctx context.Context, ID string) error {
@@ -358,7 +368,7 @@ func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
 
 	httpClient := restyutil.NewHTTPClient(cfg, auth)
 	if httpClient == nil {
-		return nil, fmt.Errorf("failed to initialize HTTP client - nil value.")
+		return nil, fmt.Errorf("failed to initialize HTTP client - nil value")
 	}
 
 	return &AdminAPI{

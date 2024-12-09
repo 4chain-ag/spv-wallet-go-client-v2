@@ -16,3 +16,9 @@ type UpdateContact struct {
 	FullName string         `json:"fullName"` // The full name of the contact.
 	Metadata map[string]any `json:"metadata"` // Metadata associated with the contact.
 }
+
+// ConfirmContact represents the body defined for confirming contact's between two users.
+type ConfirmContact struct {
+	PaymailA string `json:"paymailA"` // The paymail address of the first user in the contact relationship
+	PaymailB string `json:"paymailB"` // The paymail address of the second user in the contact relationship
+}

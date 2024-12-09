@@ -14,7 +14,7 @@ import (
 
 // NewDefaultConfig returns a new instance of the default example configuration.
 func NewDefaultConfig() config.Config {
-	return config.NewConfig()
+	return config.New()
 }
 
 // Print formats the title using the specified format and arguments, then prints the object.

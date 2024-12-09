@@ -2,6 +2,7 @@ package config
 
 import (
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -11,7 +12,7 @@ type Option func(*Config)
 // WithAddr sets the address in the configuration.
 func WithAddr(addr string) Option {
 	return func(cfg *Config) {
-		cfg.Addr = addr
+		cfg.Addr = strings.TrimSpace(addr)
 	}
 }
 

@@ -17,8 +17,8 @@ type Config struct {
 	Transport http.RoundTripper // Custom HTTP transport, allowing optional customization of the HTTP client behavior.
 }
 
-// NewConfig creates a new Config instance with optional customizations.
-func NewConfig(options ...Option) Config {
+// New creates a new Config instance with optional customizations.
+func New(options ...Option) Config {
 	cfg := Config{}
 	for _, opt := range options {
 		opt(&cfg)

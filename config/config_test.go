@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewConfig(t *testing.T) {
+func TestConfig_New(t *testing.T) {
 	transport := &http.Transport{
 		MaxIdleConns:        10,
 		MaxIdleConnsPerHost: 10,
@@ -59,13 +59,13 @@ func TestNewConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			cfg := config.NewConfig(test.options...)
+			cfg := config.New(test.options...)
 			require.Equal(t, test.expected, cfg)
 		})
 	}
 }
 
-func TestValidate(t *testing.T) {
+func TestConfig_Validate(t *testing.T) {
 	tests := []struct {
 		name        string
 		cfg         config.Config

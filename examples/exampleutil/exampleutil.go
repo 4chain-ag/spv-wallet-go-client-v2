@@ -18,9 +18,19 @@ func NewDefaultConfig() config.Config {
 	return config.NewConfig()
 }
 
-// LoadConfigFromFile loads a configuration from a file.
-func LoadConfigFromFile(filePath string) config.Config {
-	return config.LoadOrDefaultConfig(filePath)
+// NewCustomConfig allows creating a custom configuration with optional parameters.
+func NewCustomConfig(addr string, timeout time.Duration) config.Config {
+	options := []config.Option{}
+
+	if addr != "" {
+		options = append(options, config.WithAddr(addr))
+	}
+
+	if timeout > 0 {
+		options = append(options, config.WithTimeout(timeout))
+	}
+
+	return config.NewConfig(options...)
 }
 
 // NewCustomConfig allows creating a custom configuration with optional parameters.
@@ -42,19 +52,9 @@ func NewCustomConfigWithTransport(addr string, timeout time.Duration, transport 
 	return config.NewConfig(options...)
 }
 
-// NewCustomConfig allows creating a custom configuration with optional parameters.
-func NewCustomConfig(addr string, timeout time.Duration) config.Config {
-	options := []config.Option{}
-
-	if addr != "" {
-		options = append(options, config.WithAddr(addr))
-	}
-
-	if timeout > 0 {
-		options = append(options, config.WithTimeout(timeout))
-	}
-
-	return config.NewConfig(options...)
+// LoadConfigFromFile loads a configuration from a file.
+func LoadConfigFromFile(filePath string) config.Config {
+	return config.LoadOrDefaultConfig(filePath)
 }
 
 // Print formats the title using the specified format and arguments, then prints the object.

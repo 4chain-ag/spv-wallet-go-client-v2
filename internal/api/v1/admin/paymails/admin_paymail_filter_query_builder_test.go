@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAdminAccessKeyFilterQueryBuilder_Build(t *testing.T) {
+func TesAdminPaymailFilterQueryBuilder_Build(t *testing.T) {
 	tests := map[string]struct {
 		filter         filter.AdminPaymailFilter
 		expectedParams url.Values

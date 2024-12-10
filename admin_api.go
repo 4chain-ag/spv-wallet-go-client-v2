@@ -7,16 +7,16 @@ import (
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/accesskeys"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/contacts"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/invitations"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/accesskeys"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/paymails"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/stats"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/status"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/transactions"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/utxos"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/webhooks"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/admin/xpubs"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/contacts"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/invitations"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/stats"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/status"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/auth"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/restyutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
@@ -36,14 +36,14 @@ import (
 type AdminAPI struct {
 	xpubsAPI        *xpubs.API
 	paymailsAPI     *paymails.API
-	accessKeyAPI    *accesskeys.API
+	accessKeyAPI    *accesskeys.AdminAPI
 	transactionsAPI *transactions.API
 	utxosAPI        *utxos.API
-	contactsAPI     *contacts.API
-	invitationsAPI  *invitations.API
+	contactsAPI     *contacts.AdminAPI
+	invitationsAPI  *invitations.AdminAPI
 	webhooksAPI     *webhooks.API
-	statusAPI       *status.API
-	statsAPI        *stats.API
+	statusAPI       *status.AdminAPI
+	statsAPI        *stats.AdminAPI
 }
 
 // CreateXPub creates a new XPub record via the Admin XPubs API.
@@ -87,7 +87,7 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.XPubQueryOption) (
 func (a *AdminAPI) Contacts(ctx context.Context, opts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
 	res, err := a.contactsAPI.Contacts(ctx, opts...)
 	if err != nil {
-		return nil, contacts.HTTPErrorFormatter("retrieve user contacts page", err).FormatGetErr()
+		return nil, contacts.AdminAPIErrorFormatter("retrieve user contacts page", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -103,7 +103,7 @@ func (a *AdminAPI) ContactUpdate(ctx context.Context, cmd *commands.UpdateContac
 	res, err := a.contactsAPI.UpdateContact(ctx, cmd)
 	if err != nil {
 		msg := fmt.Sprintf("update contact with ID: %s", cmd.ID)
-		return nil, contacts.HTTPErrorFormatter(msg, err).FormatPutErr()
+		return nil, contacts.AdminAPIErrorFormatter(msg, err).FormatPutErr()
 	}
 
 	return res, nil
@@ -116,7 +116,7 @@ func (a *AdminAPI) DeleteContact(ctx context.Context, ID string) error {
 	err := a.contactsAPI.DeleteContact(ctx, ID)
 	if err != nil {
 		msg := fmt.Sprintf("delete contact with ID: %s", ID)
-		return contacts.HTTPErrorFormatter(msg, err).FormatDeleteErr()
+		return contacts.AdminAPIErrorFormatter(msg, err).FormatDeleteErr()
 	}
 
 	return nil
@@ -128,7 +128,7 @@ func (a *AdminAPI) AcceptInvitation(ctx context.Context, ID string) error {
 	err := a.invitationsAPI.AcceptInvitation(ctx, ID)
 	if err != nil {
 		msg := fmt.Sprintf("accept invitation with ID: %s", ID)
-		return invitations.HTTPErrorFormatter(msg, err).FormatDeleteErr()
+		return invitations.AdminAPIErrorFormatter(msg, err).FormatDeleteErr()
 	}
 
 	return nil
@@ -140,7 +140,7 @@ func (a *AdminAPI) RejectInvitation(ctx context.Context, ID string) error {
 	err := a.invitationsAPI.RejectInvitation(ctx, ID)
 	if err != nil {
 		msg := fmt.Sprintf("delete invitation with ID: %s", ID)
-		return invitations.HTTPErrorFormatter(msg, err).FormatDeleteErr()
+		return invitations.AdminAPIErrorFormatter(msg, err).FormatDeleteErr()
 	}
 
 	return nil
@@ -185,7 +185,7 @@ func (a *AdminAPI) Transaction(ctx context.Context, ID string) (*response.Transa
 func (a *AdminAPI) AccessKeys(ctx context.Context, accessKeyOpts ...queries.AdminAccessKeyQueryOption) (*queries.AccessKeyPage, error) {
 	res, err := a.accessKeyAPI.AccessKeys(ctx, accessKeyOpts...)
 	if err != nil {
-		return nil, accesskeys.HTTPErrorFormatter("retrieve access keys page ", err).FormatGetErr()
+		return nil, accesskeys.AdminAPIErrorFormatter("retrieve access keys page ", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -302,7 +302,7 @@ func (a *AdminAPI) DeletePaymail(ctx context.Context, address string) error {
 func (a *AdminAPI) Stats(ctx context.Context) (*models.AdminStats, error) {
 	res, err := a.statsAPI.Stats(ctx)
 	if err != nil {
-		return nil, stats.HTTPErrorFormatter("retrieve stats", err).FormatGetErr()
+		return nil, stats.AdminAPIErrorFormatter("retrieve stats", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -315,7 +315,7 @@ func (a *AdminAPI) Stats(ctx context.Context) (*models.AdminStats, error) {
 func (a *AdminAPI) Status(ctx context.Context) (bool, error) {
 	ok, err := a.statusAPI.Status(ctx)
 	if err != nil {
-		return false, status.HTTPErrorFormatter("retrieve information about the used key type: %w", err).FormatGetErr()
+		return false, status.AdminAPIErrorFormatter("retrieve information about the used key type: %w", err).FormatGetErr()
 	}
 
 	return ok, nil
@@ -366,11 +366,11 @@ func initAdminAPI(cfg config.Config, auth authenticator) (*AdminAPI, error) {
 		transactionsAPI: transactions.NewAPI(url, httpClient),
 		xpubsAPI:        xpubs.NewAPI(url, httpClient),
 		utxosAPI:        utxos.NewAPI(url, httpClient),
-		accessKeyAPI:    accesskeys.NewAPI(url, httpClient),
+		accessKeyAPI:    accesskeys.NewAdminAPI(url, httpClient),
 		webhooksAPI:     webhooks.NewAPI(url, httpClient),
-		contactsAPI:     contacts.NewAPI(url, httpClient),
-		invitationsAPI:  invitations.NewAPI(url, httpClient),
-		statusAPI:       status.NewAPI(url, httpClient),
-		statsAPI:        stats.NewAPI(url, httpClient),
+		contactsAPI:     contacts.NewAdminAPI(url, httpClient),
+		invitationsAPI:  invitations.NewAdminAPI(url, httpClient),
+		statusAPI:       status.NewAdminAPI(url, httpClient),
+		statsAPI:        stats.NewAdminAPI(url, httpClient),
 	}, nil
 }

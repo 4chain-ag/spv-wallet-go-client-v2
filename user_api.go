@@ -8,10 +8,10 @@ import (
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 	"github.com/bitcoin-sv/spv-wallet-go-client/config"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/accesskeys"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/configs"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/contacts"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/invitations"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/accesskeys"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/configs"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/contacts"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/invitations"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/merkleroots"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/paymails"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/totp"
@@ -38,11 +38,11 @@ import (
 // ErrUnrecognizedAPIResponse, depending on the behavior of the SPV Wallet API.
 type UserAPI struct {
 	xpubAPI         *xpubs.API
-	accessKeyAPI    *accesskeys.API
-	configsAPI      *configs.API
+	accessKeyAPI    *accesskeys.UserAPI
+	configsAPI      *configs.UserAPI
 	merkleRootsAPI  *merkleroots.API
-	contactsAPI     *contacts.API
-	invitationsAPI  *invitations.API
+	contactsAPI     *contacts.UserAPI
+	invitationsAPI  *invitations.UserAPI
 	transactionsAPI *transactions.API
 	utxosAPI        *utxos.API
 	paymailsAPI     *paymails.API
@@ -58,7 +58,7 @@ type UserAPI struct {
 func (u *UserAPI) Contacts(ctx context.Context, contactOpts ...queries.ContactQueryOption) (*queries.UserContactsPage, error) {
 	res, err := u.contactsAPI.Contacts(ctx, contactOpts...)
 	if err != nil {
-		return nil, contacts.HTTPErrorFormatter("retrieve contacts page", err).FormatGetErr()
+		return nil, contacts.UserAPIErrorFormatter("retrieve contacts page", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -70,7 +70,7 @@ func (u *UserAPI) Contacts(ctx context.Context, contactOpts ...queries.ContactQu
 func (u *UserAPI) ContactWithPaymail(ctx context.Context, paymail string) (*response.Contact, error) {
 	res, err := u.contactsAPI.ContactWithPaymail(ctx, paymail)
 	if err != nil {
-		return nil, contacts.HTTPErrorFormatter("retrieve contact with paymail", err).FormatGetErr()
+		return nil, contacts.UserAPIErrorFormatter("retrieve contact with paymail", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -82,7 +82,7 @@ func (u *UserAPI) ContactWithPaymail(ctx context.Context, paymail string) (*resp
 func (u *UserAPI) UpsertContact(ctx context.Context, cmd commands.UpsertContact) (*response.Contact, error) {
 	res, err := u.contactsAPI.UpsertContact(ctx, cmd)
 	if err != nil {
-		return nil, contacts.HTTPErrorFormatter("upsert contact", err).FormatPutErr()
+		return nil, contacts.UserAPIErrorFormatter("upsert contact", err).FormatPutErr()
 	}
 
 	return res, nil
@@ -94,7 +94,7 @@ func (u *UserAPI) UpsertContact(ctx context.Context, cmd commands.UpsertContact)
 func (u *UserAPI) RemoveContact(ctx context.Context, paymail string) error {
 	err := u.contactsAPI.RemoveContact(ctx, paymail)
 	if err != nil {
-		return contacts.HTTPErrorFormatter("remove contact", err).FormatDeleteErr()
+		return contacts.UserAPIErrorFormatter("remove contact", err).FormatDeleteErr()
 	}
 
 	return nil
@@ -108,7 +108,7 @@ func (u *UserAPI) ConfirmContact(ctx context.Context, contact *models.Contact, p
 
 	err := u.contactsAPI.ConfirmContact(ctx, contact.Paymail)
 	if err != nil {
-		return contacts.HTTPErrorFormatter("confirm contact", err).FormatPostErr()
+		return contacts.UserAPIErrorFormatter("confirm contact", err).FormatPostErr()
 	}
 
 	return nil
@@ -119,7 +119,7 @@ func (u *UserAPI) ConfirmContact(ctx context.Context, contact *models.Contact, p
 func (u *UserAPI) UnconfirmContact(ctx context.Context, paymail string) error {
 	err := u.contactsAPI.UnconfirmContact(ctx, paymail)
 	if err != nil {
-		return contacts.HTTPErrorFormatter("unconfirm contact", err).FormatDeleteErr()
+		return contacts.UserAPIErrorFormatter("unconfirm contact", err).FormatDeleteErr()
 	}
 
 	return nil
@@ -130,7 +130,7 @@ func (u *UserAPI) UnconfirmContact(ctx context.Context, paymail string) error {
 func (u *UserAPI) AcceptInvitation(ctx context.Context, paymail string) error {
 	err := u.invitationsAPI.AcceptInvitation(ctx, paymail)
 	if err != nil {
-		return invitations.HTTPErrorFormatter("accept invitation", err).FormatPostErr()
+		return invitations.UserAPIErrorFormatter("accept invitation", err).FormatPostErr()
 	}
 
 	return nil
@@ -142,7 +142,7 @@ func (u *UserAPI) AcceptInvitation(ctx context.Context, paymail string) error {
 func (u *UserAPI) RejectInvitation(ctx context.Context, paymail string) error {
 	err := u.invitationsAPI.RejectInvitation(ctx, paymail)
 	if err != nil {
-		return invitations.HTTPErrorFormatter("reject invitation", err).FormatDeleteErr()
+		return invitations.UserAPIErrorFormatter("reject invitation", err).FormatDeleteErr()
 	}
 
 	return nil
@@ -154,7 +154,7 @@ func (u *UserAPI) RejectInvitation(ctx context.Context, paymail string) error {
 func (u *UserAPI) SharedConfig(ctx context.Context) (*response.SharedConfig, error) {
 	res, err := u.configsAPI.SharedConfig(ctx)
 	if err != nil {
-		return nil, configs.HTTPErrorFormatter("retrieve shared configuration", err).FormatGetErr()
+		return nil, configs.UserAPIErrorFormatter("retrieve shared configuration", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -285,7 +285,7 @@ func (u *UserAPI) UpdateXPubMetadata(ctx context.Context, cmd *commands.UpdateXP
 func (u *UserAPI) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateAccessKey) (*response.AccessKey, error) {
 	res, err := u.accessKeyAPI.GenerateAccessKey(ctx, cmd)
 	if err != nil {
-		return nil, accesskeys.HTTPErrorFormatter("generate access key ", err).FormatPostErr()
+		return nil, accesskeys.UserAPIErrorFormatter("generate access key ", err).FormatPostErr()
 	}
 
 	return res, nil
@@ -301,7 +301,7 @@ func (u *UserAPI) GenerateAccessKey(ctx context.Context, cmd *commands.GenerateA
 func (u *UserAPI) AccessKeys(ctx context.Context, accessKeyOpts ...queries.AccessKeyQueryOption) (*queries.AccessKeyPage, error) {
 	res, err := u.accessKeyAPI.AccessKeys(ctx, accessKeyOpts...)
 	if err != nil {
-		return nil, accesskeys.HTTPErrorFormatter("retrieve access keys page ", err).FormatGetErr()
+		return nil, accesskeys.UserAPIErrorFormatter("retrieve access keys page ", err).FormatGetErr()
 	}
 
 	return res, nil
@@ -314,7 +314,7 @@ func (u *UserAPI) AccessKey(ctx context.Context, ID string) (*response.AccessKey
 	res, err := u.accessKeyAPI.AccessKey(ctx, ID)
 	if err != nil {
 		msg := fmt.Sprintf("retrieve access key with ID: %s", ID)
-		return nil, accesskeys.HTTPErrorFormatter(msg, err).FormatGetErr()
+		return nil, accesskeys.UserAPIErrorFormatter(msg, err).FormatGetErr()
 	}
 
 	return res, nil
@@ -327,7 +327,7 @@ func (u *UserAPI) RevokeAccessKey(ctx context.Context, ID string) error {
 	err := u.accessKeyAPI.RevokeAccessKey(ctx, ID)
 	if err != nil {
 		msg := fmt.Sprintf("revoke access key with ID: %s", ID)
-		return accesskeys.HTTPErrorFormatter(msg, err).FormatDeleteErr()
+		return accesskeys.UserAPIErrorFormatter(msg, err).FormatDeleteErr()
 	}
 
 	return nil
@@ -496,13 +496,13 @@ func initUserAPIWithXPriv(cfg config.Config, xPriv string, auth authenticator) (
 
 	return &UserAPI{
 		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
-		configsAPI:      configs.NewAPI(url, httpClient),
+		configsAPI:      configs.NewUserAPI(url, httpClient),
 		transactionsAPI: transactionsAPI,
 		utxosAPI:        utxos.NewAPI(url, httpClient),
-		accessKeyAPI:    accesskeys.NewAPI(url, httpClient),
+		accessKeyAPI:    accesskeys.NewUserAPI(url, httpClient),
 		xpubAPI:         xpubs.NewAPI(url, httpClient),
-		contactsAPI:     contacts.NewAPI(url, httpClient),
-		invitationsAPI:  invitations.NewAPI(url, httpClient),
+		contactsAPI:     contacts.NewUserAPI(url, httpClient),
+		invitationsAPI:  invitations.NewUserAPI(url, httpClient),
 		paymailsAPI:     paymails.NewAPI(url, httpClient),
 		totpAPI:         totpAPI,
 	}, nil
@@ -526,13 +526,13 @@ func initUserAPI(cfg config.Config, auth authenticator) (*UserAPI, error) {
 
 	return &UserAPI{
 		merkleRootsAPI:  merkleroots.NewAPI(url, httpClient),
-		configsAPI:      configs.NewAPI(url, httpClient),
+		configsAPI:      configs.NewUserAPI(url, httpClient),
 		transactionsAPI: transactionsAPI,
 		utxosAPI:        utxos.NewAPI(url, httpClient),
-		accessKeyAPI:    accesskeys.NewAPI(url, httpClient),
+		accessKeyAPI:    accesskeys.NewUserAPI(url, httpClient),
 		xpubAPI:         xpubs.NewAPI(url, httpClient),
-		contactsAPI:     contacts.NewAPI(url, httpClient),
-		invitationsAPI:  invitations.NewAPI(url, httpClient),
+		contactsAPI:     contacts.NewUserAPI(url, httpClient),
+		invitationsAPI:  invitations.NewUserAPI(url, httpClient),
 		paymailsAPI:     paymails.NewAPI(url, httpClient),
 	}, nil
 }

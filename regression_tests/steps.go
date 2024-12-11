@@ -68,7 +68,7 @@ func getEnvVariables() (*regressionTestConfig, error) {
 
 // getPaymailDomain retrieves the shared configuration from the SPV Wallet.
 func getPaymailDomain(ctx context.Context, xpriv string, clientUrl string) (string, error) {
-	cfg := config.NewDefaultConfig(clientUrl)
+	cfg := config.New(config.WithAddr(clientUrl))
 	wc, err := wallet.NewUserAPIWithXPriv(cfg, xpriv)
 	if err != nil {
 		return "", err
@@ -96,7 +96,7 @@ func createUser(ctx context.Context, paymail string, paymailDomain string, insta
 		Paymail: preparePaymail(paymail, paymailDomain),
 	}
 
-	cfg := config.NewDefaultConfig(instanceUrl)
+	cfg := config.New(config.WithAddr(instanceUrl))
 	adminClient, err := wallet.NewAdminAPIWithXPriv(cfg, adminXPriv)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func createUser(ctx context.Context, paymail string, paymailDomain string, insta
 
 // removeRegisteredPaymail soft deletes paymail from the SPV Wallet.
 func removeRegisteredPaymail(ctx context.Context, paymail string, instanceUrl string, adminXPriv string) error {
-	cfg := config.NewDefaultConfig(instanceUrl)
+	cfg := config.New(config.WithAddr(instanceUrl))
 	adminClient, err := wallet.NewAdminAPIWithXPriv(cfg, adminXPriv)
 	if err != nil {
 		return err
@@ -140,7 +140,7 @@ func removeRegisteredPaymail(ctx context.Context, paymail string, instanceUrl st
 
 // getBalance retrieves the balance from the SPV Wallet.
 func getBalance(ctx context.Context, fromInstance string, fromXPriv string) (int, error) {
-	cfg := config.NewDefaultConfig(fromInstance)
+	cfg := config.New(config.WithAddr(fromInstance))
 	client, err := wallet.NewUserAPIWithXPriv(cfg, fromXPriv)
 	if err != nil {
 		return -1, err
@@ -154,7 +154,7 @@ func getBalance(ctx context.Context, fromInstance string, fromXPriv string) (int
 
 // getTransactions retrieves the transactions from the SPV Wallet.
 func getTransactions(ctx context.Context, fromInstance string, fromXPriv string) ([]*response.Transaction, error) {
-	cfg := config.NewDefaultConfig(fromInstance)
+	cfg := config.New(config.WithAddr(fromInstance))
 	client, err := wallet.NewUserAPIWithXPriv(cfg, fromXPriv)
 	if err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ func getTransactions(ctx context.Context, fromInstance string, fromXPriv string)
 
 // sendFunds sends funds from one paymail to another.
 func sendFunds(ctx context.Context, fromInstance string, fromXPriv string, toPaymail string, howMuch int) (*response.Transaction, error) {
-	cfg := config.NewDefaultConfig(fromInstance)
+	cfg := config.New(config.WithAddr(fromInstance))
 	client, err := wallet.NewUserAPIWithXPriv(cfg, fromXPriv)
 	if err != nil {
 		return nil, err

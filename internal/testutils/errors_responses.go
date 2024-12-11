@@ -38,7 +38,7 @@ func NewInternalServerSPVError() models.SPVError {
 func NewUnrecognizedAPIResponseError() models.SPVError {
 	return models.SPVError{
 		Message:    errors.ErrUnrecognizedAPIResponse.Error(),
-		StatusCode: 500,
+		StatusCode: http.StatusInternalServerError,
 		Code:       "internal-server-error",
 	}
 }
@@ -47,7 +47,7 @@ func NewUnrecognizedAPIResponseError() models.SPVError {
 func NewInvalidRequestError() models.SPVError {
 	return models.SPVError{
 		Message:    "Invalid request",
-		StatusCode: 400,
+		StatusCode: http.StatusBadRequest,
 		Code:       "invalid-request",
 	}
 }

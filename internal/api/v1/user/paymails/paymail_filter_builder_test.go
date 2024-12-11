@@ -6,7 +6,7 @@ import (
 
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/paymails"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
+	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testutils"
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +22,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'id' field set": {
 			filter: filter.AdminPaymailFilter{
-				ID: spvwallettest.Ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
+				ID: testutils.Ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
 			},
 			expectedParams: url.Values{
 				"id": []string{"b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"},
@@ -30,7 +30,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'xPubId' field set": {
 			filter: filter.AdminPaymailFilter{
-				XpubID: spvwallettest.Ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
+				XpubID: testutils.Ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
 			},
 			expectedParams: url.Values{
 				"xpubId": []string{"7d373830-1d74-4c4b-a435-04ce09398027"},
@@ -38,7 +38,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'alias' field set": {
 			filter: filter.AdminPaymailFilter{
-				Alias: spvwallettest.Ptr("alias"),
+				Alias: testutils.Ptr("alias"),
 			},
 			expectedParams: url.Values{
 				"alias": []string{"alias"},
@@ -46,7 +46,7 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: filter with only 'public name' field set": {
 			filter: filter.AdminPaymailFilter{
-				PublicName: spvwallettest.Ptr("Alice"),
+				PublicName: testutils.Ptr("Alice"),
 			},
 			expectedParams: url.Values{
 				"publicName": []string{"Alice"},
@@ -54,10 +54,10 @@ func TestPaymailFilterBuilder_Build(t *testing.T) {
 		},
 		"admin paymail filter: all fields set": {
 			filter: filter.AdminPaymailFilter{
-				ID:         spvwallettest.Ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
-				XpubID:     spvwallettest.Ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
-				PublicName: spvwallettest.Ptr("Alice"),
-				Alias:      spvwallettest.Ptr("alias"),
+				ID:         testutils.Ptr("b950f5de-3d3a-40b6-bdf8-c9d60e9e0a0a"),
+				XpubID:     testutils.Ptr("7d373830-1d74-4c4b-a435-04ce09398027"),
+				PublicName: testutils.Ptr("Alice"),
+				Alias:      testutils.Ptr("alias"),
 			},
 			expectedParams: url.Values{
 				"publicName": []string{"Alice"},

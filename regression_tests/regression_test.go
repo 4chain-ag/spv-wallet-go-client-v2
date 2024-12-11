@@ -45,27 +45,25 @@ func TestRegression(t *testing.T) {
 
 	t.Run("Initialize Shared Configurations", func(t *testing.T) {
 		t.Run("Should get sharedConfig for instance one", func(t *testing.T) {
-			paymailDomainInstanceOne, err = getPaymailDomain(ctx, adminXPriv, rtConfig.ClientOneURL)
-			require.NoError(t, err, fmt.Sprintf(errGettingSharedConfig, err))
+			paymailDomainInstanceOne = getPaymailDomain(ctx, t, adminXPriv, rtConfig.ClientOneURL)
 		})
 
 		t.Run("Should get shared config for instance two", func(t *testing.T) {
-			paymailDomainInstanceTwo, err = getPaymailDomain(ctx, adminXPriv, rtConfig.ClientTwoURL)
-			require.NoError(t, err, fmt.Sprintf(errGettingSharedConfig, err))
+			paymailDomainInstanceTwo = getPaymailDomain(ctx, t, adminXPriv, rtConfig.ClientTwoURL)
 		})
 	})
 
 	t.Run("Create Users", func(t *testing.T) {
 		t.Run("Should create user for instance one", func(t *testing.T) {
 			userName := "instanceOneUser1"
-			userOne, err = createUser(ctx, userName, paymailDomainInstanceOne, rtConfig.ClientOneURL, adminXPriv)
-			require.NoError(t, err, fmt.Sprintf(errCreatingUser, err))
+			userOne = createUser(ctx, t, userName, paymailDomainInstanceOne, rtConfig.ClientOneURL, adminXPriv)
+
 		})
 
 		t.Run("Should create user for instance two", func(t *testing.T) {
 			userName := "instanceTwoUser1"
 			userTwo, err = createUser(ctx, userName, paymailDomainInstanceTwo, rtConfig.ClientTwoURL, adminXPriv)
-			require.NoError(t, err, fmt.Sprintf(errCreatingUser, err))
+
 		})
 	})
 
@@ -193,27 +191,32 @@ func getEnvVariables() (*regressionTestConfig, error) {
 }
 
 // getPaymailDomain retrieves the shared configuration from the SPV Wallet.
-func getPaymailDomain(ctx context.Context, xpriv string, clientUrl string) (string, error) {
-	cfg := config.New(config.WithAddr(clientUrl))
-	wc, err := wallet.NewUserAPIWithXPriv(cfg, xpriv)
+func getPaymailDomain(ctx context.Context, t *testing.T, xpriv string, url string) string {
+	t.Helper()
+
+	api, err := wallet.NewUserAPIWithXPriv(config.New(config.WithAddr(url)), xpriv)
 	if err != nil {
-		return "", err
+		t.Fatalf("test helper - failed to initialize user API with XPriv: %v", err)
 	}
-	sharedConfig, err := wc.SharedConfig(ctx)
+
+	sharedConfig, err := api.SharedConfig(ctx)
 	if err != nil {
-		return "", err
+		t.Fatalf("test helper - failed to retrieve shared config from User API: %v", err)
 	}
 	if len(sharedConfig.PaymailDomains) != 1 {
-		return "", fmt.Errorf("expected 1 paymail domain, got %d", len(sharedConfig.PaymailDomains))
+		t.Fatalf("test helper - expected to have single paymail domain, got: %d", len(sharedConfig.PaymailDomains))
 	}
-	return sharedConfig.PaymailDomains[0], nil
+
+	return sharedConfig.PaymailDomains[0]
 }
 
 // createUser creates a set of keys and new paymail in the SPV Wallet.
-func createUser(ctx context.Context, paymail string, paymailDomain string, instanceUrl string, adminXPriv string) (*regressionTestUser, error) {
+func createUser(ctx context.Context, t *testing.T, paymail string, paymailDomain string, instanceUrl string, adminXPriv string) *regressionTestUser {
+	t.Helper()
+
 	keys, err := walletkeys.RandomKeys()
 	if err != nil {
-		return nil, err
+		t.Fatalf("test helper - failed to generate random keys: %v", err)
 	}
 
 	user := &regressionTestUser{
@@ -223,9 +226,11 @@ func createUser(ctx context.Context, paymail string, paymailDomain string, insta
 	}
 
 	cfg := config.New(config.WithAddr(instanceUrl))
+	t.Log("test helper - addr: %v", cfg.Addr)
+
 	adminClient, err := wallet.NewAdminAPIWithXPriv(cfg, adminXPriv)
 	if err != nil {
-		return nil, err
+		t.Fatalf("test helper - failed to initialize admin API with XPriv: %v", err)
 	}
 
 	_, err = adminClient.CreateXPub(ctx, &commands.CreateUserXpub{
@@ -233,7 +238,7 @@ func createUser(ctx context.Context, paymail string, paymailDomain string, insta
 		XPub:     user.XPub,
 	})
 	if err != nil {
-		return nil, err
+		t.Fatalf("test helper - failed to create XPub: %v", err)
 	}
 
 	_, err = adminClient.CreatePaymail(ctx, &commands.CreatePaymail{
@@ -244,10 +249,10 @@ func createUser(ctx context.Context, paymail string, paymailDomain string, insta
 		Avatar:     "",
 	})
 	if err != nil {
-		return nil, err
+		t.Fatalf("test helper - failed to create paymail: %v", err)
 	}
 
-	return user, nil
+	return user
 }
 
 // removeRegisteredPaymail soft deletes paymail from the SPV Wallet.

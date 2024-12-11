@@ -43,4 +43,19 @@ var (
 	ErrEmptyAccessKey = errors.New("key hex string cannot be empty")
 	// ErrEmptyPubKey is returned when the key string is empty.
 	ErrEmptyPubKey = errors.New("key string cannot be empty")
+
+	// ErrConfigValidationMissingAddress is returned when the configuration is invalid.
+	ErrConfigValidationMissingAddress = errors.New("configuration validation error: address required")
+	// ErrConfigValidationInvalidAddress is returned when the address is invalid.
+	ErrConfigValidationInvalidAddress = errors.New("configuration validation error: invalid address")
+	// ErrConfigValidationInvalidTimeout is returned when the timeout is invalid.
+	ErrConfigValidationInvalidTimeout = errors.New("configuration validation error: invalid timeout must be greater than zero")
+	// ErrConfigValidationInvalidTransport is returned when the transport is invalid.
+	ErrConfigValidationInvalidTransport = errors.New("configuration validation error: invalid transport")
+	// ErrMaxUint32LimitExceeded is returned when the max uint32 value is exceeded.
+	ErrMaxUint32LimitExceeded = errors.New("max uint32 value exceeded")
+	// ErrNegativeValueNotAllowed is returned when a negative value is passed.
+	ErrNegativeValueNotAllowed = errors.New("negative value is not allowed")
+	// ErrHexHashPartIntParse is returned when the hex hash part fails to parse to int64.
+	ErrHexHashPartIntParse = errors.New("parse hex hash part to int64 failed")
 )

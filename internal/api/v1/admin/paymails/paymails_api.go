@@ -9,6 +9,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/errutil"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/go-resty/resty/v2"
 )
@@ -69,8 +70,8 @@ func (a *API) Paymail(ctx context.Context, ID string) (*response.PaymailAddress,
 	return &result, nil
 }
 
-func (a *API) Paymails(ctx context.Context, opts ...queries.PaymailQueryOption) (*queries.PaymailAddressPage, error) {
-	var query queries.PaymailQuery
+func (a *API) Paymails(ctx context.Context, opts ...queries.PaymailQueryOption[filter.AdminPaymailFilter]) (*queries.PaymailAddressPage, error) {
+	var query queries.PaymailQuery[filter.AdminPaymailFilter]
 	for _, o := range opts {
 		o(&query)
 	}
@@ -78,10 +79,7 @@ func (a *API) Paymails(ctx context.Context, opts ...queries.PaymailQueryOption) 
 	queryBuilder := querybuilders.NewQueryBuilder(
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.PageFilter),
-		querybuilders.WithFilterQueryBuilder(&paymailFilterBuilder{
-			paymailFilter:      query.PaymailFilter,
-			modelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: query.PaymailFilter.ModelFilter},
-		}),
+		querybuilders.WithFilterQueryBuilder(&adminPaymailFilterBuilder{paymailFilter: query.PaymailFilter}),
 	)
 	params, err := queryBuilder.Build()
 	if err != nil {

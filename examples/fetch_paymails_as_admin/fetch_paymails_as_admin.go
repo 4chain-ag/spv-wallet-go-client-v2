@@ -12,12 +12,12 @@ import (
 )
 
 func main() {
-	adminAPI, err := wallet.NewAdminAPIWithXPriv(exampleutil.ExampleConfig, examples.XPriv)
+	adminAPI, err := wallet.NewAdminAPIWithXPriv(exampleutil.NewDefaultConfig(), examples.XPriv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	page, err := adminAPI.Paymails(context.Background(), queries.PaymailQueryWithPageFilter(filter.Page{
+	page, err := adminAPI.Paymails(context.Background(), queries.PaymailQueryWithPageFilter[filter.AdminPaymailFilter](filter.Page{
 		Size: 3,
 	}))
 	if err != nil {

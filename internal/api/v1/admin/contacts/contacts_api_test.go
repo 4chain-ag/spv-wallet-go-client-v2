@@ -61,7 +61,7 @@ func TestContactsAPI_Contacts(t *testing.T) {
 	}
 }
 
-func TestContactsAPI_ConfirmContacts(t *testing.T) {
+func TestContactsAPI_ConfirmContact(t *testing.T) {
 	tests := map[string]struct {
 		responder   httpmock.Responder
 		expectedErr error

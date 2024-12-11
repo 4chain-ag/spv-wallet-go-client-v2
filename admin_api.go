@@ -123,6 +123,9 @@ func (a *AdminAPI) DeleteContact(ctx context.Context, ID string) error {
 	return nil
 }
 
+// ConfirmContact confirms contact between two users given their paymails in a request body.
+// Returns an error if the API fails to confirm both contacts.
+// A nil error indicates the confirmation was successful.
 func (a *AdminAPI) ConfirmContact(ctx context.Context, cmd *commands.ConfirmContact) error {
 	err := a.contactsAPI.ConfirmContact(ctx, cmd)
 	if err != nil {

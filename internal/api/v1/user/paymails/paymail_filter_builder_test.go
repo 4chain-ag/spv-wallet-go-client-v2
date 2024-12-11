@@ -4,12 +4,11 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/bitcoin-sv/spv-wallet/models/filter"
-	"github.com/stretchr/testify/require"
-
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/paymails"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/testutils"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPaymailFilterBuilder_Build(t *testing.T) {

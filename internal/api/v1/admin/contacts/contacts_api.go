@@ -74,7 +74,7 @@ func (a *API) UpdateContact(ctx context.Context, cmd *commands.UpdateContact) (*
 	return &result, nil
 }
 
-func (a *API) ConfirmContact(ctx context.Context, cmd *commands.ConfirmContact) error {
+func (a *API) ConfirmContacts(ctx context.Context, cmd *commands.ConfirmContacts) error {
 	_, err := a.httpClient.
 		R().
 		SetContext(ctx).

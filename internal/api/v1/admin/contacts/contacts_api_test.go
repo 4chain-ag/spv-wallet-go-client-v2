@@ -61,7 +61,7 @@ func TestContactsAPI_Contacts(t *testing.T) {
 	}
 }
 
-func TestContactsAPI_ConfirmContact(t *testing.T) {
+func TestContactsAPI_ConfirmContacts(t *testing.T) {
 	tests := map[string]struct {
 		responder   httpmock.Responder
 		expectedErr error
@@ -91,7 +91,7 @@ func TestContactsAPI_ConfirmContact(t *testing.T) {
 			transport.RegisterResponder(http.MethodPost, url, tc.responder)
 
 			// when:
-			err := wallet.ConfirmContact(context.Background(), &commands.ConfirmContact{
+			err := wallet.ConfirmContacts(context.Background(), &commands.ConfirmContacts{
 				PaymailA: "alice@paymail.com",
 				PaymailB: "bob@paymail.com",
 			})

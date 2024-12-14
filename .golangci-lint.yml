@@ -91,7 +91,7 @@ linters-settings:
   revive:
     rules:
       - name: exported
-        exclude: ["**/testabilities/**", "**/internal/**"]
+        exclude: ["**/testabilities/**", "**/internal/**", "**/regression_tests/**"]
   exhaustive:
     # Presence of "default" case in switch statements satisfies exhaustiveness,
     # even if all enum members are not listed.

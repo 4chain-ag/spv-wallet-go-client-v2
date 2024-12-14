@@ -33,6 +33,7 @@ func (l *LeaderService) FirstActor() *Actor {
 	if len(l.actors) > 0 {
 		return l.actors[0]
 	}
+
 	return nil
 }
 
@@ -41,6 +42,7 @@ func (l *LeaderService) Balance(ctx context.Context) (uint64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("XPub failed: %w", err)
 	}
+
 	return xPub.CurrentBalance, nil
 }
 
@@ -76,6 +78,7 @@ func (l *LeaderService) RemoveActors(ctx context.Context) error {
 			return fmt.Errorf("DeletePaymail failed: %w", err)
 		}
 	}
+
 	return nil
 }
 
@@ -100,8 +103,8 @@ func (l *LeaderService) TransferFunds(ctx context.Context, paymail string, satos
 	if err != nil {
 		return nil, fmt.Errorf("SendToRecipients failed: %w", err)
 	}
-	return transaction, nil
 
+	return transaction, nil
 }
 
 func NewLeaderService(cfg *LeaderServiceConfig) (*LeaderService, error) {
@@ -110,10 +113,12 @@ func NewLeaderService(cfg *LeaderServiceConfig) (*LeaderService, error) {
 	if err != nil {
 		return nil, fmt.Errorf("NewAdminAPIWithXPriv failed: %w", err)
 	}
+
 	userAPI, err := wallet.NewUserAPIWithXPriv(walletCfg, cfg.EnvXPriv)
 	if err != nil {
 		return nil, fmt.Errorf("NewUserAPIWithXPriv failed: %w", err)
 	}
+
 	sharedCfg, err := userAPI.SharedConfig(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("SharedConfig failed: %w", err)

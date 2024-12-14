@@ -23,6 +23,7 @@ func (a *ActorService) Balance(ctx context.Context) (uint64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("XPub failed: %w", err)
 	}
+
 	return xPub.CurrentBalance, nil
 }
 
@@ -43,6 +44,7 @@ func (a *ActorService) TransferFunds(ctx context.Context, paymail string, funds 
 	if err != nil {
 		return nil, fmt.Errorf("SendToRecipients failed: %w", err)
 	}
+
 	return transaction, nil
 }
 
@@ -51,6 +53,7 @@ func (a *ActorService) Transactions(ctx context.Context) ([]*response.Transactio
 	if err != nil {
 		return nil, fmt.Errorf("Transactions failed: %w", err)
 	}
+
 	return page.Content, nil
 }
 

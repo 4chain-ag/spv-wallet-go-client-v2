@@ -56,7 +56,7 @@ func TestRegression_TransactionsWorkflow(t *testing.T) {
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, minimalTransactionOutputValue, leader2Transaction.OutputValue)
 
-	expectedActor1Balance := 1
+	expectedActor1Balance := uint64(1)
 	actor1Balance, err := actorService1.Balance(ctx)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, actor1Balance, expectedActor1Balance)
@@ -73,7 +73,7 @@ func TestRegression_TransactionsWorkflow(t *testing.T) {
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, minimalTransactionOutputValue, leader1Transaction.OutputValue)
 
-	expectedActor2Balance := 1
+	expectedActor2Balance := uint64(1)
 	actor2Balance, err := actorService2.Balance(ctx)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, actor2Balance, expectedActor2Balance)
@@ -90,7 +90,7 @@ func TestRegression_TransactionsWorkflow(t *testing.T) {
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, minimalTransactionOutputValue, actor1Transaction.OutputValue)
 
-	minimalActor1Balance := 0
+	minimalActor1Balance := uint64(0)
 	actor1Balance, err = actorService1.Balance(ctx)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, actor1Balance, minimalActor1Balance)
@@ -100,7 +100,7 @@ func TestRegression_TransactionsWorkflow(t *testing.T) {
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(actor1Transactions), expectedActor1TransactionsCount)
 
-	expectedActor2Balance = 2
+	expectedActor2Balance = uint64(2)
 	actor2Balance, err = actorService2.Balance(ctx)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, actor2Balance, expectedActor2Balance)

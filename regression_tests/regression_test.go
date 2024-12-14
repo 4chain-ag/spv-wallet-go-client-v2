@@ -32,16 +32,12 @@ func TestRegression_TransactionsWorkflow(t *testing.T) {
 
 	defer t.Cleanup(func() {
 		err := leaderService1.RemoveActors(ctx)
-		if err != nil {
-			t.Errorf("Cleanup failed: could not actors by  leader service %s: %v", leaderService1.Name(), err)
-		}
+		require.NoError(t, err, "Cleanup failed: could not actors by leader service %s: %v", leaderService1.Name())
 	})
 
 	defer t.Cleanup(func() {
 		err := leaderService2.RemoveActors(ctx)
-		if err != nil {
-			t.Errorf("Cleanup failed: could not actors by leader service %s: %v", leaderService1.Name(), err)
-		}
+		require.NoError(t, err, "Cleanup failed: could not actors by leader service %s: %v", leaderService2.Name())
 	})
 
 	actor1 := actorService1.Actor()
@@ -115,17 +111,14 @@ func initTestServices(ctx context.Context, t *testing.T, cfg *services.LeaderSer
 	t.Helper()
 
 	leaderService, err := services.NewLeaderService(cfg)
-	if err != nil {
-		t.Fatalf("Setup failed: could not initialize leader service: %v", err)
-	}
+	require.NoError(t, err, "Setup failed: could not initialize leader service")
+
 	actor, err := leaderService.CreateActor(ctx, alias)
-	if err != nil {
-		t.Fatalf("Setup failed: could not create actor: %v", err)
-	}
+	require.NoError(t, err, "Setup failed: could not create actor")
+
 	actorService, err := services.NewActorService(cfg.EnvURL, actor)
-	if err != nil {
-		t.Fatalf("Setup failed: count not initialize actor service: %v", err)
-	}
+	require.NoError(t, err, "Setup failed: initialize actor service")
+
 	return leaderService, actorService
 }
 

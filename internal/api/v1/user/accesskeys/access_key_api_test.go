@@ -10,6 +10,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/accesskeys/accesskeystest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -120,7 +121,7 @@ func TestAccessKeyAPI_AccessKeys(t *testing.T) {
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// when:
-			got, err := wallet.AccessKeys(context.Background())
+			got, err := wallet.AccessKeys(context.Background(), queries.QueryWithPageFilter[filter.AccessKeyFilter](filter.Page{Size: 1}))
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)

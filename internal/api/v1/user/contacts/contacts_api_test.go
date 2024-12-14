@@ -11,6 +11,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
 	"github.com/bitcoin-sv/spv-wallet/models"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -19,11 +20,11 @@ import (
 func TestContactsAPI_Contacts(t *testing.T) {
 	tests := map[string]struct {
 		responder        httpmock.Responder
-		expectedResponse *queries.UserContactsPage
+		expectedResponse *queries.ContactsPage
 		expectedErr      error
 	}{
 		"HTTP GET /api/v1/contacts response: 200": {
-			expectedResponse: contactstest.ExpectedUserContactsPage(t),
+			expectedResponse: contactstest.ExpectedContactsPage(t),
 			responder:        httpmock.NewJsonResponderOrPanic(http.StatusOK, httpmock.File("contactstest/get_contacts_200.json")),
 		},
 		"HTTP GET /api/v1/contacts response: 400": {
@@ -44,7 +45,7 @@ func TestContactsAPI_Contacts(t *testing.T) {
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// when:
-			got, err := wallet.Contacts(context.Background())
+			got, err := wallet.Contacts(context.Background(), queries.QueryWithPageFilter[filter.ContactFilter](filter.Page{Size: 1}))
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)

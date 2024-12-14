@@ -14,11 +14,11 @@ type adminPaymailFilterBuilder struct {
 }
 
 func (p *adminPaymailFilterBuilder) Build() (url.Values, error) {
-	accessKeyFilterQueryBuilder := paymails.PaymailFilterBuilder{
+	builder := paymails.PaymailFilterBuilder{
 		PaymailFilter:      p.paymailFilter.PaymailFilter,
 		ModelFilterBuilder: querybuilders.ModelFilterBuilder{ModelFilter: p.paymailFilter.ModelFilter},
 	}
-	params, err := accessKeyFilterQueryBuilder.BuildExtendedURLValues()
+	params, err := builder.BuildExtendedURLValues()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build extended URL values: %w", err)
 	}

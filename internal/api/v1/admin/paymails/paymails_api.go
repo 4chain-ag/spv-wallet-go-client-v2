@@ -70,16 +70,12 @@ func (a *API) Paymail(ctx context.Context, ID string) (*response.PaymailAddress,
 	return &result, nil
 }
 
-func (a *API) Paymails(ctx context.Context, opts ...queries.PaymailQueryOption[filter.AdminPaymailFilter]) (*queries.PaymailAddressPage, error) {
-	var query queries.PaymailQuery[filter.AdminPaymailFilter]
-	for _, o := range opts {
-		o(&query)
-	}
-
+func (a *API) Paymails(ctx context.Context, opts ...queries.QueryOption[filter.AdminPaymailFilter]) (*queries.PaymailAddressPage, error) {
+	query := queries.NewQuery(opts...)
 	queryBuilder := querybuilders.NewQueryBuilder(
 		querybuilders.WithMetadataFilter(query.Metadata),
 		querybuilders.WithPageFilter(query.PageFilter),
-		querybuilders.WithFilterQueryBuilder(&adminPaymailFilterBuilder{paymailFilter: query.PaymailFilter}),
+		querybuilders.WithFilterQueryBuilder(&adminPaymailFilterBuilder{paymailFilter: query.Filter}),
 	)
 	params, err := queryBuilder.Build()
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/utxos/utxostest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 )
@@ -45,7 +46,7 @@ func TestUTXOAPI_UTXOs(t *testing.T) {
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// when:
-			got, err := wallet.UTXOs(context.Background())
+			got, err := wallet.UTXOs(context.Background(), queries.QueryWithPageFilter[filter.UtxoFilter](filter.Page{Size: 1}))
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)

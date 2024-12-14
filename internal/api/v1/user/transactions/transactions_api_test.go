@@ -11,6 +11,8 @@ import (
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/querybuilders"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/user/transactions/transactionstest"
 	"github.com/bitcoin-sv/spv-wallet-go-client/internal/spvwallettest"
+	"github.com/bitcoin-sv/spv-wallet-go-client/queries"
+	"github.com/bitcoin-sv/spv-wallet/models/filter"
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -142,7 +144,6 @@ func TestTransactionsAPI_FinalizeTransaction(t *testing.T) {
 			require.Equal(t, tc.expectedHex, hex)
 		})
 	}
-
 }
 
 func TestTransactionsAPI_UpdateTransactionMetadata(t *testing.T) {
@@ -352,7 +353,7 @@ func TestTransactionsAPI_Transactions(t *testing.T) {
 			transport.RegisterResponder(http.MethodGet, url, tc.responder)
 
 			// when:
-			got, err := spvWalletClient.Transactions(context.Background())
+			got, err := spvWalletClient.Transactions(context.Background(), queries.QueryWithPageFilter[filter.TransactionFilter](filter.Page{Size: 1}))
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)

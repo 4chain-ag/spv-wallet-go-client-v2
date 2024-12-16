@@ -58,7 +58,7 @@ func (t *TransferService) Do(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("Sender [paymail: %s] could not fetch balance after transaction: %w", sender, err)
 	}
-	expectedSenderBalance := prevSenderBalance - t.TransferFunds
+	expectedSenderBalance := prevSenderBalance - t.TransferFunds - transaction.Fee
 	if currentSenderBalance != expectedSenderBalance {
 		return fmt.Errorf("Sender [paymail: %s] balance should be equal to: %d. Got: %d", sender, expectedSenderBalance, currentSenderBalance)
 	}

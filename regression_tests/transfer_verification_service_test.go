@@ -9,7 +9,17 @@ import (
 	"testing"
 )
 
-func TestTransferService_Do(t *testing.T) {
+// TransferVerifier defines the methods required for verifying a transfer between a sender and a recipient.
+// It includes methods for performing the transfer verification (Do), retrieving the amount of funds to be transferred (Funds),
+// and obtaining the paymail addresses of the sender and recipient (SenderPaymail and RecipientPaymail).
+type TransferVerifier interface {
+	Do(ctx context.Context) error
+	Funds() uint64
+	SenderPaymail() string
+	RecipientPaymail() string
+}
+
+func TestTransferVerficiationService_Do(t *testing.T) {
 	const (
 		clientOneURL         = "CLIENT_ONE_URL"
 		clientOneLeaderXPriv = "CLIENT_ONE_LEADER_XPRIV"
@@ -18,8 +28,8 @@ func TestTransferService_Do(t *testing.T) {
 	)
 
 	const (
-		alias1 = "Actor1RegressionTest"
-		alias2 = "Actor2RegressionTest"
+		alias1 = "Actor11RegressionTest"
+		alias2 = "Actor22RegressionTest"
 		admin  = "xprv9s21ZrQH143K3CbJXirfrtpLvhT3Vgusdo8coBritQ3rcS7Jy7sxWhatuxG5h2y1Cqj8FKmPp69536gmjYRpfga2MJdsGyBsnB12E19CESK"
 	)
 
@@ -49,34 +59,30 @@ func TestTransferService_Do(t *testing.T) {
 		}
 	})
 
-	firstTransfer := &TransferService{
-		Sender:        leader2,
-		Recipient:     actor1,
-		TransferFunds: 3,
-	}
-	err := firstTransfer.Do(ctx)
-	if err != nil {
-		t.Errorf("Transfer no. 1 failed: could not transfer: %d funds from leader2 [url: %s] to actor1 [alias: %s]: %v", firstTransfer.TransferFunds, leader2.cfg.EnvURL, actor1.actor.alias, err)
-	}
-
-	secondTransfer := &TransferService{
-		Sender:        leader1,
-		Recipient:     actor2,
-		TransferFunds: 2,
-	}
-	err = secondTransfer.Do(ctx)
-	if err != nil {
-		t.Errorf("Transfer no. 2 failed: could not transfer: %d funds from leader1 [url: %s] to actor2 [alias: %s]: %v", secondTransfer.TransferFunds, leader2.cfg.EnvURL, actor2.actor.alias, err)
+	transfers := []TransferVerifier{
+		&TransferVerficiationService{
+			Sender:        leader2,
+			Recipient:     actor1,
+			TransferFunds: 3,
+		},
+		&TransferVerficiationService{
+			Sender:        leader1,
+			Recipient:     actor2,
+			TransferFunds: 2,
+		},
+		&TransferVerficiationService{
+			Sender:        actor1,
+			Recipient:     actor2,
+			TransferFunds: 2,
+		},
 	}
 
-	thirdTransfer := &TransferService{
-		Sender:        actor1,
-		Recipient:     actor2,
-		TransferFunds: 2,
-	}
-	err = thirdTransfer.Do(ctx)
-	if err != nil {
-		t.Errorf("Transfer no. 3 failed: could not transfer: %d funds from actor1 [alias: %s] to actor2 [alias: %s]: %v", thirdTransfer.TransferFunds, actor1.actor.alias, actor2.actor.alias, err)
+	for i, transfer := range transfers {
+		err := transfer.Do(ctx)
+		if err != nil {
+			const format = "Transfer no. %d failed: could not transfer: %d funds from Sender [%s] to Recipient [%s]: %v"
+			t.Errorf(format, i+1, transfer.Funds(), transfer.SenderPaymail(), transfer.RecipientPaymail(), err)
+		}
 	}
 }
 

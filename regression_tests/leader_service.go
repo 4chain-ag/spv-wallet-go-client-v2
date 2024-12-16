@@ -113,5 +113,10 @@ func NewLeaderService(cfg *LeaderServiceConfig) (*LeaderService, error) {
 	if len(sharedCfg.PaymailDomains) > 1 {
 		return nil, fmt.Errorf("expect to have single paymail domain. Got: %d paymail domains", len(sharedCfg.PaymailDomains))
 	}
-	return &LeaderService{cfg: cfg, adminAPI: adminAPI, userAPI: userAPI}, nil
+	return &LeaderService{
+		cfg:      cfg,
+		adminAPI: adminAPI,
+		userAPI:  userAPI,
+		domain:   sharedCfg.PaymailDomains[0],
+	}, nil
 }

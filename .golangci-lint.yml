@@ -118,7 +118,7 @@ issues:
         - wrapcheck
         - bodyclose
 
-    # Exclude unsued issues after adding build integration tag. 
+    # Exclude unsued issues after adding build integration tag.
     - path: regression_tests
       linters:
         - unused

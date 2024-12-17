@@ -179,8 +179,8 @@ func TestRegressionWorkflow(t *testing.T) {
 				expectedSenderBalance := prevSenderBalance - tc.funds - transaction.Fee
 				expectedRecipientBalance := prevRecipientBalance + tc.funds
 
-				require.Equal(t, expectedSenderBalance, currentSenderBalance)
-				require.Equal(t, expectedRecipientBalance, currentRecipientBalance)
+				require.EqualValues(t, expectedSenderBalance, currentSenderBalance)
+				require.EqualValues(t, expectedRecipientBalance, currentRecipientBalance)
 			})
 		}
 	})
@@ -228,8 +228,8 @@ func TestRegressionWorkflow(t *testing.T) {
 				expectedSenderBalance := prevSenderBalance - tc.funds - transaction.Fee
 				expectedRecipientBalance := prevRecipientBalance + tc.funds
 
-				require.Equal(t, expectedSenderBalance, currentSenderBalance)
-				require.Equal(t, expectedRecipientBalance, currentRecipientBalance)
+				require.EqualValues(t, expectedSenderBalance, currentSenderBalance)
+				require.EqualValues(t, expectedRecipientBalance, currentRecipientBalance)
 			})
 		}
 	})

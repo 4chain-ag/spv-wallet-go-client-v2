@@ -44,7 +44,6 @@ func TestRegressionWorkflow(t *testing.T) {
 		tests := []struct {
 			name                string
 			leader              *leader
-			expectedErr         error
 			expectedPaymailsLen int
 		}{
 			{
@@ -65,7 +64,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				got, err := tc.leader.userAPI.SharedConfig(ctx)
 
 				// when:
-				require.ErrorIs(t, err, tc.expectedErr)
+				require.NoError(t, err)
 				require.Len(t, got.PaymailDomains, tc.expectedPaymailsLen)
 				require.NotEmpty(t, got, got.PaymailDomains[0])
 
@@ -79,9 +78,8 @@ func TestRegressionWorkflow(t *testing.T) {
 
 	t.Run("Step 2: The leader attempts to add paymail records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
 		tests := []struct {
-			name        string
-			leader      *leader
-			expectedErr error
+			name   string
+			leader *leader
 		}{
 			{
 				name:   fmt.Sprintf("Leader [%s] should add paymail domain record for Actor[%s]", leader1.name(), leader1.actor.paymail),
@@ -99,16 +97,15 @@ func TestRegressionWorkflow(t *testing.T) {
 				got, err := tc.leader.adminAPI.CreatePaymail(ctx, actor.createPaymailCommand())
 
 				// when:
-				require.ErrorIs(t, err, tc.expectedErr)
+				require.NoError(t, err)
 				require.NotNil(t, got)
 			})
 		}
 	})
 	t.Run("Step 3: The leader attempts to add xpub records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
 		tests := []struct {
-			name        string
-			leader      *leader
-			expectedErr error
+			name   string
+			leader *leader
 		}{
 			{
 				name:   fmt.Sprintf("Leader [%s] should add xpub record for Actor [%s].", leader1.name(), leader1.actor.paymail),
@@ -126,7 +123,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				got, err := tc.leader.adminAPI.CreateXPub(ctx, actor.createUserXpubCommand())
 
 				// when:
-				require.ErrorIs(t, err, tc.expectedErr)
+				require.NoError(t, err)
 				require.NotNil(t, got)
 			})
 		}
@@ -238,9 +235,8 @@ func TestRegressionWorkflow(t *testing.T) {
 
 	t.Run("Step 6: The leader attempts to remove created actor paymails using the appropriate SPV Wallet API instance.", func(t *testing.T) {
 		tests := []struct {
-			name        string
-			leader      *leader
-			expectedErr error
+			name   string
+			leader *leader
 		}{
 			{
 				name:   fmt.Sprintf("Leader [%s] should delete Actor [%s] paymail record", leader2.name(), leader1.actor.paymail),

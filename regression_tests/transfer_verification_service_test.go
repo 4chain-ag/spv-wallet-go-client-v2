@@ -9,14 +9,14 @@ import (
 	"testing"
 )
 
-// TransferVerifier defines the methods required for verifying a transfer between a sender and a recipient.
-// It includes methods for performing the transfer verification (Do), retrieving the amount of funds to be transferred (Funds),
-// and obtaining the paymail addresses of the sender and recipient (SenderPaymail and RecipientPaymail).
-type TransferVerifier interface {
-	Do(ctx context.Context) error
-	Funds() uint64
-	SenderPaymail() string
-	RecipientPaymail() string
+// transferVerifier defines the methods required for verifying a transfer between a sender and a recipient.
+// It includes methods for performing the transfer verification (do), retrieving the amount of funds to be transferred (funds),
+// and obtaining the paymail addresses of the sender and recipient (senderPaymail and recipientPaymail).
+type transferVerifier interface {
+	do(ctx context.Context) error
+	funds() uint64
+	senderPaymail() string
+	recipientPaymail() string
 }
 
 func TestTransferVerficiationService_Do(t *testing.T) {
@@ -34,54 +34,54 @@ func TestTransferVerficiationService_Do(t *testing.T) {
 	)
 
 	ctx := context.Background()
-	leader1, actor1 := initTestServices(ctx, t, alias1, &LeaderServiceConfig{
-		EnvURL:     lookupEnvOrDefault(clientOneURL, ""),
-		EnvXPriv:   lookupEnvOrDefault(clientOneLeaderXPriv, ""),
-		AdminXPriv: admin,
+	leader1, actor1 := initTestServices(ctx, t, alias1, &leaderServiceConfig{
+		envURL:     lookupEnvOrDefault(clientOneURL, ""),
+		envXPriv:   lookupEnvOrDefault(clientOneLeaderXPriv, ""),
+		adminXPriv: admin,
 	})
-	leader2, actor2 := initTestServices(ctx, t, alias2, &LeaderServiceConfig{
-		EnvURL:     lookupEnvOrDefault(clientTwoURL, ""),
-		EnvXPriv:   lookupEnvOrDefault(clientTwoLeaderXPriv, ""),
-		AdminXPriv: admin,
+	leader2, actor2 := initTestServices(ctx, t, alias2, &leaderServiceConfig{
+		envURL:     lookupEnvOrDefault(clientTwoURL, ""),
+		envXPriv:   lookupEnvOrDefault(clientTwoLeaderXPriv, ""),
+		adminXPriv: admin,
 	})
 
 	t.Cleanup(func() {
-		err := leader1.RemoveActors(ctx)
+		err := leader1.removeActors(ctx)
 		if err != nil {
 			t.Errorf("Cleanup failed: could not remove actors by leader1 service: %v", err)
 		}
 	})
 
 	t.Cleanup(func() {
-		err := leader2.RemoveActors(ctx)
+		err := leader2.removeActors(ctx)
 		if err != nil {
 			t.Errorf("Cleanup failed: could not remove actors by leader2 service: %v", err)
 		}
 	})
 
-	transfers := []TransferVerifier{
-		&TransferVerficiationService{
-			Sender:        leader2,
-			Recipient:     actor1,
-			TransferFunds: 3,
+	transfers := []transferVerifier{
+		&transferVerficiationService{
+			sender:        leader2,
+			recipient:     actor1,
+			transferFunds: 3,
 		},
-		&TransferVerficiationService{
-			Sender:        leader1,
-			Recipient:     actor2,
-			TransferFunds: 2,
+		&transferVerficiationService{
+			sender:        leader1,
+			recipient:     actor2,
+			transferFunds: 2,
 		},
-		&TransferVerficiationService{
-			Sender:        actor1,
-			Recipient:     actor2,
-			TransferFunds: 2,
+		&transferVerficiationService{
+			sender:        actor1,
+			recipient:     actor2,
+			transferFunds: 2,
 		},
 	}
 
 	for i, transfer := range transfers {
-		err := transfer.Do(ctx)
+		err := transfer.do(ctx)
 		if err != nil {
 			const format = "Transfer no. %d failed: could not transfer: %d funds from Sender [%s] to Recipient [%s]: %v"
-			t.Errorf(format, i+1, transfer.Funds(), transfer.SenderPaymail(), transfer.RecipientPaymail(), err)
+			t.Fatalf(format, i+1, transfer.funds(), transfer.senderPaymail(), transfer.recipientPaymail(), err)
 		}
 	}
 }
@@ -94,18 +94,18 @@ func lookupEnvOrDefault(env string, s string) string {
 	return s
 }
 
-func initTestServices(ctx context.Context, t *testing.T, alias string, cfg *LeaderServiceConfig) (*LeaderService, *ActorService) {
+func initTestServices(ctx context.Context, t *testing.T, alias string, cfg *leaderServiceConfig) (*leaderService, *actorService) {
 	t.Helper()
 
-	service1, err := NewLeaderService(cfg)
+	service1, err := newLeaderService(cfg)
 	if err != nil {
-		t.Fatalf("Setup failed: could not initialize leader service [url: %s]: %v", cfg.EnvURL, err)
+		t.Fatalf("Setup failed: could not initialize leader service [url: %s]: %v", cfg.envURL, err)
 	}
-	actor, err := service1.CreateActor(ctx, alias)
+	actor, err := service1.createActor(ctx, alias)
 	if err != nil {
 		t.Fatalf("Setup failed: could not create actor [alias: %s]: %v", alias, err)
 	}
-	service2, err := NewActorService(cfg.EnvURL, actor)
+	service2, err := newActorService(cfg.envURL, actor)
 	if err != nil {
 		t.Fatalf("Setup failed: initialize actor service [alias: %s]: %v", alias, err)
 	}

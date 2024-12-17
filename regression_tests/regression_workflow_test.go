@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
@@ -172,6 +173,8 @@ func TestRegressionWorkflow(t *testing.T) {
 
 				// then:
 				require.NoError(t, err)
+
+				time.Sleep(5 * time.Second) // temp
 
 				currentSenderBalance := checkBalance(ctx, t, tc.sender.userAPI)
 				currentRecipientBalance := checkBalance(ctx, t, tc.recipient.userAPI)

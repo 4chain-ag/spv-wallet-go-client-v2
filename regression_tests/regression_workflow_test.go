@@ -76,33 +76,7 @@ func TestRegressionWorkflow(t *testing.T) {
 	leader1.setActor(initActor(t, alias1, leader1.domain))
 	leader2.setActor(initActor(t, alias2, leader2.domain))
 
-	t.Run("Step 2: The leader attempts to add paymail records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
-		tests := []struct {
-			name   string
-			leader *leader
-		}{
-			{
-				name:   fmt.Sprintf("Leader [%s] should add paymail domain record for Actor[%s]", leader1.name(), leader1.actor.paymail),
-				leader: leader1,
-			},
-			{
-				name:   fmt.Sprintf("Leader [%s] should add paymail domain record for Actor[%s]", leader2.name(), leader2.actor.paymail),
-				leader: leader2,
-			},
-		}
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				// given:
-				actor := tc.leader.actor
-				got, err := tc.leader.adminAPI.CreatePaymail(ctx, actor.createPaymailCommand())
-
-				// when:
-				require.NoError(t, err)
-				require.NotNil(t, got)
-			})
-		}
-	})
-	t.Run("Step 3: The leader attempts to add xpub records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
+	t.Run("Step 2: The leader attempts to add xpub records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
 		tests := []struct {
 			name   string
 			leader *leader
@@ -121,6 +95,33 @@ func TestRegressionWorkflow(t *testing.T) {
 				// given:
 				actor := tc.leader.actor
 				got, err := tc.leader.adminAPI.CreateXPub(ctx, actor.createUserXpubCommand())
+
+				// when:
+				require.NoError(t, err)
+				require.NotNil(t, got)
+			})
+		}
+	})
+
+	t.Run("Step 3: The leader attempts to add paymail records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
+		tests := []struct {
+			name   string
+			leader *leader
+		}{
+			{
+				name:   fmt.Sprintf("Leader [%s] should add paymail domain record for Actor[%s]", leader1.name(), leader1.actor.paymail),
+				leader: leader1,
+			},
+			{
+				name:   fmt.Sprintf("Leader [%s] should add paymail domain record for Actor[%s]", leader2.name(), leader2.actor.paymail),
+				leader: leader2,
+			},
+		}
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// given:
+				actor := tc.leader.actor
+				got, err := tc.leader.adminAPI.CreatePaymail(ctx, actor.createPaymailCommand())
 
 				// when:
 				require.NoError(t, err)

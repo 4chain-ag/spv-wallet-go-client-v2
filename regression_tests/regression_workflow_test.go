@@ -11,7 +11,6 @@ import (
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
-	"github.com/stretchr/testify/require"
 )
 
 func TestRegressionWorkflow(t *testing.T) {
@@ -107,7 +106,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				if err != nil {
 					t.Errorf("[Leader: %s][Actor: %s] expected to get nil err after CreateXPub AdminAPI call; got: %v", tc.leader.name(), actor.paymail, err)
 				}
-				if got != nil {
+				if got == nil {
 					t.Errorf("[Leader: %s][Actor: %s] expected to get non nil Xpub response after CreateXPub AdminAPI call", tc.leader.name(), actor.paymail)
 				}
 			})
@@ -138,7 +137,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				if err != nil {
 					t.Errorf("[Leader: %s][Actor: %s] expected to get nil err after CreatePaymail AdminAPI call; got: %v", tc.leader.name(), actor.paymail, err)
 				}
-				if got != nil {
+				if got == nil {
 					t.Errorf("[Leader: %s][Actor: %s] expected to get non nil Xpub response after CreatePaymail AdminAPI call", tc.leader.name(), actor.paymail)
 				}
 			})
@@ -171,7 +170,9 @@ func TestRegressionWorkflow(t *testing.T) {
 				// given:
 				prevRecipientBalance := checkBalance(ctx, t, tc.recipient.userAPI)
 				prevSenderBalance := checkBalance(ctx, t, tc.sender.userAPI)
-				require.GreaterOrEqual(t, prevSenderBalance, tc.funds)
+				if prevSenderBalance < tc.funds {
+					t.Fatalf("[Sender: %s] has insufficient funds to make the transaction. Need at least: %d; got: %d", tc.sender.name(), tc.funds, prevSenderBalance)
+				}
 
 				// when:
 				to := tc.recipient.actor.paymail

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	wallet "github.com/bitcoin-sv/spv-wallet-go-client"
 	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
@@ -174,15 +173,12 @@ func TestRegressionWorkflow(t *testing.T) {
 				// then:
 				require.NoError(t, err)
 
-				time.Sleep(5 * time.Second) // temp
-
 				currentSenderBalance := checkBalance(ctx, t, tc.sender.userAPI)
-				currentRecipientBalance := checkBalance(ctx, t, tc.recipient.userAPI)
-
 				expectedSenderBalance := prevSenderBalance - tc.funds - transaction.Fee
-				expectedRecipientBalance := prevRecipientBalance + tc.funds
-
 				require.EqualValues(t, expectedSenderBalance, currentSenderBalance)
+
+				currentRecipientBalance := checkBalance(ctx, t, tc.recipient.userAPI)
+				expectedRecipientBalance := prevRecipientBalance + tc.funds
 				require.EqualValues(t, expectedRecipientBalance, currentRecipientBalance)
 			})
 		}
@@ -226,12 +222,11 @@ func TestRegressionWorkflow(t *testing.T) {
 				require.NoError(t, err)
 
 				currentSenderBalance := checkBalance(ctx, t, tc.sender.userAPI)
-				currentRecipientBalance := checkBalance(ctx, t, tc.recipient.userAPI)
-
 				expectedSenderBalance := prevSenderBalance - tc.funds - transaction.Fee
-				expectedRecipientBalance := prevRecipientBalance + tc.funds
-
 				require.EqualValues(t, expectedSenderBalance, currentSenderBalance)
+
+				currentRecipientBalance := checkBalance(ctx, t, tc.recipient.userAPI)
+				expectedRecipientBalance := prevRecipientBalance + tc.funds
 				require.EqualValues(t, expectedRecipientBalance, currentRecipientBalance)
 			})
 		}

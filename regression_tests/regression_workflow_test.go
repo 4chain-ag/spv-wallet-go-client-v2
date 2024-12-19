@@ -3,86 +3,13 @@ package regressiontests
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 )
 
 func TestRegressionWorkflow(t *testing.T) {
-	ctx := context.Background()
-	spvWalletPG, spvWalletSL := setupTest(t)
-
-	t.Run("Step 1: The SPV Wallet admin clients attempt to add xPub records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
-		tests := []struct {
-			name string
-			xPub string
-			spv  *spvWallet
-		}{
-			{
-				name: fmt.Sprintf("%s admin client should add xPub record %s for the user %s.", spvWalletPG.name, spvWalletPG.user.xPub, spvWalletPG.user.alias),
-				spv:  spvWalletPG,
-				xPub: spvWalletPG.user.xPub,
-			},
-			{
-				name: fmt.Sprintf("%s admin client should add xPub record %s for the user %s.", spvWalletPG.name, spvWalletSL.user.xPub, spvWalletSL.user.alias),
-				spv:  spvWalletSL,
-				xPub: spvWalletSL.user.xPub,
-			},
-		}
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				// when:
-				err := tc.spv.admin.createXPub(ctx, tc.xPub)
-
-				// then:
-				if err != nil {
-					t.Errorf("xPub record: %s wasn't created successfully for the user %s with paymail %s by %s. Got error: %v", tc.spv.user.xPub, tc.spv.user.alias, tc.spv.user.paymail, tc.name, err)
-				} else {
-					t.Logf("xPub record: %s was created successfully for the user %s with paymail %s by %s.", tc.spv.user.xPub, tc.spv.user.alias, tc.spv.user.paymail, tc.name)
-				}
-			})
-		}
-	})
-
-	t.Run("Step 2: The SPV Wallet admin clients attempt to add paymail records by making requests to their SPV Wallet API instance.", func(t *testing.T) {
-		tests := []struct {
-			name    string
-			paymail string
-			xPub    string
-			spv     *spvWallet
-		}{
-			{
-				name:    fmt.Sprintf("%s admin client should add paymail record %s for user %s", spvWalletPG.name, spvWalletPG.user.paymail, spvWalletPG.user.alias),
-				spv:     spvWalletPG,
-				paymail: spvWalletPG.user.paymail,
-				xPub:    spvWalletPG.user.xPub,
-			},
-			{
-				name:    fmt.Sprintf("%s admin client should add paymail record %s for user %s", spvWalletPG.name, spvWalletSL.user.paymail, spvWalletSL.user.alias),
-				spv:     spvWalletSL,
-				paymail: spvWalletSL.user.paymail,
-				xPub:    spvWalletSL.user.xPub,
-			},
-		}
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				// when:
-				err := tc.spv.admin.createPaymail(ctx, tc.xPub, tc.paymail)
-
-				// then:
-				if err != nil {
-					t.Errorf("Paymail record: %s wasn't created successfully for user %s with paymail %s by %s. Got error: %v", tc.spv.user.paymail, tc.spv.user.alias, tc.spv.user.paymail, tc.name, err)
-				} else {
-					t.Logf("Paymail record: %s was created successfully for the user %s with paymail %s by %s.", tc.spv.user.paymail, tc.spv.user.alias, tc.spv.user.paymail, tc.name)
-				}
-			})
-		}
-	})
-}
-
-func setupTest(t *testing.T) (*spvWallet, *spvWallet) {
-	t.Helper()
-
-	const admin = "xprv9s21ZrQH143K3CbJXirfrtpLvhT3Vgusdo8coBritQ3rcS7Jy7sxWhatuxG5h2y1Cqj8FKmPp69536gmjYRpfga2MJdsGyBsnB12E19CESK"
+	const adminXPriv = "xprv9s21ZrQH143K3CbJXirfrtpLvhT3Vgusdo8coBritQ3rcS7Jy7sxWhatuxG5h2y1Cqj8FKmPp69536gmjYRpfga2MJdsGyBsnB12E19CESK"
 
 	const (
 		clientOneURL         = "CLIENT_ONE_URL"
@@ -92,37 +19,288 @@ func setupTest(t *testing.T) (*spvWallet, *spvWallet) {
 	)
 
 	const (
-		alias1 = "Actor1RegressionTest"
-		alias2 = "Actor2RegressionTest"
+		alias1 = "UserPGRegressionTest"
+		alias2 = "UserSLRegressionTest"
 	)
 
-	client1, err := initSPVWallet(&spvWalletConfig{
-		envURL:     lookupEnvOrDefault(clientOneURL, ""),
-		envXPriv:   lookupEnvOrDefault(clientOneLeaderXPriv, ""),
-		adminXPriv: admin,
-		name:       "SPV Wallet PG",
+	ctx := context.Background()
+	spvWalletPG, err := initSPVWalletAPI(&spvWalletAPIConfig{
+		envURL:     lookupEnvOrDefault(t, clientOneURL, ""),
+		envXPriv:   lookupEnvOrDefault(t, clientOneLeaderXPriv, ""),
+		adminXPriv: adminXPriv,
 	}, alias1)
 	if err != nil {
-		t.Fatalf("Setup failed: could not initialize SPV Wallet PG: %v", err)
+		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletPG.cfg.envURL, err)
 	}
 
-	client2, err := initSPVWallet(&spvWalletConfig{
-		envURL:     lookupEnvOrDefault(clientTwoURL, ""),
-		envXPriv:   lookupEnvOrDefault(clientTwoLeaderXPriv, ""),
-		adminXPriv: admin,
-		name:       "SPV Wallet SL",
-	}, alias2)
+	spvWalletSL, err := initSPVWalletAPI(&spvWalletAPIConfig{
+		envURL:     lookupEnvOrDefault(t, clientTwoURL, ""),
+		envXPriv:   lookupEnvOrDefault(t, clientTwoLeaderXPriv, ""),
+		adminXPriv: adminXPriv,
+	}, alias1)
 	if err != nil {
-		t.Fatalf("Setup failed: could not initialize SPV Wallet SL: %v", err)
+		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletSL.cfg.envURL, err)
 	}
 
-	return client1, client2
-}
+	t.Log("Step 1: Setup success: created SPV client instances with test users")
+	t.Logf("SPV clients for env: %s, user: %s, admin: %s, leader: %s", spvWalletPG.cfg.envURL, spvWalletPG.user.alias, spvWalletPG.admin.paymail, spvWalletPG.leader.paymail)
+	t.Logf("SPV clients for env: %s, user: %s, admin: %s, leader: %s", spvWalletSL.cfg.envURL, spvWalletSL.user.alias, spvWalletSL.admin.paymail, spvWalletSL.leader.paymail)
 
-func lookupEnvOrDefault(env string, s string) string {
-	v, ok := os.LookupEnv(env)
-	if ok {
-		return v
-	}
-	return s
+	t.Run("Step 2: The leader user attempts to retrieve the shared configuration response from their SPV Wallet API instance.", func(t *testing.T) {
+		tests := []struct {
+			name                string
+			leader              *user
+			user                *user
+			admin               *admin
+			expectedPaymailsLen int
+		}{
+			{
+				name:   fmt.Sprintf("leader %s should set paymail domain after fetching shared config", spvWalletPG.leader.alias),
+				leader: spvWalletPG.leader,
+				user:   spvWalletPG.user,
+				admin:  spvWalletPG.admin,
+			},
+			{
+				name:   fmt.Sprintf("leader %s should set paymail domain after fetching shared config", spvWalletSL.leader.alias),
+				leader: spvWalletSL.leader,
+				user:   spvWalletSL.user,
+				admin:  spvWalletSL.admin,
+			},
+		}
+
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// when:
+				got, err := tc.leader.client.SharedConfig(ctx)
+
+				// then:
+				if err != nil {
+					t.Errorf("Shared config wasn't successful retrieve by leader %s. Expect to get nil error, got error: %v", tc.leader.paymail, err)
+				}
+
+				if len(got.PaymailDomains) != 1 {
+					t.Errorf("Shared config retrieved by leader %s should have single paymail domain. Got: %d paymail domains", tc.leader.paymail, len(got.PaymailDomains))
+				}
+				domain := got.PaymailDomains[0]
+				if len(domain) == 0 {
+					t.Errorf("Shared config retrieved by leader %s should not be empty string", tc.leader.paymail)
+				}
+
+				tc.leader.setPaymail(domain)
+				tc.admin.setPaymail(domain)
+				tc.user.setPaymail(domain)
+			})
+		}
+	})
+
+	t.Run("Step 3: The SPV Wallet admin client attempt to add xPub records of the user from the same env by making request to their SPV Wallet API instance", func(t *testing.T) {
+		tests := []struct {
+			name  string
+			user  *user
+			admin *admin
+		}{
+			{
+				name:  fmt.Sprintf("admin %s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletPG.user.xPub, spvWalletPG.user.paymail),
+				admin: spvWalletPG.admin,
+				user:  spvWalletPG.user,
+			},
+			{
+				name:  fmt.Sprintf("admin %s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletSL.user.xPub, spvWalletSL.user.paymail),
+				admin: spvWalletSL.admin,
+				user:  spvWalletSL.user,
+			},
+		}
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// when:
+				res, err := tc.admin.client.CreateXPub(ctx, &commands.CreateUserXpub{XPub: tc.user.xPub})
+				// then:
+				if err != nil {
+					t.Errorf("xPub record %s wasn't created successfully for the user %s by admin %s. Got error: %v", tc.user.xPub, tc.user.paymail, tc.admin.paymail, err)
+				}
+
+				if res == nil {
+					t.Errorf("Expected to get non-nil xPub response after sending creation request by admin %s.", tc.admin.paymail)
+				}
+
+				if res != nil && err == nil {
+					t.Logf("xPub record %s was created successfully for the user %s by admin %s", tc.user.xPub, tc.user.paymail, tc.admin.paymail)
+				}
+			})
+		}
+	})
+
+	t.Run("Step 4: The SPV Wallet admin clients attempt to add paymail record of the user from the same env by making request to their SPV Wallet API instance", func(t *testing.T) {
+		tests := []struct {
+			name  string
+			user  *user
+			admin *admin
+		}{
+			{
+				name:  fmt.Sprintf("admin %s should add paymail record %s for the user %s", spvWalletPG.admin.paymail, spvWalletPG.user.paymail, spvWalletPG.user.alias),
+				admin: spvWalletPG.admin,
+				user:  spvWalletPG.user,
+			},
+			{
+				name:  fmt.Sprintf("admin %s should add paymail record %s for the user %s", spvWalletPG.admin.paymail, spvWalletSL.user.paymail, spvWalletSL.user.alias),
+				admin: spvWalletSL.admin,
+				user:  spvWalletSL.user,
+			},
+		}
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// when:
+				res, err := tc.admin.client.CreatePaymail(ctx, &commands.CreatePaymail{
+					Key:        tc.user.xPub,
+					Address:    tc.user.paymail,
+					PublicName: "Regression tests",
+				})
+
+				// then:
+				if err != nil {
+					t.Errorf("Paymail record %s wasn't created successfully for user %s by admin %s. Got error: %v", tc.user.paymail, tc.user.alias, tc.admin.paymail, err)
+				}
+
+				if res == nil {
+					t.Errorf("Expected to get non-nil paymail addresss response after sending creation request by admin %s.", tc.admin.paymail)
+				}
+
+				if err == nil && res != nil {
+					t.Logf("Paymail record %s was created successfully for the user %s by admin %s.", tc.user.paymail, tc.user.alias, tc.admin.paymail)
+				}
+			})
+		}
+	})
+
+	t.Run("Step 5: The leaders from one env attempts to transfer funds to users from another env using the appropriate SPV Wallet API instance", func(t *testing.T) {
+		tests := []struct {
+			name   string
+			leader *user
+			user   *user
+			funds  uint64
+		}{
+			{
+				leader: spvWalletPG.leader,
+				user:   spvWalletSL.user,
+				funds:  3,
+				name:   fmt.Sprintf("leader %s should transfer 3 satoshis to the user %s", spvWalletPG.leader.paymail, spvWalletSL.user.paymail),
+			},
+			{
+				leader: spvWalletSL.leader,
+				user:   spvWalletPG.user,
+				funds:  2,
+				name:   fmt.Sprintf("leader %s should transfer 2 satoshis to the user %s", spvWalletSL.leader.paymail, spvWalletPG.user.paymail),
+			},
+		}
+
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// given:
+				balance := checkBalance(ctx, t, tc.leader.client)
+				if balance < tc.funds {
+					t.Fatalf("Transfer funds %d wasn't successful from the leader %s to user %s. Due to insufficient balance. Need to have at least: %d sathoshis. Got: %d",
+						tc.funds, tc.leader.paymail, tc.user.paymail, tc.funds, balance)
+				}
+
+				// when:
+				transaction, err := tc.leader.transferFunds(ctx, tc.user.paymail, tc.funds)
+
+				// then:
+				if err != nil {
+					t.Errorf("Transfer funds %d wasn't successful from the leader %s to user %s. Expect to get nil error after making transaction, got error: %v",
+						tc.funds, tc.leader.paymail, tc.user.paymail, err)
+				}
+
+				transferBalance := transferBalance{
+					sender:           tc.leader,
+					recipient:        tc.user,
+					senderBalance:    balance,
+					recipientBalance: checkBalance(ctx, t, tc.user.client),
+					transactionID:    transaction.ID,
+					fee:              transaction.Fee,
+					funds:            tc.funds,
+				}
+
+				transferBalance.check(ctx, t)
+			})
+		}
+	})
+
+	t.Run("Step 6: The user from one env attempts to transfer funds to the user from external env using the appropriate SPV Wallet API instance", func(t *testing.T) {
+		tests := []struct {
+			name      string
+			sender    *user
+			recipient *user
+			funds     uint64
+		}{
+			{
+				name:      fmt.Sprintf("user %s should transfer 2 satoshis to the user %s", spvWalletSL.user.paymail, spvWalletPG.user.paymail),
+				sender:    spvWalletSL.user,
+				recipient: spvWalletPG.user,
+				funds:     2,
+			},
+		}
+
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// given:
+				balance := checkBalance(ctx, t, tc.sender.client)
+				if balance < tc.funds {
+					t.Fatalf("Transfer funds %d wasn't successful from sender %s to recipient %s. Due to insufficient balance. Need to have at least: %d sathoshis. Got: %d",
+						tc.funds, tc.sender.paymail, tc.recipient.paymail, tc.funds, balance)
+				}
+
+				// when:
+				transaction, err := tc.sender.transferFunds(ctx, tc.recipient.paymail, tc.funds)
+
+				// then:
+				if err != nil {
+					t.Errorf("Transfer funds %d wasn't successful from sender %s to recipient %s. Expect to get nil error after making transaction, got error: %v",
+						tc.funds, tc.sender.paymail, tc.recipient.paymail, err)
+				}
+
+				transferBalance := transferBalance{
+					sender:           tc.sender,
+					recipient:        tc.recipient,
+					senderBalance:    balance,
+					recipientBalance: checkBalance(ctx, t, tc.recipient.client),
+					transactionID:    transaction.ID,
+					fee:              transaction.Fee,
+					funds:            tc.funds,
+				}
+
+				transferBalance.check(ctx, t)
+			})
+		}
+	})
+
+	t.Run("Step 7: The leader attempts to remove created actor paymails using the appropriate SPV Wallet API instance.", func(t *testing.T) {
+		tests := []struct {
+			name    string
+			admin   *admin
+			paymail string
+		}{
+			{
+				name:    fmt.Sprintf("admin %s should delete %s paymail record", spvWalletPG.admin.paymail, spvWalletPG.user.paymail),
+				admin:   spvWalletPG.admin,
+				paymail: spvWalletPG.user.paymail,
+			},
+			{
+				name:    fmt.Sprintf("admin %s should delete %s paymail record", spvWalletSL.admin.paymail, spvWalletSL.user.paymail),
+				admin:   spvWalletSL.admin,
+				paymail: spvWalletSL.user.paymail,
+			},
+		}
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// when:
+				err := tc.admin.client.DeletePaymail(ctx, tc.paymail)
+
+				// then:
+				if err != nil {
+					t.Errorf("Delete paymail %s wasn't successful by admin %s. Expect to get nil error, got error: %v", tc.paymail, tc.admin.paymail, err)
+				}
+			})
+		}
+	})
 }

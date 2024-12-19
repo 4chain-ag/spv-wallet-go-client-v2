@@ -12,33 +12,8 @@ import (
 )
 
 func TestRegressionWorkflow(t *testing.T) {
-	const adminXPriv = "xprv9s21ZrQH143K3CbJXirfrtpLvhT3Vgusdo8coBritQ3rcS7Jy7sxWhatuxG5h2y1Cqj8FKmPp69536gmjYRpfga2MJdsGyBsnB12E19CESK"
-
-	const (
-		clientOneURL         = "CLIENT_ONE_URL"
-		clientOneLeaderXPriv = "CLIENT_ONE_LEADER_XPRIV"
-		clientTwoURL         = "CLIENT_TWO_URL"
-		clientTwoLeaderXPriv = "CLIENT_TWO_LEADER_XPRIV"
-	)
-
 	ctx := context.Background()
-	spvWalletSL, err := initSPVWalletAPI(&spvWalletAPIConfig{
-		envURL:     lookupEnvOrDefault(t, clientOneURL, ""),
-		envXPriv:   lookupEnvOrDefault(t, clientOneLeaderXPriv, ""),
-		adminXPriv: adminXPriv,
-	}, "UserSLRegressionTest1")
-	if err != nil {
-		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletSL.cfg.envURL, err)
-	}
-
-	spvWalletPG, err := initSPVWalletAPI(&spvWalletAPIConfig{
-		envURL:     lookupEnvOrDefault(t, clientTwoURL, ""),
-		envXPriv:   lookupEnvOrDefault(t, clientTwoLeaderXPriv, ""),
-		adminXPriv: adminXPriv,
-	}, "UserPGRegressionTest2")
-	if err != nil {
-		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletPG.cfg.envURL, err)
-	}
+	spvWalletPG, spvWalletSL := initSPVWalletAPIs(t)
 
 	t.Log("Step 1: Setup success: created SPV client instances with test users")
 	t.Logf("SPV clients for env: %s, user: %s, admin: %s, leader: %s", spvWalletPG.cfg.envURL, spvWalletPG.user.alias, spvWalletPG.admin.alias, spvWalletPG.leader.alias)
@@ -98,12 +73,12 @@ func TestRegressionWorkflow(t *testing.T) {
 			admin *admin
 		}{
 			{
-				name:  fmt.Sprintf("admin %s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletPG.user.xPub, spvWalletPG.user.paymail),
+				name:  fmt.Sprintf("%s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletPG.user.xPub, spvWalletPG.user.paymail),
 				admin: spvWalletPG.admin,
 				user:  spvWalletPG.user,
 			},
 			{
-				name:  fmt.Sprintf("admin %s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletSL.user.xPub, spvWalletSL.user.paymail),
+				name:  fmt.Sprintf("%s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletSL.user.xPub, spvWalletSL.user.paymail),
 				admin: spvWalletSL.admin,
 				user:  spvWalletSL.user,
 			},
@@ -135,12 +110,12 @@ func TestRegressionWorkflow(t *testing.T) {
 			admin *admin
 		}{
 			{
-				name:  fmt.Sprintf("admin %s should add paymail record %s for the user %s", spvWalletPG.admin.paymail, spvWalletPG.user.paymail, spvWalletPG.user.alias),
+				name:  fmt.Sprintf("%s should add paymail record %s for the user %s", spvWalletPG.admin.paymail, spvWalletPG.user.paymail, spvWalletPG.user.alias),
 				admin: spvWalletPG.admin,
 				user:  spvWalletPG.user,
 			},
 			{
-				name:  fmt.Sprintf("admin %s should add paymail record %s for the user %s", spvWalletPG.admin.paymail, spvWalletSL.user.paymail, spvWalletSL.user.alias),
+				name:  fmt.Sprintf("%s should add paymail record %s for the user %s", spvWalletPG.admin.paymail, spvWalletSL.user.paymail, spvWalletSL.user.alias),
 				admin: spvWalletSL.admin,
 				user:  spvWalletSL.user,
 			},
@@ -181,13 +156,13 @@ func TestRegressionWorkflow(t *testing.T) {
 				leader: spvWalletPG.leader,
 				user:   spvWalletSL.user,
 				funds:  3,
-				name:   fmt.Sprintf("leader %s should transfer 3 satoshis to the user %s", spvWalletPG.leader.paymail, spvWalletSL.user.paymail),
+				name:   fmt.Sprintf("%s should transfer 3 satoshis to the user %s", spvWalletPG.leader.paymail, spvWalletSL.user.paymail),
 			},
 			{
 				leader: spvWalletSL.leader,
 				user:   spvWalletPG.user,
 				funds:  2,
-				name:   fmt.Sprintf("leader %s should transfer 2 satoshis to the user %s", spvWalletSL.leader.paymail, spvWalletPG.user.paymail),
+				name:   fmt.Sprintf("%s should transfer 2 satoshis to the user %s", spvWalletSL.leader.paymail, spvWalletPG.user.paymail),
 			},
 		}
 
@@ -239,7 +214,7 @@ func TestRegressionWorkflow(t *testing.T) {
 			funds     uint64
 		}{
 			{
-				name:      fmt.Sprintf("user %s should transfer 2 satoshis to the user %s", spvWalletSL.user.paymail, spvWalletPG.user.paymail),
+				name:      fmt.Sprintf("%s should transfer 2 satoshis to the user %s", spvWalletSL.user.paymail, spvWalletPG.user.paymail),
 				sender:    spvWalletSL.user,
 				recipient: spvWalletPG.user,
 				funds:     2,
@@ -293,12 +268,12 @@ func TestRegressionWorkflow(t *testing.T) {
 			paymail string
 		}{
 			{
-				name:    fmt.Sprintf("admin %s should delete %s paymail record", spvWalletPG.admin.paymail, spvWalletPG.user.paymail),
+				name:    fmt.Sprintf("%s should delete %s paymail record", spvWalletPG.admin.paymail, spvWalletPG.user.paymail),
 				admin:   spvWalletPG.admin,
 				paymail: spvWalletPG.user.paymail,
 			},
 			{
-				name:    fmt.Sprintf("admin %s should delete %s paymail record", spvWalletSL.admin.paymail, spvWalletSL.user.paymail),
+				name:    fmt.Sprintf("%s should delete %s paymail record", spvWalletSL.admin.paymail, spvWalletSL.user.paymail),
 				admin:   spvWalletSL.admin,
 				paymail: spvWalletSL.user.paymail,
 			},
@@ -315,4 +290,40 @@ func TestRegressionWorkflow(t *testing.T) {
 			})
 		}
 	})
+}
+
+func initSPVWalletAPIs(t *testing.T) (*spvWalletAPI, *spvWalletAPI) {
+	const adminXPriv = "xprv9s21ZrQH143K3CbJXirfrtpLvhT3Vgusdo8coBritQ3rcS7Jy7sxWhatuxG5h2y1Cqj8FKmPp69536gmjYRpfga2MJdsGyBsnB12E19CESK"
+
+	const (
+		clientOneURL         = "CLIENT_ONE_URL"
+		clientOneLeaderXPriv = "CLIENT_ONE_LEADER_XPRIV"
+		clientTwoURL         = "CLIENT_TWO_URL"
+		clientTwoLeaderXPriv = "CLIENT_TWO_LEADER_XPRIV"
+	)
+
+	const (
+		alias1 = "UserSLRegressionTest1"
+		alias2 = "UserPGRegressionTest2"
+	)
+
+	spvWalletSL, err := initSPVWalletAPI(&spvWalletAPIConfig{
+		envURL:     lookupEnvOrDefault(t, clientOneURL, ""),
+		envXPriv:   lookupEnvOrDefault(t, clientOneLeaderXPriv, ""),
+		adminXPriv: adminXPriv,
+	}, alias1)
+	if err != nil {
+		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletSL.cfg.envURL, err)
+	}
+
+	spvWalletPG, err := initSPVWalletAPI(&spvWalletAPIConfig{
+		envURL:     lookupEnvOrDefault(t, clientTwoURL, ""),
+		envXPriv:   lookupEnvOrDefault(t, clientTwoLeaderXPriv, ""),
+		adminXPriv: adminXPriv,
+	}, alias2)
+	if err != nil {
+		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletPG.cfg.envURL, err)
+	}
+
+	return spvWalletPG, spvWalletSL
 }

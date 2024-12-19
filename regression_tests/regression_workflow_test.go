@@ -21,28 +21,23 @@ func TestRegressionWorkflow(t *testing.T) {
 		clientTwoLeaderXPriv = "CLIENT_TWO_LEADER_XPRIV"
 	)
 
-	const (
-		alias1 = "UserPGRegressionTest"
-		alias2 = "UserSLRegressionTest"
-	)
-
 	ctx := context.Background()
-	spvWalletPG, err := initSPVWalletAPI(&spvWalletAPIConfig{
+	spvWalletSL, err := initSPVWalletAPI(&spvWalletAPIConfig{
 		envURL:     lookupEnvOrDefault(t, clientOneURL, ""),
 		envXPriv:   lookupEnvOrDefault(t, clientOneLeaderXPriv, ""),
 		adminXPriv: adminXPriv,
-	}, alias1)
+	}, "UserSLRegressionTest")
 	if err != nil {
-		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletPG.cfg.envURL, err)
+		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletSL.cfg.envURL, err)
 	}
 
-	spvWalletSL, err := initSPVWalletAPI(&spvWalletAPIConfig{
+	spvWalletPG, err := initSPVWalletAPI(&spvWalletAPIConfig{
 		envURL:     lookupEnvOrDefault(t, clientTwoURL, ""),
 		envXPriv:   lookupEnvOrDefault(t, clientTwoLeaderXPriv, ""),
 		adminXPriv: adminXPriv,
-	}, alias1)
+	}, "UserPGRegressionTest")
 	if err != nil {
-		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletSL.cfg.envURL, err)
+		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletPG.cfg.envURL, err)
 	}
 
 	t.Log("Step 1: Setup success: created SPV client instances with test users")

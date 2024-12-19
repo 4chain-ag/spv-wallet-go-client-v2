@@ -26,7 +26,7 @@ func TestRegressionWorkflow(t *testing.T) {
 		envURL:     lookupEnvOrDefault(t, clientOneURL, ""),
 		envXPriv:   lookupEnvOrDefault(t, clientOneLeaderXPriv, ""),
 		adminXPriv: adminXPriv,
-	}, "UserSLRegressionTest")
+	}, "UserSLRegressionTest1")
 	if err != nil {
 		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletSL.cfg.envURL, err)
 	}
@@ -35,7 +35,7 @@ func TestRegressionWorkflow(t *testing.T) {
 		envURL:     lookupEnvOrDefault(t, clientTwoURL, ""),
 		envXPriv:   lookupEnvOrDefault(t, clientTwoLeaderXPriv, ""),
 		adminXPriv: adminXPriv,
-	}, "UserPGRegressionTest")
+	}, "UserPGRegressionTest2")
 	if err != nil {
 		t.Fatalf("Step 1: Setup failed could not initialize the clients for env: %s. Got error: %v", spvWalletPG.cfg.envURL, err)
 	}
@@ -194,10 +194,11 @@ func TestRegressionWorkflow(t *testing.T) {
 		for _, tc := range tests {
 			t.Run(tc.name, func(t *testing.T) {
 				// given:
-				balance := checkBalance(ctx, t, tc.leader.client)
-				if balance < tc.funds {
+				recipientBalance := checkBalance(ctx, t, tc.user.client)
+				leaderBalance := checkBalance(ctx, t, tc.leader.client)
+				if leaderBalance < tc.funds {
 					t.Fatalf("Transfer funds %d wasn't successful from the leader %s to user %s. Due to insufficient balance. Need to have at least: %d sathoshis. Got: %d",
-						tc.funds, tc.leader.paymail, tc.user.paymail, tc.funds, balance)
+						tc.funds, tc.leader.paymail, tc.user.paymail, tc.funds, leaderBalance)
 				}
 
 				// when:
@@ -217,8 +218,8 @@ func TestRegressionWorkflow(t *testing.T) {
 					transferBalance := transferBalance{
 						sender:           tc.leader,
 						recipient:        tc.user,
-						senderBalance:    balance,
-						recipientBalance: checkBalance(ctx, t, tc.user.client),
+						senderBalance:    leaderBalance,
+						recipientBalance: recipientBalance,
 						transactionID:    transaction.ID,
 						fee:              transaction.Fee,
 						funds:            tc.funds,
@@ -248,10 +249,11 @@ func TestRegressionWorkflow(t *testing.T) {
 		for _, tc := range tests {
 			t.Run(tc.name, func(t *testing.T) {
 				// given:
-				balance := checkBalance(ctx, t, tc.sender.client)
-				if balance < tc.funds {
+				recipientBalance := checkBalance(ctx, t, tc.recipient.client)
+				senderBalance := checkBalance(ctx, t, tc.sender.client)
+				if senderBalance < tc.funds {
 					t.Fatalf("Transfer funds %d wasn't successful from sender %s to recipient %s. Due to insufficient balance. Need to have at least: %d sathoshis. Got: %d",
-						tc.funds, tc.sender.paymail, tc.recipient.paymail, tc.funds, balance)
+						tc.funds, tc.sender.paymail, tc.recipient.paymail, tc.funds, senderBalance)
 				}
 
 				// when:
@@ -271,8 +273,8 @@ func TestRegressionWorkflow(t *testing.T) {
 					transferBalance := transferBalance{
 						sender:           tc.sender,
 						recipient:        tc.recipient,
-						senderBalance:    balance,
-						recipientBalance: checkBalance(ctx, t, tc.recipient.client),
+						senderBalance:    senderBalance,
+						recipientBalance: recipientBalance,
 						transactionID:    transaction.ID,
 						fee:              transaction.Fee,
 						funds:            tc.funds,

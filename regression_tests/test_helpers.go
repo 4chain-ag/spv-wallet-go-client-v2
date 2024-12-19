@@ -2,7 +2,6 @@ package regressiontests
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 
@@ -91,7 +90,7 @@ func lookupEnvOrDefault(t *testing.T, env string, defaultValue string) string {
 
 	v, ok := os.LookupEnv(env)
 	if !ok {
-		fmt.Printf("Environment variable %s not set, using default: %s\n", env, defaultValue)
+		t.Logf("Environment variable %s not set, using default: %s\n", env, defaultValue)
 		return defaultValue
 	}
 	return v

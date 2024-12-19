@@ -63,6 +63,8 @@ func (tr *transferBalance) check(ctx context.Context, t *testing.T) {
 		t.Errorf("Transfer funds %d wasn't successful from sender %s to recipient %s. Expected recipient balance to increase from %d to %d, but got %d.",
 			tr.funds, tr.sender.paymail, tr.recipient.paymail, tr.recipientBalance, expectedBalance, actualBalance)
 	}
+
+	t.Logf("Transfer funds %d was successful from sender %s to recipient %s", tr.funds, tr.sender.paymail, tr.recipient.paymail)
 }
 
 // checkBalance retrieves and returns the current balance for the given user client.

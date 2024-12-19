@@ -28,13 +28,13 @@ func TestRegressionWorkflow(t *testing.T) {
 			expectedPaymailsLen int
 		}{
 			{
-				name:   fmt.Sprintf("leader %s should set paymail domain after fetching shared config", spvWalletPG.leader.alias),
+				name:   fmt.Sprintf("%s should set paymail domain after fetching shared config", spvWalletPG.leader.alias),
 				leader: spvWalletPG.leader,
 				user:   spvWalletPG.user,
 				admin:  spvWalletPG.admin,
 			},
 			{
-				name:   fmt.Sprintf("leader %s should set paymail domain after fetching shared config", spvWalletSL.leader.alias),
+				name:   fmt.Sprintf("%s should set paymail domain after fetching shared config", spvWalletSL.leader.alias),
 				leader: spvWalletSL.leader,
 				user:   spvWalletSL.user,
 				admin:  spvWalletSL.admin,
@@ -48,15 +48,15 @@ func TestRegressionWorkflow(t *testing.T) {
 
 				// then:
 				if err != nil {
-					t.Errorf("Shared config wasn't successful retrieve by leader %s. Expect to get nil error, got error: %v", tc.leader.paymail, err)
+					t.Errorf("Shared config wasn't successful retrieve by %s. Expect to get nil error, got error: %v", tc.leader.paymail, err)
 				}
 
 				if len(got.PaymailDomains) != 1 {
-					t.Errorf("Shared config retrieved by leader %s should have single paymail domain. Got: %d paymail domains", tc.leader.paymail, len(got.PaymailDomains))
+					t.Errorf("Shared config retrieved by %s should have single paymail domain. Got: %d paymail domains", tc.leader.paymail, len(got.PaymailDomains))
 				}
 				domain := got.PaymailDomains[0]
 				if len(domain) == 0 {
-					t.Errorf("Shared config retrieved by leader %s should not be empty string", tc.leader.paymail)
+					t.Errorf("Shared config retrieved by %s should not be empty string", tc.leader.paymail)
 				}
 
 				tc.leader.setPaymail(domain)
@@ -73,12 +73,12 @@ func TestRegressionWorkflow(t *testing.T) {
 			admin *admin
 		}{
 			{
-				name:  fmt.Sprintf("%s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletPG.user.xPub, spvWalletPG.user.paymail),
+				name:  fmt.Sprintf("%s should add xPub record %s for %s", spvWalletPG.admin.paymail, spvWalletPG.user.xPub, spvWalletPG.user.paymail),
 				admin: spvWalletPG.admin,
 				user:  spvWalletPG.user,
 			},
 			{
-				name:  fmt.Sprintf("%s should add xPub record %s for the user %s", spvWalletPG.admin.paymail, spvWalletSL.user.xPub, spvWalletSL.user.paymail),
+				name:  fmt.Sprintf("%s should add xPub record %s for %s", spvWalletPG.admin.paymail, spvWalletSL.user.xPub, spvWalletSL.user.paymail),
 				admin: spvWalletSL.admin,
 				user:  spvWalletSL.user,
 			},
@@ -89,15 +89,15 @@ func TestRegressionWorkflow(t *testing.T) {
 				xPub, err := tc.admin.client.CreateXPub(ctx, &commands.CreateUserXpub{XPub: tc.user.xPub})
 				// then:
 				if err != nil {
-					t.Errorf("xPub record %s wasn't created successfully for the user %s by admin %s. Got error: %v", tc.user.xPub, tc.user.paymail, tc.admin.paymail, err)
+					t.Errorf("xPub record %s wasn't created successfully for %s by %s. Got error: %v", tc.user.xPub, tc.user.paymail, tc.admin.paymail, err)
 				}
 
 				if xPub == nil {
-					t.Errorf("Expected to get non-nil xPub response after sending creation request by admin %s.", tc.admin.paymail)
+					t.Errorf("Expected to get non-nil xPub response after sending creation request by %s.", tc.admin.paymail)
 				}
 
 				if xPub != nil && err == nil {
-					t.Logf("xPub record %s was created successfully for the user %s by admin %s", tc.user.xPub, tc.user.paymail, tc.admin.paymail)
+					t.Logf("xPub record %s was created successfully for %s by %s", tc.user.xPub, tc.user.paymail, tc.admin.paymail)
 				}
 			})
 		}
@@ -131,15 +131,15 @@ func TestRegressionWorkflow(t *testing.T) {
 
 				// then:
 				if err != nil {
-					t.Errorf("Paymail record %s wasn't created successfully for user %s by admin %s. Got error: %v", tc.user.paymail, tc.user.alias, tc.admin.paymail, err)
+					t.Errorf("Paymail record %s wasn't created successfully for %s by %s. Got error: %v", tc.user.paymail, tc.user.alias, tc.admin.paymail, err)
 				}
 
 				if paymail == nil {
-					t.Errorf("Expected to get non-nil paymail addresss response after sending creation request by admin %s.", tc.admin.paymail)
+					t.Errorf("Expected to get non-nil paymail addresss response after sending creation request by %s.", tc.admin.paymail)
 				}
 
 				if err == nil && paymail != nil {
-					t.Logf("Paymail record %s was created successfully for the user %s by admin %s.", tc.user.paymail, tc.user.alias, tc.admin.paymail)
+					t.Logf("Paymail record %s was created successfully for %s by %s.", tc.user.paymail, tc.user.alias, tc.admin.paymail)
 				}
 			})
 		}
@@ -172,7 +172,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				recipientBalance := checkBalance(ctx, t, tc.user.client)
 				leaderBalance := checkBalance(ctx, t, tc.leader.client)
 				if leaderBalance < tc.funds {
-					t.Fatalf("Transfer funds %d wasn't successful from the leader %s to user %s. Due to insufficient balance. Need to have at least: %d sathoshis. Got: %d",
+					t.Fatalf("Transfer funds %d wasn't successful from  %s to %s. Due to insufficient balance. Need to have at least: %d sathoshis. Got: %d",
 						tc.funds, tc.leader.paymail, tc.user.paymail, tc.funds, leaderBalance)
 				}
 
@@ -181,12 +181,11 @@ func TestRegressionWorkflow(t *testing.T) {
 
 				// then:
 				if err != nil {
-					t.Errorf("Transfer funds %d wasn't successful from the leader %s to user %s. Expect to get nil error after making transaction, got error: %v",
-						tc.funds, tc.leader.paymail, tc.user.paymail, err)
+					t.Errorf("Transfer funds %d wasn't successful from %s to %s. Expect to get nil error after making transaction, got error: %v", tc.funds, tc.leader.paymail, tc.user.paymail, err)
 				}
 
 				if transaction == nil {
-					t.Errorf("Expected to get non-nil transaction response after transfer funds %d from leader %s to the user %s", tc.funds, tc.leader.paymail, tc.user.paymail)
+					t.Errorf("Expected to get non-nil transaction response after transfer funds %d from %s to %s", tc.funds, tc.leader.paymail, tc.user.paymail)
 				}
 
 				if transaction != nil && err == nil {
@@ -214,7 +213,7 @@ func TestRegressionWorkflow(t *testing.T) {
 			funds     uint64
 		}{
 			{
-				name:      fmt.Sprintf("%s should transfer 2 satoshis to the user %s", spvWalletSL.user.paymail, spvWalletPG.user.paymail),
+				name:      fmt.Sprintf("%s should transfer 2 satoshis to %s", spvWalletSL.user.paymail, spvWalletPG.user.paymail),
 				sender:    spvWalletSL.user,
 				recipient: spvWalletPG.user,
 				funds:     2,
@@ -285,7 +284,11 @@ func TestRegressionWorkflow(t *testing.T) {
 
 				// then:
 				if err != nil {
-					t.Errorf("Delete paymail %s wasn't successful by admin %s. Expect to get nil error, got error: %v", tc.paymail, tc.admin.paymail, err)
+					t.Errorf("Delete paymail %s wasn't successful by %s. Expect to get nil error, got error: %v", tc.paymail, tc.admin.paymail, err)
+				}
+
+				if err == nil {
+					t.Logf("Delete paymail %s was successful by %s", tc.paymail, tc.admin.paymail)
 				}
 			})
 		}
@@ -303,8 +306,8 @@ func initSPVWalletAPIs(t *testing.T) (*spvWalletAPI, *spvWalletAPI) {
 	)
 
 	const (
-		alias1 = "UserSLRegressionTest1"
-		alias2 = "UserPGRegressionTest2"
+		alias1 = "UserSLRegressionTest"
+		alias2 = "UserPGRegressionTest"
 	)
 
 	spvWalletSL, err := initSPVWalletAPI(&spvWalletAPIConfig{

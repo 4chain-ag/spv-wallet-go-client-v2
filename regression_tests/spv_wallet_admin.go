@@ -14,10 +14,11 @@ type admin struct {
 	xPriv   string           // The extended private key for the administrator.
 	client  *wallet.AdminAPI // The API client for interacting with administrative functionalities in the SPV Wallet.
 	paymail string           // The paymail addresses the administrator.
+	alias   string           // The alias of the administrator.
 }
 
 // setPaymail sets the admin's Paymail address to the given value.
-func (a *admin) setPaymail(s string) { a.paymail = "Admin@" + s }
+func (a *admin) setPaymail(s string) { a.paymail = a.alias + "@" + s }
 
 // initAdmin initializes a new admin within the SPV Wallet ecosystem.
 // It accepts the SPV Wallet API URL and the administrator's extended private key (xPriv) as input parameters.
@@ -32,5 +33,5 @@ func initAdmin(url, xPriv string) (*admin, error) {
 		return nil, fmt.Errorf("could not initialize admin API: %w", err)
 	}
 
-	return &admin{xPriv: xPriv, client: client}, nil
+	return &admin{xPriv: xPriv, client: client, alias: "Admin"}, nil
 }

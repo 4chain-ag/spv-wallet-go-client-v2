@@ -1,3 +1,6 @@
+//go:build regression
+// +build regression
+
 package regressiontests
 
 import (
@@ -43,8 +46,8 @@ func TestRegressionWorkflow(t *testing.T) {
 	}
 
 	t.Log("Step 1: Setup success: created SPV client instances with test users")
-	t.Logf("SPV clients for env: %s, user: %s, admin: %s, leader: %s", spvWalletPG.cfg.envURL, spvWalletPG.user.alias, spvWalletPG.admin.paymail, spvWalletPG.leader.paymail)
-	t.Logf("SPV clients for env: %s, user: %s, admin: %s, leader: %s", spvWalletSL.cfg.envURL, spvWalletSL.user.alias, spvWalletSL.admin.paymail, spvWalletSL.leader.paymail)
+	t.Logf("SPV clients for env: %s, user: %s, admin: %s, leader: %s", spvWalletPG.cfg.envURL, spvWalletPG.user.alias, spvWalletPG.admin.alias, spvWalletPG.leader.alias)
+	t.Logf("SPV clients for env: %s, user: %s, admin: %s, leader: %s", spvWalletSL.cfg.envURL, spvWalletSL.user.alias, spvWalletSL.admin.alias, spvWalletSL.leader.alias)
 
 	t.Run("Step 2: The leader user attempts to retrieve the shared configuration response from their SPV Wallet API instance.", func(t *testing.T) {
 		tests := []struct {
@@ -113,17 +116,17 @@ func TestRegressionWorkflow(t *testing.T) {
 		for _, tc := range tests {
 			t.Run(tc.name, func(t *testing.T) {
 				// when:
-				res, err := tc.admin.client.CreateXPub(ctx, &commands.CreateUserXpub{XPub: tc.user.xPub})
+				xPub, err := tc.admin.client.CreateXPub(ctx, &commands.CreateUserXpub{XPub: tc.user.xPub})
 				// then:
 				if err != nil {
 					t.Errorf("xPub record %s wasn't created successfully for the user %s by admin %s. Got error: %v", tc.user.xPub, tc.user.paymail, tc.admin.paymail, err)
 				}
 
-				if res == nil {
+				if xPub == nil {
 					t.Errorf("Expected to get non-nil xPub response after sending creation request by admin %s.", tc.admin.paymail)
 				}
 
-				if res != nil && err == nil {
+				if xPub != nil && err == nil {
 					t.Logf("xPub record %s was created successfully for the user %s by admin %s", tc.user.xPub, tc.user.paymail, tc.admin.paymail)
 				}
 			})
@@ -150,7 +153,7 @@ func TestRegressionWorkflow(t *testing.T) {
 		for _, tc := range tests {
 			t.Run(tc.name, func(t *testing.T) {
 				// when:
-				res, err := tc.admin.client.CreatePaymail(ctx, &commands.CreatePaymail{
+				paymail, err := tc.admin.client.CreatePaymail(ctx, &commands.CreatePaymail{
 					Key:        tc.user.xPub,
 					Address:    tc.user.paymail,
 					PublicName: "Regression tests",
@@ -161,11 +164,11 @@ func TestRegressionWorkflow(t *testing.T) {
 					t.Errorf("Paymail record %s wasn't created successfully for user %s by admin %s. Got error: %v", tc.user.paymail, tc.user.alias, tc.admin.paymail, err)
 				}
 
-				if res == nil {
+				if paymail == nil {
 					t.Errorf("Expected to get non-nil paymail addresss response after sending creation request by admin %s.", tc.admin.paymail)
 				}
 
-				if err == nil && res != nil {
+				if err == nil && paymail != nil {
 					t.Logf("Paymail record %s was created successfully for the user %s by admin %s.", tc.user.paymail, tc.user.alias, tc.admin.paymail)
 				}
 			})
@@ -211,17 +214,23 @@ func TestRegressionWorkflow(t *testing.T) {
 						tc.funds, tc.leader.paymail, tc.user.paymail, err)
 				}
 
-				transferBalance := transferBalance{
-					sender:           tc.leader,
-					recipient:        tc.user,
-					senderBalance:    balance,
-					recipientBalance: checkBalance(ctx, t, tc.user.client),
-					transactionID:    transaction.ID,
-					fee:              transaction.Fee,
-					funds:            tc.funds,
+				if transaction == nil {
+					t.Errorf("Expected to get non-nil transaction response after transfer funds %d from leader %s to the user %s", tc.funds, tc.leader.paymail, tc.user.paymail)
 				}
 
-				transferBalance.check(ctx, t)
+				if transaction != nil && err == nil {
+					transferBalance := transferBalance{
+						sender:           tc.leader,
+						recipient:        tc.user,
+						senderBalance:    balance,
+						recipientBalance: checkBalance(ctx, t, tc.user.client),
+						transactionID:    transaction.ID,
+						fee:              transaction.Fee,
+						funds:            tc.funds,
+					}
+
+					transferBalance.check(ctx, t)
+				}
 			})
 		}
 	})
@@ -259,17 +268,23 @@ func TestRegressionWorkflow(t *testing.T) {
 						tc.funds, tc.sender.paymail, tc.recipient.paymail, err)
 				}
 
-				transferBalance := transferBalance{
-					sender:           tc.sender,
-					recipient:        tc.recipient,
-					senderBalance:    balance,
-					recipientBalance: checkBalance(ctx, t, tc.recipient.client),
-					transactionID:    transaction.ID,
-					fee:              transaction.Fee,
-					funds:            tc.funds,
+				if transaction == nil {
+					t.Errorf("Expected to get non-nil transaction response after transfer funds %d from sender %s to recipient %s", tc.funds, tc.sender.paymail, tc.recipient.paymail)
 				}
 
-				transferBalance.check(ctx, t)
+				if err == nil && transaction != nil {
+					transferBalance := transferBalance{
+						sender:           tc.sender,
+						recipient:        tc.recipient,
+						senderBalance:    balance,
+						recipientBalance: checkBalance(ctx, t, tc.recipient.client),
+						transactionID:    transaction.ID,
+						fee:              transaction.Fee,
+						funds:            tc.funds,
+					}
+
+					transferBalance.check(ctx, t)
+				}
 			})
 		}
 	})

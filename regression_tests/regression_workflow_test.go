@@ -49,7 +49,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				got, err := leader.client.SharedConfig(ctx)
 
 				// then:
-				assert.Errorf(err, "Shared config wasn't successful retrieved by %s. Expect to get nil error, got error: %v", leader.paymail)
+				assert.NoError(err, "Shared config wasn't successful retrieved by %s. Expect to get nil error", leader.paymail)
 
 				if assert.NotNil(got.PaymailDomains, "Shared config should contain non-nil paymail domains slice") {
 					actualLen := len(got.PaymailDomains)
@@ -89,7 +89,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				xPub, err := admin.client.CreateXPub(ctx, &commands.CreateUserXpub{XPub: user.xPub})
 
 				// then:
-				assert.NoError(err, "xPub record %s wasn't created successfully for %s by %s. Got error: %v", user.xPub, user.paymail, admin.paymail)
+				assert.NoError(err, "xPub record %s wasn't created successfully for %s by %s. Expect to get nil error", user.xPub, user.paymail, admin.paymail)
 				assert.NotNil(xPub, "Expected to get non-nil xPub response after sending creation request by %s.", admin.paymail)
 
 				logSuccessOp(t, err, "xPub record %s was created successfully for %s by %s", user.xPub, user.paymail, admin.paymail)
@@ -125,7 +125,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				})
 
 				// then:
-				assert.NoError(err, "Paymail record %s wasn't created successfully for %s by %s. Got error: %v", user.paymail, user.alias, admin.paymail)
+				assert.NoError(err, "Paymail record %s wasn't created successfully for %s by %s. Expect to get nil error", user.paymail, user.alias, admin.paymail)
 				assert.NotNil(paymail, "Expected to get non-nil paymail addresss response after sending creation request by %s.", admin.paymail)
 
 				logSuccessOp(t, err, "Paymail record %s was created successfully for %s by %s.", user.paymail, user.alias, admin.paymail)
@@ -167,7 +167,7 @@ func TestRegressionWorkflow(t *testing.T) {
 				transaction, err := leader.transferFunds(ctx, user.paymail, tc.funds)
 
 				// then:
-				assert.NoError(err, "Transfer funds %d wasn't successful from %s to %s. Expect to get nil error after making transaction, got error: %v", tc.funds, leader.paymail, user.paymail)
+				assert.NoError(err, "Transfer funds %d wasn't successful from %s to %s. Expect to get nil error", tc.funds, leader.paymail, user.paymail)
 
 				if assert.NotNil(transaction, "Expected to get non-nil transaction response after transfer funds %d from %s to %s", tc.funds, leader.paymail, user.paymail) {
 					// Verify sender's balance after the transaction
@@ -178,9 +178,9 @@ func TestRegressionWorkflow(t *testing.T) {
 
 					// Verify that the transaction appears in the recipient's transaction list
 					page, err := user.client.Transactions(ctx)
-					assert.NoError(err, "Failed to retrieve transactions for recipient %s. Expected nil error, got: %v", user.paymail)
+					assert.NoError(err, "Failed to retrieve transactions for recipient %s. Expected to get nil error", user.paymail)
 
-					recipientTransactionsCorrect := assert.Contains(page.Content, transaction.ID, "Transaction %s was not found in %s's transaction list. Sent by %s.", transaction.ID, user.alias, leader.paymail)
+					recipientTransactionsCorrect := assert.True(transactionsSlice(page.Content).Has(transaction.ID), "Transaction %s made by %s was not found in %s's transaction list.", transaction.ID, leader.paymail, user.paymail)
 
 					if senderBalanceCorrect && recipientBalanceCorrect && recipientTransactionsCorrect {
 						logSuccessOp(t, nil, "Transfer funds %d was successful from leader %s to user %s", tc.funds, leader.paymail, user.paymail)

@@ -11,6 +11,21 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
+// transactionsSlice represents a slice of response.Transaction objects.
+type transactionsSlice []*response.Transaction
+
+// Has checks if a transaction with the specified ID exists in the transactions slice.
+// It returns true if a transaction with the given ID is found, and false otherwise.
+func (tt transactionsSlice) Has(id string) bool {
+	for _, t := range tt {
+		if t.ID == id {
+			return true
+		}
+	}
+
+	return false
+}
+
 // user represents an individual user within the SPV Wallet ecosystem.
 // It includes details like the alias, private key (xPriv), public key (xPub), and paymail address.
 // The user struct also utilizes the wallet's UserAPI client to interact with the SPV Wallet API

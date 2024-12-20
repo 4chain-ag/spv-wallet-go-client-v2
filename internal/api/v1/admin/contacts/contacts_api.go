@@ -24,6 +24,20 @@ type API struct {
 	url        *url.URL
 }
 
+func (a *API) CreateContact(ctx context.Context, cmd *commands.CreateContact) (*response.Contact, error) {
+	var result response.Contact
+	_, err := a.httpClient.
+		R().
+		SetContext(ctx).
+		SetBody(cmd).
+		Post(a.url.JoinPath("paymail").String())
+	if err != nil {
+		return nil, fmt.Errorf("HTTP response failure: %w", err)
+	}
+
+	return &result, nil
+}
+
 func (a *API) Contacts(ctx context.Context, opts ...queries.QueryOption[filter.AdminContactFilter]) (*queries.ContactsPage, error) {
 	query := queries.NewQuery(opts...)
 	queryBuilder := querybuilders.NewQueryBuilder(

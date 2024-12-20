@@ -23,3 +23,20 @@ type ConfirmContacts struct {
 	PaymailA string `json:"paymailA"` // The paymail address of the first user in the contact relationship
 	PaymailB string `json:"paymailB"` // The paymail address of the second user in the contact relationship
 }
+
+// CreateContact holds the necessary arguments for creating a contact in the SPV Wallet system.
+// It includes the paymail of the creator (the user initiating the contact addition),
+// the full name of the contact, and any associated metadata.
+type CreateContact struct {
+	// CreatorPaymail is the paymail address of the user who is adding the contact.
+	// It identifies the owner or creator of the contact.
+	CreatorPaymail string `json:"creatorPaymail"`
+
+	// FullName is the full name of the contact to be added.
+	// This is the name that will be associated with the contact in the system.
+	FullName string `json:"fullName"`
+
+	// Metadata is additional information that can be associated with the contact.
+	// It is a key-value pair where the value can be of any type.
+	Metadata map[string]any `json:"metadata"`
+}

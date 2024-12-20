@@ -13,14 +13,13 @@ import (
 // It calls t.Helper() to ensure that errors are reported at the caller's location.
 func assertBalanceAfterTransaction(ctx context.Context, t *testing.T, user *user, expectedBalance uint64) bool {
 	t.Helper()
-	assert := assert.New(t)
 
 	actualBalance, err := user.balance(ctx)
-	if !assert.NoError(err, "Failed to retrieve balance for %s", user.paymail) {
+	if !assert.NoError(t, err, "Failed to retrieve balance for %s", user.paymail) {
 		return false
 	}
 
-	return assert.Equal(t, expectedBalance, actualBalance, "Balance mismatch for %s. Expected: %d, Got: %d", user.paymail, expectedBalance, actualBalance)
+	return assert.Equal(t, expectedBalance, actualBalance, "Balance mismatch for %s.", user.paymail)
 }
 
 // lookupEnvOrDefault retrieves the value of the specified environment variable.
@@ -43,6 +42,7 @@ func lookupEnvOrDefault(t *testing.T, env string, defaultValue string) string {
 // to ensure that errors are reported at the caller's location.
 func logSuccessOp(t *testing.T, err error, format string, args ...any) {
 	t.Helper()
+
 	if err != nil {
 		return
 	}

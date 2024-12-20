@@ -11,21 +11,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/response"
 )
 
-// transactionsSlice represents a slice of response.Transaction objects.
-type transactionsSlice []*response.Transaction
-
-// Has checks if a transaction with the specified ID exists in the transactions slice.
-// It returns true if a transaction with the given ID is found, and false otherwise.
-func (tt transactionsSlice) Has(id string) bool {
-	for _, t := range tt {
-		if t.ID == id {
-			return true
-		}
-	}
-
-	return false
-}
-
 // user represents an individual user within the SPV Wallet ecosystem.
 // It includes details like the alias, private key (xPriv), public key (xPub), and paymail address.
 // The user struct also utilizes the wallet's UserAPI client to interact with the SPV Wallet API
@@ -38,8 +23,8 @@ type user struct {
 	client  *wallet.UserAPI // The API client for interacting with the SPV Wallet.
 }
 
-// setPaymail sets the user's Paymail address to the given value.
-func (u *user) setPaymail(s string) { u.paymail = u.alias + "@" + s }
+// setPaymail sets the user's Paymail address with the given domain.
+func (u *user) setPaymail(domain string) { u.paymail = u.alias + "@" + domain }
 
 // transferFunds sends a specified amount of satoshis to a recipient's paymail.
 // It accepts a context parameter to manage cancellation and timeouts.

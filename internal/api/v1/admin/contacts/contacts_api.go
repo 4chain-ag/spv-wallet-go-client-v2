@@ -30,7 +30,8 @@ func (a *API) CreateContact(ctx context.Context, cmd *commands.CreateContact) (*
 		R().
 		SetContext(ctx).
 		SetBody(cmd).
-		Post(a.url.JoinPath("paymail").String())
+		SetResult(&result).
+		Post(a.url.JoinPath(cmd.Paymail).String())
 	if err != nil {
 		return nil, fmt.Errorf("HTTP response failure: %w", err)
 	}

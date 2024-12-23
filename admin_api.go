@@ -81,7 +81,7 @@ func (a *AdminAPI) XPubs(ctx context.Context, opts ...queries.QueryOption[filter
 
 // CreateContact creates a new contact record via the Admin Contacts API.
 // It accepts a command containing the necessary parameters to define the contact record,
-// such as the creator's paymail, contact's full name, and any associated metadata.
+// such as the creator's paymail, contact's full name, paymail and any associated metadata.
 //
 // The method sends a request to the Contacts API to create the contact, and the API
 // response is unmarshaled into a *response.Contact struct, representing the newly created contact.

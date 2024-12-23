@@ -17,13 +17,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	paymail := "john.doe@example"
 	contact, err := adminAPI.CreateContact(ctx, &commands.CreateContact{
-		CreatorPaymail: "john.doe@example.com",
-		FullName:       "Jane Doe",
+		Paymail:        paymail,
+		CreatorPaymail: "admin@example",
+		FullName:       "John Doe",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	exampleutil.Print("Create Paymail - api/v1/admin/contacts/paymail", contact)
+	exampleutil.Printf("Create Paymail - api/v1/admin/contacts/%s", contact, "", 0, paymail)
 }

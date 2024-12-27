@@ -5,6 +5,15 @@ import (
 )
 
 var (
+	// ErrQueryParamsBuilder is returned when the query parameters builder fails to parse the provided input.
+	ErrQueryParamsBuilder = errors.New("query parameters builder - failed to parse input data")
+
+	// ErrFilterNonStructType is returned when a query filter is provided with a type that is not a struct.
+	ErrFilterNonStructType = errors.New("query filter must be of struct type")
+
+	// ErrQueryParamsBuilderQuery is returned when the provided input query is nil.
+	ErrQueryParamsBuilderQuery = errors.New("query parameters builder - nil input query")
+
 	// ErrMissingXpriv is returned when the xpriv is missing.
 	ErrMissingXpriv = errors.New("xpriv is missing")
 	// ErrContactPubKeyInvalid is returned when the contact's PubKey is invalid.

@@ -24,14 +24,19 @@ func TestFilterParser_Parse(t *testing.T) {
 		},
 		"filter: non-struct input": {
 			filter:      "abcd",
-			expectedErr: goclienterr.ErrFilterNonStructType,
+			expectedErr: goclienterr.ErrFilterTypeNotStruct,
+		},
+		"filter: nil input": {
+			expectedErr: goclienterr.ErrNilFilterProvided,
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			// when:
+			// given:
 			parser := queryparams.FilterParser{Filter: tc.filter}
+
+			// when:
 			got, err := parser.Parse()
 
 			// then:
@@ -142,8 +147,10 @@ func TestFilterParser_Parse_ModelFilter(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			// when:
+			// given:
 			parser := queryparams.FilterParser{Filter: tc.filter}
+
+			// when:
 			got, err := parser.Parse()
 
 			// then:
@@ -209,8 +216,10 @@ func TestFilterParser_Parse_PageFilter(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			// when:
+			// given:
 			parser := queryparams.FilterParser{Filter: tc.filter}
+
+			// when:
 			got, err := parser.Parse()
 
 			// then:

@@ -9,12 +9,6 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
 
-// TODO: Handle Merkleroots search query params X
-// TODO: Handle Admin XPubs search query params X
-// TODO: Add per HTTP Get API query params check in responders X
-// TODO: Change types to be non-exported if not used outside pkg
-// TODO: Update error docs
-
 type Parser interface {
 	Parse() (url.Values, error)
 }
@@ -28,7 +22,7 @@ func (b *Builder) Build() (*URLValues, error) {
 	for _, p := range b.parsers {
 		values, err := p.Parse()
 		if err != nil {
-			return nil, errors.Join(err, goclienterr.ErrQueryParamsBuilder)
+			return nil, errors.Join(err, goclienterr.ErrQueryParamsBuildFailed)
 		}
 
 		if len(values) > 0 {
@@ -42,68 +36,74 @@ func (b *Builder) Build() (*URLValues, error) {
 func NewBuilder[F queries.QueryFilters](query *queries.Query[F]) (*Builder, error) {
 	var parsers []Parser
 	if query.Metadata != nil {
-		parsers = append(parsers, &MetadataParser{
-			Metadata: query.Metadata,
-			MaxDepth: DefaultMaxDepth,
-		})
+		parsers = append(parsers, &MetadataParser{Metadata: query.Metadata, MaxDepth: DefaultMaxDepth})
 	}
 
-	var zero filter.Page
-	if query.PageFilter != zero {
+	if query.PageFilter != (filter.Page{}) {
 		parsers = append(parsers, &FilterParser{Filter: query.PageFilter})
 	}
 
-	switch f := any(query.Filter).(type) {
+	parsers = append(parsers, initNonAdminQueryFilters(query)...)
+	parsers = append(parsers, initAdminQueryFilters(query)...)
+	return &Builder{parsers: parsers}, nil
+}
 
+func initNonAdminQueryFilters[F queries.QueryFilters](query *queries.Query[F]) []Parser {
+	switch f := any(query.Filter).(type) {
 	case filter.XpubFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
+		return []Parser{&FilterParser{Filter: f.ModelFilter}, &FilterParser{Filter: f}}
 
 	case filter.AccessKeyFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
+		return []Parser{&FilterParser{Filter: f.ModelFilter}, &FilterParser{Filter: f}}
 
 	case filter.ContactFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
+		return []Parser{&FilterParser{Filter: f.ModelFilter}, &FilterParser{Filter: f}}
 
 	case filter.PaymailFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
+		return []Parser{&FilterParser{Filter: f.ModelFilter}, &FilterParser{Filter: f}}
 
 	case filter.TransactionFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
+		return []Parser{&FilterParser{Filter: f.ModelFilter}, &FilterParser{Filter: f}}
 
 	case filter.UtxoFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
-
-	case filter.AdminAccessKeyFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.AccessKeyFilter})
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
-
-	case filter.AdminContactFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.ContactFilter})
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
-
-	case filter.AdminPaymailFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.PaymailFilter})
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
-
-	case filter.AdminTransactionFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.TransactionFilter})
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
-
-	case filter.AdminUtxoFilter:
-		parsers = append(parsers, &FilterParser{Filter: f.UtxoFilter})
-		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
-		parsers = append(parsers, &FilterParser{Filter: f})
+		return []Parser{&FilterParser{Filter: f.ModelFilter}, &FilterParser{Filter: f}}
 	}
 
-	return &Builder{parsers: parsers}, nil
+	return nil
+}
+
+func initAdminQueryFilters[F queries.QueryFilters](query *queries.Query[F]) []Parser {
+	switch f := any(query.Filter).(type) {
+	case filter.AdminAccessKeyFilter:
+		return []Parser{
+			&FilterParser{Filter: f.AccessKeyFilter},
+			&FilterParser{Filter: f.ModelFilter},
+			&FilterParser{Filter: f}}
+
+	case filter.AdminContactFilter:
+		return []Parser{
+			&FilterParser{Filter: f.ContactFilter},
+			&FilterParser{Filter: f.ModelFilter},
+			&FilterParser{Filter: f}}
+
+	case filter.AdminPaymailFilter:
+		return []Parser{
+			&FilterParser{Filter: f.PaymailFilter},
+			&FilterParser{Filter: f.ModelFilter},
+			&FilterParser{Filter: f}}
+
+	case filter.AdminTransactionFilter:
+		return []Parser{
+			&FilterParser{Filter: f.TransactionFilter},
+			&FilterParser{Filter: f.ModelFilter},
+			&FilterParser{Filter: f}}
+
+	case filter.AdminUtxoFilter:
+		return []Parser{
+			&FilterParser{Filter: f.UtxoFilter},
+			&FilterParser{Filter: f.ModelFilter},
+			&FilterParser{Filter: f}}
+	}
+
+	return nil
 }

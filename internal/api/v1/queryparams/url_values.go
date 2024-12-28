@@ -34,7 +34,12 @@ func (u *URLValues) AddPair(key string, val any) {
 			write(v)
 		}
 
-	case bool, uint64:
+	case uint64:
+		if v > 0 {
+			write(v)
+		}
+
+	case bool:
 		write(v)
 
 	case string:

@@ -15,12 +15,16 @@ type FilterParser struct {
 }
 
 func (f *FilterParser) Parse() (url.Values, error) {
+	if f.Filter == nil {
+		return nil, goclienterr.ErrNilFilterProvided
+	}
+
 	t := reflect.TypeOf(f.Filter)
 	v := reflect.ValueOf(f.Filter)
 
 	// Ensure Filter is a struct
 	if t.Kind() != reflect.Struct {
-		return nil, goclienterr.ErrFilterNonStructType
+		return nil, goclienterr.ErrFilterTypeNotStruct
 	}
 
 	params := NewURLValues()

@@ -285,7 +285,7 @@ func TestQueryParamsBuilder_Build_AdminTransactionsQuery(t *testing.T) {
 				},
 			},
 			expectedValues: url.Values{
-				"xpubid":                        []string{"9b496655-616a-48cd-a3f8-89608473a5f1"},
+				"xpubId":                        []string{"9b496655-616a-48cd-a3f8-89608473a5f1"},
 				"id":                            []string{"d425432e0d10a46af1ec6d00f380e9581ebf7907f3486572b3cd561a4c326e14"},
 				"hex":                           []string{"001290b87619e679aaf6b8aadd30c778726c89fc4442110feb6d8265a190386beb8311a31e7e97a1c9ff2c84f3993283078965eb81f6fa64f3d7ba7fdd09678d"},
 				"blockHash":                     []string{"0000000000000000031928c28075a82d7a00c2c90b489d1d66dc0afa3f8d26f8"},
@@ -305,6 +305,10 @@ func TestQueryParamsBuilder_Build_AdminTransactionsQuery(t *testing.T) {
 				"metadata[key2][]":              []string{"value2", "value3", "value4"},
 				"metadata[key3][key3_nested]":   []string{"value5"},
 				"metadata[key4][key4_nested][]": []string{"6", "7"},
+				"page":                          []string{"1"},
+				"size":                          []string{"2"},
+				"sort":                          []string{"asc"},
+				"sortBy":                        []string{"key"},
 			},
 		},
 	}
@@ -742,6 +746,142 @@ func TestQueryParamsBuilder_Build_AdminAccessKeysQuery(t *testing.T) {
 				"size":                          []string{"2"},
 				"sort":                          []string{"asc"},
 				"sortBy":                        []string{"key"},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			// given:
+			builder, err := queryparams.NewBuilder(tc.query)
+			require.NoError(t, err)
+
+			// when:
+			got, err := builder.Build()
+
+			// then:
+			require.ErrorIs(t, err, tc.expectedErr)
+			require.Equal(t, tc.expectedValues, got.Values)
+		})
+	}
+}
+
+func TestQueryParamsBuilder_Build_XpubsQuery(t *testing.T) {
+	tests := map[string]struct {
+		query          *queries.Query[filter.XpubFilter]
+		expectedValues url.Values
+		expectedErr    error
+	}{
+		"xpubs query: with only metadata": {
+			query: &queries.Query[filter.XpubFilter]{
+				Metadata: queryparams.Metadata{
+					"key1": "value1",
+					"key2": []string{"value2", "value3", "value4"},
+					"key3": queryparams.Metadata{
+						"key3_nested": "value5",
+					},
+					"key4": queryparams.Metadata{
+						"key4_nested": []int{6, 7},
+					},
+				},
+			},
+			expectedValues: url.Values{
+				"metadata[key1]":                []string{"value1"},
+				"metadata[key2][]":              []string{"value2", "value3", "value4"},
+				"metadata[key3][key3_nested]":   []string{"value5"},
+				"metadata[key4][key4_nested][]": []string{"6", "7"},
+			},
+		},
+		"xpubs query: with only page filter": {
+			query: &queries.Query[filter.XpubFilter]{
+				PageFilter: filter.Page{
+					Number: 1,
+					Size:   2,
+					Sort:   "asc",
+					SortBy: "key",
+				},
+			},
+			expectedValues: url.Values{
+				"page":   []string{"1"},
+				"size":   []string{"2"},
+				"sort":   []string{"asc"},
+				"sortBy": []string{"key"},
+			},
+		},
+		"xpubs query: with only model filter": {
+			query: &queries.Query[filter.XpubFilter]{
+				Filter: filter.XpubFilter{
+					ModelFilter: filter.ModelFilter{
+						IncludeDeleted: testutils.Ptr(true),
+						CreatedRange: &filter.TimeRange{
+							From: testutils.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testutils.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+						},
+						UpdatedRange: &filter.TimeRange{
+							From: testutils.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testutils.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+						},
+					},
+				},
+			},
+			expectedValues: url.Values{
+				"includeDeleted":     []string{"true"},
+				"createdRange[from]": []string{"2021-01-01T00:00:00Z"},
+				"createdRange[to]":   []string{"2021-01-02T00:00:00Z"},
+				"updatedRange[from]": []string{"2021-02-01T00:00:00Z"},
+				"updatedRange[to]":   []string{"2021-02-02T00:00:00Z"},
+			},
+		},
+		"xpubs query: all fields set": {
+			query: &queries.Query[filter.XpubFilter]{
+				Metadata: queryparams.Metadata{
+					"key1": "value1",
+					"key2": []string{"value2", "value3", "value4"},
+					"key3": queryparams.Metadata{
+						"key3_nested": "value5",
+					},
+					"key4": queryparams.Metadata{
+						"key4_nested": []int{6, 7},
+					},
+				},
+				PageFilter: filter.Page{
+					Number: 1,
+					Size:   2,
+					Sort:   "asc",
+					SortBy: "key",
+				},
+				Filter: filter.XpubFilter{
+					ModelFilter: filter.ModelFilter{
+						IncludeDeleted: testutils.Ptr(true),
+						CreatedRange: &filter.TimeRange{
+							From: testutils.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testutils.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
+						},
+						UpdatedRange: &filter.TimeRange{
+							From: testutils.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
+							To:   testutils.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
+						},
+					},
+					ID:             testutils.Ptr("5505cbc3-b38f-40d4-885f-c53efd84828f"),
+					CurrentBalance: testutils.Ptr(uint64(24)),
+				},
+			},
+			expectedValues: url.Values{
+				"includeDeleted":                []string{"true"},
+				"createdRange[from]":            []string{"2021-01-01T00:00:00Z"},
+				"createdRange[to]":              []string{"2021-01-02T00:00:00Z"},
+				"updatedRange[from]":            []string{"2021-02-01T00:00:00Z"},
+				"updatedRange[to]":              []string{"2021-02-02T00:00:00Z"},
+				"id":                            []string{"5505cbc3-b38f-40d4-885f-c53efd84828f"},
+				"currentBalance":                []string{"24"},
+				"page":                          []string{"1"},
+				"size":                          []string{"2"},
+				"sort":                          []string{"asc"},
+				"sortBy":                        []string{"key"},
+				"metadata[key1]":                []string{"value1"},
+				"metadata[key2][]":              []string{"value2", "value3", "value4"},
+				"metadata[key3][key3_nested]":   []string{"value5"},
+				"metadata[key4][key4_nested][]": []string{"6", "7"},
 			},
 		},
 	}

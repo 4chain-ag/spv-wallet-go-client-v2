@@ -9,8 +9,9 @@ import (
 	"github.com/bitcoin-sv/spv-wallet/models/filter"
 )
 
-// TODO: Handle Merkleroots search query params
-// TODO: Handle Admin XPubs search query params
+// TODO: Handle Merkleroots search query params X
+// TODO: Handle Admin XPubs search query params X
+// TODO: Add per HTTP Get API query params check in responders X
 // TODO: Change types to be non-exported if not used outside pkg
 // TODO: Update error docs
 
@@ -53,6 +54,11 @@ func NewBuilder[F queries.QueryFilters](query *queries.Query[F]) (*Builder, erro
 	}
 
 	switch f := any(query.Filter).(type) {
+
+	case filter.XpubFilter:
+		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
+		parsers = append(parsers, &FilterParser{Filter: f})
+
 	case filter.AccessKeyFilter:
 		parsers = append(parsers, &FilterParser{Filter: f.ModelFilter})
 		parsers = append(parsers, &FilterParser{Filter: f})

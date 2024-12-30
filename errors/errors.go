@@ -5,20 +5,10 @@ import (
 )
 
 var (
-	// ErrNilFilterProvided indicates that a nil filter was passed to the parser,
-	// making it impossible to parse. Ensure the filter is properly initialized before parsing.
-	ErrNilFilterProvided = errors.New("filter parser: cannot parse a nil filter")
+	// ErrQueryParserFailed is returned when the query parser encounters an error
+	// during initialization, such as when the provided query is nil or invalid.
+	ErrQueryParserFailed = errors.New("query parser: failed to initialize input query. Query can't be nil")
 
-	// ErrQueryParamsBuildFailed is returned when the query parameters builder
-	// encounters an error while parsing the provided input data.
-	ErrQueryParamsBuildFailed = errors.New("query parameters builder: failed to parse input data")
-
-	// ErrFilterTypeNotStruct is returned when a query filter is provided with
-	// a type that is not a struct. Filters must be of struct type to be valid.
-	ErrFilterTypeNotStruct = errors.New("query filter: must be of struct type")
-)
-
-var (
 	// ErrMissingXpriv is returned when the xpriv is missing.
 	ErrMissingXpriv = errors.New("xpriv is missing")
 

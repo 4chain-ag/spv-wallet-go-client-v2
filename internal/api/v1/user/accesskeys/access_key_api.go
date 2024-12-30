@@ -55,12 +55,12 @@ func (a *API) AccessKey(ctx context.Context, ID string) (*response.AccessKey, er
 
 func (a *API) AccessKeys(ctx context.Context, opts ...queries.QueryOption[filter.AccessKeyFilter]) (*queries.AccessKeyPage, error) {
 	query := queries.NewQuery(opts...)
-	builder, err := queryparams.NewBuilder(query)
+	parser, err := queryparams.NewQueryParser(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize query parmas builder: %w", err)
+		return nil, fmt.Errorf("failed to initialize query parser: %w", err)
 	}
 
-	params, err := builder.Build()
+	params, err := parser.Parse()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build access keys query params: %w", err)
 	}

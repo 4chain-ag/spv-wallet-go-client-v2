@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestQueryParamsBuilder_Build_AdminUtxosQuery(t *testing.T) {
+func TestQueryParser_Parse_AdminUtxosQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.AdminUtxoFilter]
 		expectedValues url.Values
@@ -158,11 +158,11 @@ func TestQueryParamsBuilder_Build_AdminUtxosQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -171,7 +171,7 @@ func TestQueryParamsBuilder_Build_AdminUtxosQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_AdminTransactionsQuery(t *testing.T) {
+func TestQueryParser_Parse_AdminTransactionsQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.AdminTransactionFilter]
 		expectedValues url.Values
@@ -316,11 +316,11 @@ func TestQueryParamsBuilder_Build_AdminTransactionsQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -329,7 +329,7 @@ func TestQueryParamsBuilder_Build_AdminTransactionsQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_AdminPaymailsQuery(t *testing.T) {
+func TestQueryParser_Parse_AdminPaymailsQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.AdminPaymailFilter]
 		expectedValues url.Values
@@ -461,11 +461,11 @@ func TestQueryParamsBuilder_Build_AdminPaymailsQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -474,7 +474,7 @@ func TestQueryParamsBuilder_Build_AdminPaymailsQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_AdminContactsQuery(t *testing.T) {
+func TestQueryParser_Parse_AdminContactsQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.AdminContactFilter]
 		expectedValues url.Values
@@ -609,11 +609,11 @@ func TestQueryParamsBuilder_Build_AdminContactsQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -622,7 +622,7 @@ func TestQueryParamsBuilder_Build_AdminContactsQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_AdminAccessKeysQuery(t *testing.T) {
+func TestQueryParser_Parse_AdminAccessKeysQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.AdminAccessKeyFilter]
 		expectedValues url.Values
@@ -753,11 +753,11 @@ func TestQueryParamsBuilder_Build_AdminAccessKeysQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -766,7 +766,7 @@ func TestQueryParamsBuilder_Build_AdminAccessKeysQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_XpubsQuery(t *testing.T) {
+func TestQueryParser_Parse_XpubsQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.XpubFilter]
 		expectedValues url.Values
@@ -889,11 +889,11 @@ func TestQueryParamsBuilder_Build_XpubsQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -902,7 +902,7 @@ func TestQueryParamsBuilder_Build_XpubsQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_UtxosQuery(t *testing.T) {
+func TestQueryParser_Parse_UtxosQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.UtxoFilter]
 		expectedValues url.Values
@@ -1043,11 +1043,11 @@ func TestQueryParamsBuilder_Build_UtxosQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -1056,7 +1056,7 @@ func TestQueryParamsBuilder_Build_UtxosQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_TransactionsQuery(t *testing.T) {
+func TestQueryParser_Parse_TransactionsQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.TransactionFilter]
 		expectedValues url.Values
@@ -1195,11 +1195,11 @@ func TestQueryParamsBuilder_Build_TransactionsQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -1208,7 +1208,7 @@ func TestQueryParamsBuilder_Build_TransactionsQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_PaymailsQuery(t *testing.T) {
+func TestQueryParser_Parse_PaymailsQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.PaymailFilter]
 		expectedValues url.Values
@@ -1333,11 +1333,11 @@ func TestQueryParamsBuilder_Build_PaymailsQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)
@@ -1346,7 +1346,7 @@ func TestQueryParamsBuilder_Build_PaymailsQuery(t *testing.T) {
 	}
 }
 
-func TestQueryParamsBuilder_Build_ContactsQuery(t *testing.T) {
+func TestQueryParser_Parse_ContactsQuery(t *testing.T) {
 	tests := map[string]struct {
 		query          *queries.Query[filter.ContactFilter]
 		expectedValues url.Values
@@ -1473,149 +1473,11 @@ func TestQueryParamsBuilder_Build_ContactsQuery(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
+			parser, err := queryparams.NewQueryParser(tc.query)
 			require.NoError(t, err)
 
 			// when:
-			got, err := builder.Build()
-
-			// then:
-			require.ErrorIs(t, err, tc.expectedErr)
-			require.Equal(t, tc.expectedValues, got.Values)
-		})
-	}
-}
-
-func TestQueryParamsBuilder_Build_AccessKeysQuery(t *testing.T) {
-	tests := map[string]struct {
-		query          *queries.Query[filter.AccessKeyFilter]
-		expectedValues url.Values
-		expectedErr    error
-	}{
-		"access keys query: with only metadata": {
-			query: &queries.Query[filter.AccessKeyFilter]{
-				Metadata: queryparams.Metadata{
-					"key1": "value1",
-					"key2": []string{"value2", "value3", "value4"},
-					"key3": queryparams.Metadata{
-						"key3_nested": "value5",
-					},
-					"key4": queryparams.Metadata{
-						"key4_nested": []int{6, 7},
-					},
-				},
-			},
-			expectedValues: url.Values{
-				"metadata[key1]":                []string{"value1"},
-				"metadata[key2][]":              []string{"value2", "value3", "value4"},
-				"metadata[key3][key3_nested]":   []string{"value5"},
-				"metadata[key4][key4_nested][]": []string{"6", "7"},
-			},
-		},
-		"access keys query: with only page filter": {
-			query: &queries.Query[filter.AccessKeyFilter]{
-				PageFilter: filter.Page{
-					Number: 1,
-					Size:   2,
-					Sort:   "asc",
-					SortBy: "key",
-				},
-			},
-			expectedValues: url.Values{
-				"page":   []string{"1"},
-				"size":   []string{"2"},
-				"sort":   []string{"asc"},
-				"sortBy": []string{"key"},
-			},
-		},
-		"access keys query: with only model filter": {
-			query: &queries.Query[filter.AccessKeyFilter]{
-				Filter: filter.AccessKeyFilter{
-					ModelFilter: filter.ModelFilter{
-						IncludeDeleted: testutils.Ptr(true),
-						CreatedRange: &filter.TimeRange{
-							From: testutils.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testutils.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
-						},
-						UpdatedRange: &filter.TimeRange{
-							From: testutils.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testutils.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
-						},
-					},
-				},
-			},
-			expectedValues: url.Values{
-				"includeDeleted":     []string{"true"},
-				"createdRange[from]": []string{"2021-01-01T00:00:00Z"},
-				"createdRange[to]":   []string{"2021-01-02T00:00:00Z"},
-				"updatedRange[from]": []string{"2021-02-01T00:00:00Z"},
-				"updatedRange[to]":   []string{"2021-02-02T00:00:00Z"},
-			},
-		},
-		"access keys query: all fields set": {
-			query: &queries.Query[filter.AccessKeyFilter]{
-				Metadata: queryparams.Metadata{
-					"key1": "value1",
-					"key2": []string{"value2", "value3", "value4"},
-					"key3": queryparams.Metadata{
-						"key3_nested": "value5",
-					},
-					"key4": queryparams.Metadata{
-						"key4_nested": []int{6, 7},
-					},
-				},
-				PageFilter: filter.Page{
-					Number: 1,
-					Size:   2,
-					Sort:   "asc",
-					SortBy: "key",
-				},
-				Filter: filter.AccessKeyFilter{
-					RevokedRange: &filter.TimeRange{
-						From: testutils.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-						To:   testutils.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
-					},
-					ModelFilter: filter.ModelFilter{
-						IncludeDeleted: testutils.Ptr(true),
-						CreatedRange: &filter.TimeRange{
-							From: testutils.Ptr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testutils.Ptr(time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)),
-						},
-						UpdatedRange: &filter.TimeRange{
-							From: testutils.Ptr(time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)),
-							To:   testutils.Ptr(time.Date(2021, 2, 2, 0, 0, 0, 0, time.UTC)),
-						},
-					},
-				},
-			},
-			expectedValues: url.Values{
-				"revokedRange[from]":            []string{"2021-02-01T00:00:00Z"},
-				"revokedRange[to]":              []string{"2021-02-02T00:00:00Z"},
-				"includeDeleted":                []string{"true"},
-				"createdRange[from]":            []string{"2021-01-01T00:00:00Z"},
-				"createdRange[to]":              []string{"2021-01-02T00:00:00Z"},
-				"updatedRange[from]":            []string{"2021-02-01T00:00:00Z"},
-				"updatedRange[to]":              []string{"2021-02-02T00:00:00Z"},
-				"page":                          []string{"1"},
-				"size":                          []string{"2"},
-				"sort":                          []string{"asc"},
-				"sortBy":                        []string{"key"},
-				"metadata[key1]":                []string{"value1"},
-				"metadata[key2][]":              []string{"value2", "value3", "value4"},
-				"metadata[key3][key3_nested]":   []string{"value5"},
-				"metadata[key4][key4_nested][]": []string{"6", "7"},
-			},
-		},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			// given:
-			builder, err := queryparams.NewBuilder(tc.query)
-			require.ErrorIs(t, err, tc.expectedErr)
-
-			// when:
-			got, err := builder.Build()
+			got, err := parser.Parse()
 
 			// then:
 			require.ErrorIs(t, err, tc.expectedErr)

@@ -40,11 +40,12 @@ func (a *API) CreateXPub(ctx context.Context, cmd *commands.CreateUserXpub) (*re
 
 func (a *API) XPubs(ctx context.Context, opts ...queries.QueryOption[filter.XpubFilter]) (*queries.XPubPage, error) {
 	query := queries.NewQuery(opts...)
-	builder, err := queryparams.NewBuilder(query)
+	parser, err := queryparams.NewQueryParser(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize query parmas builder: %w", err)
+		return nil, fmt.Errorf("failed to initialize query parser: %w", err)
 	}
-	params, err := builder.Build()
+
+	params, err := parser.Parse()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build user xpubs query params: %w", err)
 	}

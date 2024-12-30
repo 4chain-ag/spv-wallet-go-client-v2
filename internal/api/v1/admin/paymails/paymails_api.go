@@ -72,11 +72,12 @@ func (a *API) Paymail(ctx context.Context, ID string) (*response.PaymailAddress,
 
 func (a *API) Paymails(ctx context.Context, opts ...queries.QueryOption[filter.AdminPaymailFilter]) (*queries.PaymailsPage, error) {
 	query := queries.NewQuery(opts...)
-	builder, err := queryparams.NewBuilder(query)
+	parser, err := queryparams.NewQueryParser(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize query parmas builder: %w", err)
+		return nil, fmt.Errorf("failed to initialize query parser: %w", err)
 	}
-	params, err := builder.Build()
+
+	params, err := parser.Parse()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build paymail address query params: %w", err)
 	}

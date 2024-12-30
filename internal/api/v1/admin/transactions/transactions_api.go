@@ -38,11 +38,12 @@ func (a *API) Transaction(ctx context.Context, ID string) (*response.Transaction
 
 func (a *API) Transactions(ctx context.Context, opts ...queries.QueryOption[filter.AdminTransactionFilter]) (*queries.TransactionPage, error) {
 	query := queries.NewQuery(opts...)
-	builder, err := queryparams.NewBuilder(query)
+	parser, err := queryparams.NewQueryParser(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize query parmas builder: %w", err)
+		return nil, fmt.Errorf("failed to initialize query parser: %w", err)
 	}
-	params, err := builder.Build()
+
+	params, err := parser.Parse()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create transactions query params: %w", err)
 	}

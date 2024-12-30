@@ -24,12 +24,12 @@ type API struct {
 
 func (a *API) UTXOs(ctx context.Context, opts ...queries.QueryOption[filter.UtxoFilter]) (*queries.UtxosPage, error) {
 	query := queries.NewQuery(opts...)
-	builder, err := queryparams.NewBuilder(query)
+	parser, err := queryparams.NewQueryParser(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize query parmas builder: %w", err)
+		return nil, fmt.Errorf("failed to initialize query parser: %w", err)
 	}
 
-	params, err := builder.Build()
+	params, err := parser.Parse()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build utxo query params: %w", err)
 	}

@@ -2,7 +2,6 @@ package queryparams
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
 	"strings"
 
@@ -15,104 +14,85 @@ type QueryParser[F queries.QueryFilters] struct {
 	query *queries.Query[F]
 }
 
-func (q *QueryParser[F]) parse(v any) url.Values {
-	params := NewURLValues()
-	for i := 0; i < reflect.TypeOf(v).NumField(); i++ {
-		field := reflect.TypeOf(v).Field(i)
-		value := reflect.ValueOf(v).Field(i)
-
-		// Extract the JSON tag
-		tag := strings.Split(field.Tag.Get("json"), ",")[0]
-
-		// Process the value based on its type
-		switch field.Type {
-		case reflect.TypeOf(filter.ModelFilter{}):
-			params.Append(q.parse(value.Interface()))
-
-		case reflect.PointerTo(reflect.TypeOf(filter.TimeRange{})):
-			if !value.IsNil() {
-				params.AddPair(tag, value.Interface().(*filter.TimeRange))
-			}
-		case reflect.PointerTo(reflect.TypeOf(false)): // Pointer to a bool
-			if !value.IsNil() {
-				params.AddPair(tag, value.Elem().Bool())
-			}
-		case reflect.PointerTo(reflect.TypeOf("")): // Pointer to a string
-			if !value.IsNil() {
-				params.AddPair(tag, value.Elem().String())
-			}
-		case reflect.PointerTo(reflect.TypeOf(uint64(0))), reflect.PointerTo(reflect.TypeOf(uint32(0))): // Pointer to a uint64, unit32
-			if !value.IsNil() {
-				params.AddPair(tag, value.Elem().Uint())
-			}
-
-		default:
-			if value.IsValid() && value.CanInterface() {
-				params.AddPair(tag, fmt.Sprintf("%v", value.Interface()))
-			}
-		}
+func (q *QueryParser[F]) isNestedFilter(t reflect.Type) bool {
+	filters := []reflect.Type{
+		reflect.TypeOf(filter.UtxoFilter{}),
+		reflect.TypeOf(filter.TransactionFilter{}),
+		reflect.TypeOf(filter.PaymailFilter{}),
+		reflect.TypeOf(filter.ContactFilter{}),
+		reflect.TypeOf(filter.AccessKeyFilter{}),
+		reflect.TypeOf(filter.XpubFilter{}),
+		reflect.TypeOf(filter.ModelFilter{}),
 	}
 
-	return params.Values
+	for _, f := range filters {
+		if t == f {
+			return true
+		}
+	}
+	return false
+}
+
+func (q *QueryParser[F]) parse(val any, totalParams *URLValues) {
+	t := reflect.TypeOf(val)
+	v := reflect.ValueOf(val)
+
+	for i := 0; i < reflect.TypeOf(val).NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		if q.isNestedFilter(field.Type) {
+			q.parse(value.Interface(), totalParams)
+			continue
+		}
+
+		if value.Kind() == reflect.Ptr && value.IsNil() {
+			continue
+		}
+
+		tags := strings.Split(field.Tag.Get("json"), ",")
+		if len(tags) == 0 {
+			continue
+		}
+		tag := tags[0]
+
+		switch field.Type {
+		case reflect.PointerTo(reflect.TypeOf(filter.TimeRange{})):
+			totalParams.AddPair(tag, value.Interface().(*filter.TimeRange))
+
+		case reflect.PointerTo(reflect.TypeOf(false)):
+			totalParams.AddPair(tag, value.Elem().Bool())
+
+		case reflect.PointerTo(reflect.TypeOf("")):
+			totalParams.AddPair(tag, value.Elem().String())
+
+		case reflect.PointerTo(reflect.TypeOf(uint64(0))), reflect.PointerTo(reflect.TypeOf(uint32(0))):
+			totalParams.AddPair(tag, value.Elem().Uint())
+
+		default:
+			totalParams.AddPair(tag, fmt.Sprintf("%v", value.Interface()))
+		}
+	}
 }
 
 func (q *QueryParser[F]) Parse() (*URLValues, error) {
-	total := NewURLValues()
+	totalParams := NewURLValues()
+	// Parse page filter if present
 	if q.query.PageFilter != (filter.Page{}) {
-		total.Append(q.parse(q.query.PageFilter))
+		q.parse(q.query.PageFilter, totalParams)
 	}
 
+	// Parse metadata
 	metadata := &MetadataParser{Metadata: q.query.Metadata, MaxDepth: DefaultMaxDepth}
 	params, err := metadata.Parse()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse metadata: %w", err)
 	}
-	total.Append(params)
+	totalParams.Append(params)
 
-	t := reflect.TypeOf(q.query.Filter)
-	v := reflect.ValueOf(q.query.Filter)
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		value := v.Field(i)
-
-		// Extract the JSON tag
-		tag := strings.Split(field.Tag.Get("json"), ",")[0]
-
-		switch field.Type {
-		case
-			reflect.TypeOf(filter.UtxoFilter{}),
-			reflect.TypeOf(filter.TransactionFilter{}),
-			reflect.TypeOf(filter.PaymailFilter{}),
-			reflect.TypeOf(filter.ContactFilter{}),
-			reflect.TypeOf(filter.AccessKeyFilter{}),
-			reflect.TypeOf(filter.XpubFilter{}):
-
-			total.Append(q.parse(value.Interface()))
-
-		case reflect.TypeOf(filter.ModelFilter{}):
-			total.Append(q.parse(value.Interface()))
-
-		case reflect.PointerTo(reflect.TypeOf(filter.TimeRange{})): // Pointer to a time range
-			if !value.IsNil() {
-				total.AddPair(tag, value.Interface().(*filter.TimeRange))
-			}
-		case reflect.PointerTo(reflect.TypeOf(false)): // Pointer to a bool
-			if !value.IsNil() {
-				total.AddPair(tag, value.Elem().Bool())
-			}
-		case reflect.PointerTo(reflect.TypeOf("")): // Pointer to a string
-			if !value.IsNil() {
-				total.AddPair(tag, value.Elem().String())
-			}
-		case reflect.PointerTo(reflect.TypeOf(uint64(0))), reflect.PointerTo(reflect.TypeOf(uint32(0))): // Pointer to a uint64, unit32
-			if !value.IsNil() {
-				total.AddPair(tag, value.Elem().Uint())
-			}
-		}
-	}
-
-	return total, nil
+	// Parse main query filter
+	q.parse(q.query.Filter, totalParams)
+	return totalParams, nil
 }
 
 func NewQueryParser[F queries.QueryFilters](query *queries.Query[F]) (*QueryParser[F], error) {

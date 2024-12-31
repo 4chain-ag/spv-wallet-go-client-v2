@@ -14,20 +14,18 @@ type QueryParser[F queries.QueryFilters] struct {
 	query *queries.Query[F]
 }
 
-func (q *QueryParser[F]) isNestedFilter(t reflect.Type) bool {
-	filters := []reflect.Type{
-		reflect.TypeOf(filter.UtxoFilter{}),
-		reflect.TypeOf(filter.TransactionFilter{}),
-		reflect.TypeOf(filter.PaymailFilter{}),
-		reflect.TypeOf(filter.ContactFilter{}),
-		reflect.TypeOf(filter.AccessKeyFilter{}),
-		reflect.TypeOf(filter.XpubFilter{}),
-		reflect.TypeOf(filter.ModelFilter{}),
+func (q *QueryParser[F]) contaisModelFilter(t reflect.Type) bool {
+	// Check if the type directly matches ModelFilter
+	if t == reflect.TypeOf(filter.ModelFilter{}) {
+		return true
 	}
-
-	for _, f := range filters {
-		if t == f {
-			return true
+	// If the input is a struct, check its fields for ModelFilter
+	if t.Kind() == reflect.Struct {
+		for i := 0; i < t.NumField(); i++ {
+			field := t.Field(i)
+			if field.Type == reflect.TypeOf(filter.ModelFilter{}) {
+				return true
+			}
 		}
 	}
 	return false
@@ -41,7 +39,7 @@ func (q *QueryParser[F]) parse(val any, totalParams *URLValues) {
 		field := t.Field(i)
 		value := v.Field(i)
 
-		if q.isNestedFilter(field.Type) {
+		if q.contaisModelFilter(field.Type) {
 			q.parse(value.Interface(), totalParams)
 			continue
 		}

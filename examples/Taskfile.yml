@@ -86,14 +86,6 @@ tasks:
       - go run ./list_access_keys/list_access_keys.go
       - echo "=================================================================="
 
-  list_access_keys:
-    desc: "Fetch first page of access keys as User."
-    silent: true
-    cmds:
-      - echo "=================================================================="
-      - go run ./list_access_keys/list_access_keys.go
-      - echo "=================================================================="
-
   list_transactions:
     desc: "Fetch first page of transactions as User."
     silent: true

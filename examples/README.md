@@ -46,7 +46,10 @@ task: Available tasks for this project:
 > Don't use the keys which are already added to another wallet.
 
 > [!IMPORTANT]
-> Additionally, to make it work properly, you should adjust the `ExamplePaymail` to align with your `domains` configuration in the `spv-wallet` instance.
+> Additionally, to make it work properly, you should adjust the `Paymail` to align with your `domains` configuration in the `spv-wallet` instance.
+
+> [!IMPORTANT]
+> `Paymail` is defined in example_keys.go file. 
 
 Before interacting with the SPV Wallet API, you must complete the authorization process.
 

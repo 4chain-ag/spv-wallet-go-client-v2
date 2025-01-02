@@ -1,10 +1,10 @@
-# Qucik Guide
+# Quick Guide
 
 In this directory you can find bunch of examples describing how to use
 the wallet client package during interaction wit the SPV Wallet API.
 
 1. [Before you run](#before-you-run)
-1. [Authorization](#authroization)
+1. [Authorization](#authorization)
 1. [How to run example](#how-to-run-an-example)
 
 ## Before you run
@@ -21,41 +21,26 @@ the wallet client package during interaction wit the SPV Wallet API.
 ```
 task: [default] task --list
 task: Available tasks for this project:
-* create-paymail-as-admin:                Create a paymail address.
-* default:                                Display all available tasks.
-* delete-paymail-as-admin:                Delete paymail address.
-* fetch-paymail-as-admin:                 Fetch paymail with a given address.
-* fetch-paymails-as-admin:                Fetch paymails page.
-* accept-invitation-as-admin:             Accept invitation with a given ID as Admin.
-* create-xpub-as-admin:                   Create xPub as Admin.
-* default:                                Display all available tasks.
-* delete-contact-as-admin:                Delete contact with a given ID as Admin.
-* fetch-contacts-as-admin:                Fetch contacts page as Admin.
-* fetch-user-contact-by-paymail:          Fetch user contact by given paymail.
-* fetch-user-contacts:                    Fetch user contacts page.
-* fetch-user-merkleroots:                 Fetch user Merkle roots page.
-* fetch-user-shared-config:               Fetch user shared configuration.
-* fetch-user-transaction:                 Fetch user transaction with a given ID.
-* fetch-user-transactions:                Fetch user transactions page.
-* fetch-user-utxos:                       Fetch user UTXOs page.
-* fetch-user-xpub:                        Fetch current authorized user's xpub info.
-* fetch-xpubs-as-admin:                   Fetch xPubs page as Admin.
-* generate-keys:                          Generate keys for SPV Wallet API access.
-* reject-invitation-as-admin:             Reject invitation with a given ID as Admin.
-* update-contact-as-admin:                Update contact with a given ID as Admin.
-* user-contact-confirmation:              Confirm user contact with a given paymail address.
-* user-contact-remove:                    Remove user contact with a given paymail address.
-* user-contact-unconfirm:                 Unconfirm user contact with a given paymail address.
-* user-contact-upsert:                    Upsert user contact with a given paymail address.
-* user-draft-transaction:                 Create a user draft transaction.
-* user-invitation-accept:                 Accept user contact invitation with a given paymail address.
-* user-invitation-reject:                 Reject user contact invitation with a given paymail address.
-* user-transaction-metadata-update:       Update user transaction metadata with a given ID.
-* user-xpub-metadata:                     Update current authorized user's xpub metadata.
-* send-op-return:                         Sends an OP_RETURN transaction.
+* access_key:                        Fetch Access key as User.
+* admin_add_user:                    Add user as Admin.
+* admin_remove_user:                 Remove user as Admin.
+* create_transaction:                Create transaction as User.
+* default:                           Display all available tasks.
+* generate_keys:                     Generate keys for SPV Wallet API access.
+* generate_totp:                     Generate totp.
+* get_balance:                       Get balance as User.
+* get_handled_paymail_domains:       Get paymail domains as User.
+* get_shared_config:                 Get shared config as User.
+* list_access_keys:                  Fetch first page of access keys as User.
+* list_transactions:                 Fetch first page of transactions as User.
+* send_op_return:                    Create draft transaction, finalize transaction and record transaction as User.
+* sync_merkleroots:                  Sync Merkle roots as User.
+* update_user_xpub_metadata:         Update xPub metadata as User.
+* xpriv_from_mnemonic:               Extract xPriv from mnemonic.
+* xpub_from_xpriv:                   Extract xPub from xPriv.
 ```
 
-## Authroization
+## Authorization
 
 > [!CAUTION]
 > Don't use the keys which are already added to another wallet.

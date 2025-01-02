@@ -50,7 +50,7 @@ task: Available tasks for this project:
 
 Before interacting with the SPV Wallet API, you must complete the authorization process.
 
-To begin, generate a pair of keys using the `task generate-keys` command, which is included in the dedicated Taskfile.
+To begin, generate a pair of keys using the `task generate_keys` command, which is included in the dedicated Taskfile.
 
 **Example output:**
 

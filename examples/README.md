@@ -138,6 +138,23 @@ XPub
 
 ## How to run an example
 
+> [!TIP]
+> To fully experience the next steps, it would be beneficial to transfer some funds to your `Paymail`. This ensures the examples run smoothly by demonstrating the creation of a transaction with an actual balance. You can transfer funds to your `Paymail` using a Bitcoin SV wallet application such as HandCash or any other that supports Paymail.
+
+> [!IMPORTANT]
+> `Paymail`, `UserXPub` are defined in example_keys.go file. 
+
+**Proposed order of executing examples**
+
+1. `generate_keys` - generates new keys (you can copy them to `example_keys` if you want to use them in next examples)
+1. `admin_add_user` - adds a new user (more precisely adds `UserXPub` and then `Paymail` to the wallet)
+1. `get_balance` - Returns the current user balance. If you've transferred funds to your `Paymail`, you should see them here.
+1. `create_transaction` - Creates a transaction (you can adjust the `outputs` to your needs).
+1. `list_transactions` - Lists all transactions and with example filtering.
+1. `send_op_return` - Sends an OP_RETURN transaction.
+1. `admin_remove_user` - Removes the user.
+
+
 The examples are written in Go and can be run by:
 
 ```bash

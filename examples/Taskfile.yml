@@ -13,7 +13,7 @@ tasks:
       - echo "=================================================================="
       - go run ./access_key/access_key.go
       - echo "=================================================================="
-  
+
   admin_add_user:
     desc: "Add user as Admin."
     silent: true
@@ -53,7 +53,7 @@ tasks:
       - echo "=================================================================="
       - go run ./generate_totp/generate_totp.go
       - echo "=================================================================="
-  
+
   get_balance:
     desc: "Get balance as User."
     silent: true
@@ -109,7 +109,7 @@ tasks:
       - echo "=================================================================="
       - go run ./send_op_return/send_op_return.go
       - echo "=================================================================="
-  
+
   sync_merkleroots:
     desc: "Sync Merkle roots as User."
     silent: true
@@ -117,7 +117,7 @@ tasks:
       - echo "=================================================================="
       - go run ./sync_merkleroots/sync_merkleroots.go
       - echo "=================================================================="
-  
+
   update_user_xpub_metadata:
     desc: "Update xPub metadata as User."
     silent: true
@@ -125,7 +125,7 @@ tasks:
       - echo "=================================================================="
       - go run ./update_user_xpub_metadata/update_user_xpub_metadata.go
       - echo "=================================================================="
-    
+
   xpriv_from_mnemonic:
     desc: "Extract xPriv from mnemonic."
     silent: true
@@ -133,7 +133,7 @@ tasks:
       - echo "=================================================================="
       - go run ./xpriv_from_mnemonic/xpriv_from_mnemonic.go
       - echo "=================================================================="
-  
+
   xpub_from_xpriv:
     desc: "Extract xPub from xPriv."
     silent: true

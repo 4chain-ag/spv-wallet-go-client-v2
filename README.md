@@ -21,11 +21,10 @@
 ## Table of Contents
 1. [Requirements and Compatibility](#requirements-and-compatibility)
 1. [Quick start](#quick-start)
-1. Documentation
-1. Testing
+1. [Documentation](#documentation)
+1. [Testing and Development Standards](#testing-and-development-standards)
 1. [Examples](/examples/README.md)
-1. Contributing  
-1. License
+1. [License](#license)
 
 ## Requirements and Compatibility
 
@@ -214,3 +213,48 @@ The implementation enforces separation of concerns by isolating admin and non-ad
 **Code snippets:**
 - [AdminAPI example](/examples/admin_add_user/admin_add_user.go)
 - [UserAPI example](/examples/list_transactions/list_transactions.go)
+
+
+## Documentation
+ 
+View the generated [documentation](https://pkg.go.dev/github.com/bitcoin-sv/spv-wallet-go-client)
+
+For in-depth information and guidance, please refer to the [SPV Wallet Documentation](https://docs.bsvblockchain.org/network-topology/applications/spv-wallet).
+
+[![GoDoc](https://godoc.org/github.com/bitcoin-sv/spv-wallet-go-client?status.svg&style=flat&v=2)](https://pkg.go.dev/github.com/bitcoin-sv/spv-wallet-go-client)
+
+# Testing and Development Standards
+
+The current implementation includes comprehensive support for:
+- **Unit Tests:** To validate individual components and ensure they work as expected in isolation.
+- **Regression Tests:** To verify compatibility with the latest released version of the SPV Wallet API and to prevent unintended functionality breaks.
+
+These tests ensure a stable and reliable integration with the SPV Wallet API, maintaining high-quality code and robust functionality.
+
+## Commands
+
+Run all tests (including integration tests)
+```shell script
+make test
+```
+
+
+Run tests (excluding integration tests)
+```shell script
+make test-short
+```
+
+## Development Guidelines
+
+Each new proposed functionality must adhere to the following principles:
+1. **Code of Conduct:** Contributions should align with the repository's code of conduct, fostering a positive and collaborative environment.
+1. **Repository Standards:** Proposals and implementations should strictly follow the coding standards, conventions, and best practices outlined in the repository documentation.
+
+By adhering to these guidelines, contributors can ensure that their changes are consistent, maintainable, and compatible with the SPV Wallet API.
+
+All kinds of contributions are welcome 🎉! To get started, take a look at [code standards](.github/CODE_STANDARDS.md).
+View the [contributing guidelines](.github/CODE_STANDARDS.md#3-contributing) and follow the [code of conduct](.github/CODE_OF_CONDUCT.md).
+
+## License
+
+[![License](https://img.shields.io/github/license/bitcoin-sv/spv-wallet-go-client.svg?style=flat&v=2)](LICENSE)

@@ -5,7 +5,7 @@ the wallet client package during interaction wit the SPV Wallet API.
 
 1. [Before you run](#before-you-run)
 1. [Authorization](#authorization)
-1. [How to run example](#how-to-run-an-example)
+1. [Getting Started with the Project](#getting-started-with-the-project)
 
 ## Before you run
 
@@ -21,23 +21,22 @@ the wallet client package during interaction wit the SPV Wallet API.
 ```
 task: [default] task --list
 task: Available tasks for this project:
-* access_key:                        Fetch Access key as User.
-* admin_add_user:                    Add user as Admin.
-* admin_remove_user:                 Remove user as Admin.
-* create_transaction:                Create transaction as User.
-* default:                           Display all available tasks.
-* generate_keys:                     Generate keys for SPV Wallet API access.
-* generate_totp:                     Generate totp.
-* get_balance:                       Get balance as User.
-* get_handled_paymail_domains:       Get paymail domains as User.
-* get_shared_config:                 Get shared config as User.
-* list_access_keys:                  Fetch first page of access keys as User.
-* list_transactions:                 Fetch first page of transactions as User.
-* send_op_return:                    Create draft transaction, finalize transaction and record transaction as User.
-* sync_merkleroots:                  Sync Merkle roots as User.
-* update_user_xpub_metadata:         Update xPub metadata as User.
-* xpriv_from_mnemonic:               Extract xPriv from mnemonic.
-* xpub_from_xpriv:                   Extract xPub from xPriv.
+* access_key:                      Fetch Access key as User.
+* admin_add_user:                  Add user as Admin.
+* admin_remove_paymail:            Remove paymail as Admin.
+* create_transaction:              Create transaction as User.
+* default:                         Display all available tasks.
+* generate_keys:                   Generate keys for SPV Wallet API access.
+* generate_totp:                   Generate totp.
+* get_balance:                     Get balance as User.
+* get_shared_config:               Get shared config as User.
+* list_access_keys:                Fetch first page of access keys as User.
+* list_transactions:               Fetch first page of transactions as User.
+* send_op_return:                  Create draft transaction, finalize transaction and record transaction as User.
+* sync_merkleroots:                Sync Merkle roots as User.
+* update_user_xpub_metadata:       Update xPub metadata as User.
+* xpriv_from_mnemonic:             Extract xPriv from mnemonic.
+* xpub_from_xpriv:                 Extract xPub from xPriv.
 ```
 
 ## Authorization
@@ -139,24 +138,51 @@ XPub
 }
 ```
 
-## How to run an example
+## Getting Started with the Project
+
+To help you fully utilize this project, we've outlined a series of steps and important tips to guide you through the process.
+
+## Preliminary Setup
 
 > [!TIP]
-> To fully experience the next steps, it would be beneficial to transfer some funds to your `Paymail`. This ensures the examples run smoothly by demonstrating the creation of a transaction with an actual balance. You can transfer funds to your `Paymail` using a Bitcoin SV wallet application such as HandCash or any other that supports Paymail.
+> For the best experience, we recommend transferring some funds to your Paymail. This allows the examples to demonstrate key functionality, such as creating transactions with an actual balance. 
+
+You can transfer funds to your Paymail using any Bitcoin SV wallet application that supports Paymail, such as **HandCash** or similar applications.
 
 > [!IMPORTANT]
-> `Paymail`, `UserXPub` are defined in example_keys.go file. 
+> The following terms are defined in the `example_keys.go` file:
+> - **Paymail**
+> - **UserXPub**
 
-**Proposed order of executing examples**
+Ensure that this file is configured appropriately before running the examples.
 
-1. `generate_keys` - generates new keys (you can copy them to `example_keys` if you want to use them in next examples)
-1. `admin_add_user` - adds a new user (more precisely adds `UserXPub` and then `Paymail` to the wallet)
-1. `get_balance` - Returns the current user balance. If you've transferred funds to your `Paymail`, you should see them here.
-1. `create_transaction` - Creates a transaction (you can adjust the `outputs` to your needs).
-1. `list_transactions` - Lists all transactions and with example filtering.
-1. `send_op_return` - Sends an OP_RETURN transaction.
-1. `admin_remove_user` - Removes the user.
+## Recommended Order of Examples
 
+1. **`generate_keys`**  
+   Generates new keys. If you want to use these keys in subsequent examples, you can copy them to the `example_keys.go` file.
+
+2. **`admin_add_user`**  
+   Adds a new user to the wallet. Specifically, it registers the **UserXPub** and associates a **Paymail**.
+
+3. **`get_balance`**  
+   Retrieves the current balance for the user. If you've transferred funds to your Paymail, the balance will be displayed here.
+
+4. **`create_transaction`**  
+   Creates a transaction. You can customize the outputs to suit your specific requirements.
+
+5. **`list_transactions`**  
+   Lists all transactions. This includes examples of filtering options.
+
+6. **`send_op_return`**  
+   Sends an OP_RETURN transaction, allowing you to attach data to the blockchain.
+
+7. **`admin_remove_paymail`**  
+   Removes the user by deleting their Paymail from the wallet.
+
+
+## Next Steps
+
+Follow the steps in the suggested order to gain a comprehensive understanding of the project's functionality. If you encounter any issues or have questions, refer to the documentation or reach out for support.
 
 The examples are written in Go and can be run by:
 

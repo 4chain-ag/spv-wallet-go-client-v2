@@ -22,12 +22,12 @@ tasks:
       - go run ./admin_add_user/admin_add_user.go
       - echo "=================================================================="
 
-  admin_remove_user:
-    desc: "Remove user as Admin."
+  admin_remove_paymail:
+    desc: "Remove paymail as Admin."
     silent: true
     cmds:
       - echo "=================================================================="
-      - go run ./admin_remove_user/admin_remove_user.go
+      - go run ./admin_remove_paymail/admin_remove_paymail.go
       - echo "=================================================================="
 
   create_transaction:
@@ -61,15 +61,7 @@ tasks:
       - echo "=================================================================="
       - go run ./get_balance/get_balance.go
       - echo "=================================================================="
-
-  get_handled_paymail_domains:
-    desc: "Get paymail domains as User."
-    silent: true
-    cmds:
-      - echo "=================================================================="
-      - go run ./get_handled_paymail_domains/get_handled_paymail_domains.go
-      - echo "=================================================================="
-
+      
   get_shared_config:
     desc: "Get shared config as User."
     silent: true

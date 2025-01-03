@@ -87,7 +87,7 @@ import (
 )
 
 func main() {
- xPriv := "121d2f43-4261-42ab-813e-3d3fa4d87313"
+ xPriv := "xprv1d77e47e-452c-453f-bc4c-a42748f8145f"
  cfg := wallet.NewDefaultConfig("http://localhost:3003")
  userAPI, err := wallet.NewUserAPIWithXPriv(cfg, xPriv)
  if err != nil {

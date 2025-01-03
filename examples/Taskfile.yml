@@ -61,7 +61,7 @@ tasks:
       - echo "=================================================================="
       - go run ./get_balance/get_balance.go
       - echo "=================================================================="
-      
+
   get_shared_config:
     desc: "Get shared config as User."
     silent: true

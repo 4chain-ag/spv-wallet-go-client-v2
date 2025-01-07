@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
-	"github.com/bitcoin-sv/spv-wallet-go-client/internal/api/v1/errutil"
 	"github.com/go-resty/resty/v2"
+
+	"github.com/bitcoin-sv/spv-wallet-go-client/commands"
 )
 
 const (
@@ -48,12 +48,4 @@ func (a *API) UnsubscribeWebhook(ctx context.Context, cmd *commands.CancelWebhoo
 
 func NewAPI(url *url.URL, httpClient *resty.Client) *API {
 	return &API{url: url.JoinPath(route), httpClient: httpClient}
-}
-
-func HTTPErrorFormatter(action string, err error) *errutil.HTTPErrorFormatter {
-	return &errutil.HTTPErrorFormatter{
-		Action: action,
-		API:    api,
-		Err:    err,
-	}
 }
